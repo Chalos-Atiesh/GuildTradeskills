@@ -19,3 +19,7 @@
 <ul>
 <li>Right clicking a character's name is supposed to send them a whisper about the last skill that was clicked. Currently no whisper is sent.</li>
 </ul>
+<p>&nbsp;</p>
+<h2>Links</h2>
+<p><a href="https://www.curseforge.com/wow/addons/guild-tradeskills/settings/general">CurseForge</a></p>
+<p><a href="https://github.com/Chalos-Atiesh/GuildTradeskills">GitHub</a></p>
