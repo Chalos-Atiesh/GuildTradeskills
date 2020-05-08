@@ -60,6 +60,11 @@ function GT.search.openSearch(tokens)
 	mainFrame:SetLayout('Flow')
 	mainFrame:ClearAllPoints()
 	mainFrame:SetCallback('OnClose', function()
+		GT.search.lastSkillClicked = nil
+		GT.search.lastSkillLinkClicked = nil
+		GT.search.lastReagentClicked = nil
+		GT.search.lastCharacterClicked = nil
+
 		GT.search.mainFrame = nil
 		GT.search.skillScrollFrame = nil
 		GT.search.reagentScrollFrame = nil
@@ -78,6 +83,7 @@ function GT.search.openSearch(tokens)
 	resetFiltersButton:SetText(GT.L['BUTTON_FILTERS_RESET'])
 	resetFiltersButton:SetCallback('OnClick', function()
 		GT.search.lastSkillClicked = nil
+		GT.search.lastSkillLinkClicked = nil
 		GT.search.lastReagentClicked = nil
 		GT.search.lastCharacterClicked = nil
 
@@ -147,6 +153,7 @@ function GT.search.openSearch(tokens)
 	characterSearchBox:SetCallback('OnTextChanged', function(widget, event, value)
 		GT.search.characterSearchText = value
 		GT.search.lastSkillClicked = nil
+		GT.search.lastSkillLinkClicked = nil
 		GT.search.lastReagentClicked = nil
 		GT.search.lastCharacterClicked = nil
 		GT.search.populateCharacters(true)
@@ -215,6 +222,10 @@ function GT.search.openSearch(tokens)
 		profCheckBox:SetValue(checked)
 		profCheckBox:SetCallback('OnValueChanged', function(widget, callback, value)
 			local professionName = widget.text:GetText()
+			GT.search.lastSkillClicked = nil
+			GT.search.lastSkillLinkClicked = nil
+			GT.search.lastReagentClicked = nil
+			GT.search.lastCharacterClicked = nil
 			GT.search.state.professions[professionName] = value
 			GT.search.populateSkills(true)
 		end)
@@ -471,6 +482,7 @@ function GT.search.populateReagents(shouldCascade)
 			local reagentName = table.concat(tokens, ' ')
 
 			GT.search.lastSkillClicked = nil
+			GT.search.lastSkillLinkClicked = nil
 			GT.search.lastReagentClicked = reagentName
 			GT.search.lastCharacterClicked = nil
 
@@ -594,6 +606,7 @@ function GT.search.populateCharacters(shouldCascade)
 			end
 			
 			GT.search.lastSkillClicked = nil
+			GT.search.lastSkillLinkClicked = nil
 			GT.search.lastReagentClicked = nil
 			GT.search.lastCharacterClicked = characterName
 			GT.search.populateSkills(false)
