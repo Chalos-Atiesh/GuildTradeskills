@@ -31,7 +31,9 @@ local function GT_Init()
 
 	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command']] = GT_Reset
 
+	--@debug@
 	SLASH_COMMAND_MAP['togglecomms'] = GT.comm.toggleComms
+	--@end-debug@
 
 	GT.logging.init()
 	GT.database.init()

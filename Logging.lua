@@ -22,6 +22,9 @@ function GT.logging.init(force)
 	GT.logging.PLAYER = GT.logging.PLAYER_INFO
 
 	GT.logging.state.logLevelFilter = GT.logging.PLAYER_INFO
+	--@debug@ 
+	GT.logging.state.logLevelFilter = GT.logging.INFO
+	--@end-debug@
 	GT.logging.state.logLevelDefault = GT.logging.INFO
 
 	LOG_COLOR_MAP[GT.logging.INFO] = '7f7f7f'
