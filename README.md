@@ -1,4 +1,4 @@
-<p><span style="font-size: 36px; color: #339966;"><strong>Guild</strong></span>&nbsp;<span style="font-size: 36px; color: #ffcc00;"><strong>Tradeskills</strong></span></p>
+<p><h1><span style="font-size: 36px; color: #339966;"><strong>Guild</strong></span>&nbsp;<span style="font-size: 36px; color: #ffcc00;"><strong>Tradeskills</strong></span></h1></p>
 <p><span style="font-size: 14px;">This addon will send any profession you add to it to other guild mates who also have the addon and they'll send you the professions they've added also.</span></p>
 <p><span style="font-size: 14px;">You can then easily search through their skills for something that might interest you and ask them the next time they're on if they'll craft it for you! Don't forget to tip your guildies!</span></p>
 <p>&nbsp;</p>
