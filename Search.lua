@@ -512,9 +512,6 @@ function GT.search.populateCharacters(shouldCascade)
 						break
 					end
 				end
-				if addCharacter then
-					break
-				end
 			end
 			if addCharacter and not GT.tableUtils.tableContains(charactersToAdd, characterName) then
 				table.insert(charactersToAdd, characterName)
