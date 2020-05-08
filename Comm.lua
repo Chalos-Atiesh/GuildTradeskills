@@ -3,6 +3,7 @@ local GT_Name, GT = ...
 GT.comm = {}
 GT.comm.state = {}
 GT.comm.state.initialized = false
+GT.comm.state.enabled = true
 
 GT.comm.aceComm = LibStub("AceAddon-3.0"):NewAddon("TSWL", "AceComm-3.0")
 
@@ -38,6 +39,10 @@ function GT.comm.aceComm:OnCommReceived(prefix, message, distribution, sender)
 		return
 	end
 	GT.logging.info('GT_Comm_OnCommReceived: ' .. prefix .. ', ' .. distribution .. ', ' .. sender)
+	if not GT.comm.state.enabled then
+		GT.logging.info('GT_Comm_OnCommReceived_Dropped')
+		return
+	end
 
 	local tokens = GT.textUtils.tokenize(message, GT.comm.DELIMITER)
 	local command = tokens[1]
@@ -56,6 +61,13 @@ end
 
 function GT.comm.sendTimestamps()
 	GT.logging.info('GT_Comm_SendTimestamps')
+	if not GT.comm.state.enabled then
+		GT.logging.info('GT_Comm_SendTimestamps_Dropped')
+		return
+	end
+	if GT_Character.guildName == nil then
+		GT.logging.warn('Character does not have a guild. Not sending timestamps')
+	end
 	local characters = GT.database.getGuild(GT_Character.realmName, GT_Character.factionName, GT_Character.guildName)
 	if characters == nil then
 		GT.logging.error('No characters found.')
@@ -83,6 +95,10 @@ end
 
 function GT.comm.onTimestampsReceived(prefix, tokens, distribution, sender)
 	GT.logging.info('GT_Comm_OnTimestampsReceived: ' .. prefix .. ', ' .. distribution .. ', ' .. sender)
+	if not GT.comm.state.enabled then
+		GT.logging.info('GT_Comm_OnTimestampsReceived_Dropped')
+		return
+	end
 	local charactersToPost = {}
 	local charactersToGet = {}
 	local charactersReceived = {}
@@ -160,12 +176,12 @@ function GT.comm.onTimestampsReceived(prefix, tokens, distribution, sender)
 	end
 end
 
-function GT.comm.sendGet(characterName, professionName)
-	GT.logging.info('GT_Comm_SendGet: ' .. characterName .. ', ' .. professionName)
-end
-
 function GT.comm.onGetReceived(prefix, tokens, distribution, sender)
 	GT.logging.info('GT_Comm_OnGetReceived: ' .. prefix .. ', ' .. distribution .. ', ' .. sender)
+	if not GT.comm.state.enabled then
+		GT.logging.info('GT_Comm_OnGetReceived_Dropped')
+		return
+	end
 	while #tokens > 0 do
 		local characterName = tokens[1]
 		tokens = GT.tableUtils.removeToken(tokens)
@@ -178,6 +194,10 @@ end
 
 function GT.comm.sendPost(characterName, professionName, recipient)
 	GT.logging.info('GT_Comm_SendPost: ' .. characterName .. ', ' .. professionName .. ', ' .. recipient)
+	if not GT.comm.state.enabled then
+		GT.logging.info('GT_Comm_SendPost_Dropped')
+		return
+	end
 
 	local profession = GT.database.getProfession(
 		GT_Character.realmName,
@@ -215,6 +235,10 @@ end
 
 function GT.comm.onPostReceived(prefix, tokens, distribution, sender)
 	GT.logging.info('GT_Comm_OnPostReceived: ' .. prefix .. ', ' .. distribution .. ', ' .. sender)
+	if not GT.comm.state.enabled then
+		GT.logging.info('GT_Comm_OnPostReceived_Dropped')
+		return
+	end
 	local characterName = tokens[1]
 	tokens = GT.tableUtils.removeToken(tokens)
 	local professionName = tokens[1]
@@ -319,5 +343,15 @@ function GT.comm.onPostReceived(prefix, tokens, distribution, sender)
 
 			i = i + 1
 		end
+	end
+end
+
+function GT.comm.toggleComms()
+	if GT.comm.state.enabled then
+		GT.logging.info('Disabling comms.')
+		GT.comm.state.enabled = false
+	else
+		GT.logging.info('Enabling comms.')
+		GT.comm.state.enabled = true
 	end
 end

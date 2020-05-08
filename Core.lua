@@ -18,6 +18,7 @@ local function GT_Init()
 		PPLAYER_ENTERING_WORLD = GT_PlayerEnteringWorld,
 		ADDON_LOADED = GT_AddonLoaded,
 		TRADE_SKILL_UPDATE = GT_TradeSkillUpdate,
+		CRAFT_UPDATE = GT_TradeSkillUpdate,
 		PLAYER_GUILD_UPDATE = GT_GuildUpdate
 	}
 
@@ -30,9 +31,10 @@ local function GT_Init()
 
 	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command']] = GT_Reset
 
+	SLASH_COMMAND_MAP['togglecomms'] = GT_ToggleComms
+
 	RESET_COMMAND_MAP[GT.L['RESET_COMMANDS']['RESET_PROFESSION']['command']] = GT_ResetProfession
 	RESET_COMMAND_MAP[GT.L['RESET_COMMANDS']['RESET_CHARACTER']['command']] = GT_ResetCharacter
-
 
 	GT.logging.init()
 	GT.database.init()
@@ -114,6 +116,7 @@ mainFrame:RegisterEvent('PLAYER_LOGIN')
 mainFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
 mainFrame:RegisterEvent('ADDON_LOADED')
 mainFrame:RegisterEvent('TRADE_SKILL_UPDATE')
+mainFrame:RegisterEvent('CRAFT_UPDATE')
 mainFrame:RegisterEvent('PLAYER_GUILD_UPDATE')
 
 mainFrame:SetScript('OnEvent', GT_MainEventHandler)
@@ -149,6 +152,10 @@ function GT_Reset(tokens)
 	else
 		GT.logging.playerWarn(string.gsub(GT.L['RESET_UNKNOWN'], '%{{command}}', tokens[#tokens]))
 	end
+end
+
+function GT_ToggleComms(tokens)
+	GT.comm.toggleComms()
 end
 
 function GT_ResetProfession(tokens)
