@@ -46,6 +46,7 @@
 <p>&nbsp;</p>
 <ul>
 	<li>Right clicking a character's name is supposed to send them a whisper about the last skill that was clicked. Currently no whisper is sent.</li>
+	<li>Left clicking a character name causes the game to stutter and does not filter the skills.</li>
 </ul>
 <p>&nbsp;</p>
 <h3>
