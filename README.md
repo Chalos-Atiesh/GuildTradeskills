@@ -26,7 +26,7 @@
 </ul>
 <h2>Links</h2>
 <ul>
-	<li><a href="https://www.curseforge.com/wow/addons/guild-tradeskills">CurseForge</a></li>
-	<li><a href="https://www.wowinterface.com/downloads/info25573-GuildTradeskills.html">WoWInterface</a></li>
-	<li><a href="https://github.com/Chalos-Atiesh/GuildTradeskills">GitHub</a></li>
+	<li><a href="https://www.curseforge.com/wow/addons/guild-tradeskills" target="_blank">CurseForge</a></li>
+	<li><a href="https://www.wowinterface.com/downloads/info25573-GuildTradeskills.html" target="_blank">WoWInterface</a></li>
+	<li><a href="https://github.com/Chalos-Atiesh/GuildTradeskills" target="_blank">GitHub</a></li>
 </ul>
