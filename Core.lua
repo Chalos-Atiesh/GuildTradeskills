@@ -31,10 +31,7 @@ local function GT_Init()
 
 	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command']] = GT_Reset
 
-	SLASH_COMMAND_MAP['togglecomms'] = GT_ToggleComms
-
-	RESET_COMMAND_MAP[GT.L['RESET_COMMANDS']['RESET_PROFESSION']['command']] = GT_ResetProfession
-	RESET_COMMAND_MAP[GT.L['RESET_COMMANDS']['RESET_CHARACTER']['command']] = GT_ResetCharacter
+	SLASH_COMMAND_MAP['togglecomms'] = GT.comm.toggleComms
 
 	GT.logging.init()
 	GT.database.init()
@@ -73,6 +70,7 @@ end
 
 function GT_PlayerLogin(frame, event, ...)
 	GT.player.init()
+	GT.comm.sendDeletions()
 	GT.comm.sendTimestamps()
 end
 
@@ -82,6 +80,7 @@ end
 
 function GT_TradeSkillUpdate(frame, event, ...)
 	GT.professions.addProfession()
+	GT.comm.sendDeletions()
 	GT.comm.sendTimestamps()
 end
 
@@ -129,7 +128,6 @@ function GT_SlashCommandHelp()
 end
 
 function GT_Reset(tokens)
-
 	if not GT.state.resetWarned then
 		if #tokens <= 0 then
 			GT.logging.playerWarn(GT.L['RESET_WARN'])
@@ -152,18 +150,6 @@ function GT_Reset(tokens)
 	else
 		GT.logging.playerWarn(string.gsub(GT.L['RESET_UNKNOWN'], '%{{command}}', tokens[#tokens]))
 	end
-end
-
-function GT_ToggleComms(tokens)
-	GT.comm.toggleComms()
-end
-
-function GT_ResetProfession(tokens)
-
-end
-
-function GT_ResetCharacter(tokens)
-
 end
 
 ---------- END SLASH COMMAND HANDLERS ----------
