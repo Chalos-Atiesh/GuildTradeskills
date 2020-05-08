@@ -1,4 +1,5 @@
 0.0.4
+	Added support for enchanting.
 	Added ability to toggle comms. Non localized as this shouldn't be regularly used by end users.
 	Reset last skill clicked in the GUI when necessary.
 
