@@ -7,6 +7,18 @@ function GT.tableUtils.removeToken(tokens)
 	return tokens
 end
 
+function GT.tableUtils.removeByValue(tbl, value, valueIsKey)
+	local returnTable = {}
+	for k, v in pairs(tbl) do
+		if valueIsKey and k ~= value then
+			returnTable[k] = v
+		elseif not valueIsKey and v ~= value then
+			returnTable[k] = v
+		end
+	end
+	return returnTable
+end
+
 function GT.tableUtils.getSortedKeys(tbl, sortFunction, sortByKey)
 	local keys = {}
 	for key in pairs(tbl) do
