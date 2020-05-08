@@ -12,6 +12,9 @@ end
 
 function GT.professions.addProfession()
 	local professionName = GetTradeSkillLine()
+	if professionName == 'UNKNOWN' then
+		professionName = GetCraftDisplaySkillLine()
+	end
 	if professionName == nil then
 		return
 	end
@@ -49,6 +52,25 @@ function GT.professions.updateProfession(professionName)
 	if professionName == nil then
 		return
 	end
+	local GetNumTradeSkills = GetNumTradeSkills
+	local GetTradeSkillInfo = GetTradeSkillInfo
+	local GetTradeSkillItemLink = GetTradeSkillItemLink
+	local GetTradeSkillNumReagents = GetTradeSkillNumReagents
+	local GetTradeSkillReagentInfo = GetTradeSkillReagentInfo
+
+	if professionName == 'Enchanting' then
+		GetNumTradeSkills = GetNumCrafts
+		GetTradeSkillItemLink = GetCraftItemLink
+		GetTradeSkillNumReagents = GetCraftNumReagents
+		GetTradeSkillReagentInfo = GetCraftReagentInfo
+
+		GetTradeSkillInfo = function(i)
+			local name, _, kind, num = GetCraftInfo(i)
+
+			return name, kind, num
+		end
+	end
+
 	local profession = GT.database.getProfession(
 		GT_Character.realmName,
 		GT_Character.factionName,
@@ -56,6 +78,7 @@ function GT.professions.updateProfession(professionName)
 		GT_Character.characterName,
 		professionName
 	)
+	GT.logging.info(profession, 2)
 	if profession == nil then
 		return
 	end
