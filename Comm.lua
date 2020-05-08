@@ -14,6 +14,7 @@ GT.comm.REAGENT_COUNT = 'REAGENT_COUNT'
 GT.comm.COMMAND_TIMESTAMP = 'TIMESTAMP'
 GT.comm.COMMAND_GET = 'GET'
 GT.comm.COMMAND_POST = 'POST'
+GT.comm.COMMAND_DELETE = 'DELETE'
 
 GT.comm.COMMAND_MAP = {}
 
@@ -27,6 +28,7 @@ function GT.comm.init()
 		TIMESTAMP = GT.comm.onTimestampsReceived,
 		GET = GT.comm.onGetReceived,
 		POST = GT.comm.onPostReceived,
+		DELETE = GT.comm.onDeleteReceived
 	}
 
 	GT.comm.aceComm:RegisterComm(GT.comm.PREFIX, GT.comm.aceComm:OnCommReceived())
@@ -59,6 +61,75 @@ function GT.comm.aceComm:OnCommReceived(prefix, message, distribution, sender)
 	end
 end
 
+function GT.comm.sendDeletions()
+	GT.logging.info('GT_Comm_SendDeletions')
+	if not GT.comm.state.enabled then
+		GT.logging.info('GT_Comm_SendDeletions_Dropped')
+		return
+	end
+	if GT_Character.guildName == nil then
+		GT.logging.warn('Character does not have a guild. Not sending deletions.')
+	end
+	local characters = GT.database.getGuild(GT_Character.realmName, GT_Character.factionName, GT_Character.guildName)
+	if characters == nil then
+		GT.logging.error('No characters found to send deletions for.')
+		return
+	end
+	characters = characters.characters
+	local msg = GT.comm.COMMAND_DELETE
+	for characterName, _ in pairs(characters) do
+		if characters[characterName].deletedProfessions ~= nil then
+			for _, professionName in pairs(characters[characterName].deletedProfessions) do
+				msg = msg .. GT.comm.DELIMITER .. characterName .. GT.comm.DELIMITER .. professionName
+			end
+		else
+			characters[characterName].deletedProfessions = {}
+		end
+	end
+	if msg ~= GT.comm.COMMAND_DELETE then
+		GT.comm.aceComm:SendCommMessage(GT.comm.PREFIX, msg, 'WHISPER', characterName, 'NORMAL')
+	end
+end
+
+function GT.comm.onDeleteReceived(prefix, tokens, distribution, sender)
+	GT.logging.info('GT_Comm_OnDelete_Received')
+	while #tokens > 0 do
+		local characterName = tokens[1]
+		tokens = GT.tableUtils.removeToken(tokens)
+		local professionName = tokens[1]
+		tokens = GT.tableUtils.removeToken(tokens)
+
+		local character = GT.database.getCharacter(
+			GT_Character.realmName,
+			GT_Character.factionName,
+			GT_Character.guildName,
+			characterName
+		)
+		if character ~= nil then
+			local profession = GT.database.getProfession(
+				GT_Character.realmName,
+				GT_Character.factionName,
+				GT_Character.guildName,
+				characterName,
+				professionName
+			)
+			if profession ~= nil then
+				GT.database.removeProfession(
+					GT_Character.realmName,
+					GT_Character.factionName,
+					GT_Character.guildName,
+					characterName,
+					professionName
+				)
+			else
+				GT.logging.info(characterName .. ' does not have profession ' .. professionName .. '.')
+			end
+		else
+			GT.logging.warn('No character ' .. characterName .. ' found to delete ' .. professionName .. ' from.')
+		end
+	end
+end
+
 function GT.comm.sendTimestamps()
 	GT.logging.info('GT_Comm_SendTimestamps')
 	if not GT.comm.state.enabled then
@@ -70,7 +141,7 @@ function GT.comm.sendTimestamps()
 	end
 	local characters = GT.database.getGuild(GT_Character.realmName, GT_Character.factionName, GT_Character.guildName)
 	if characters == nil then
-		GT.logging.error('No characters found.')
+		GT.logging.error('No characters found to send timestamps for.')
 		return
 	end
 	characters = characters.characters
@@ -102,6 +173,7 @@ function GT.comm.onTimestampsReceived(prefix, tokens, distribution, sender)
 	local charactersToPost = {}
 	local charactersToGet = {}
 	local charactersReceived = {}
+	local professionsToDelete = {}
 	while #tokens > 0 do
 		local characterName = tokens[1]
 		tokens = GT.tableUtils.removeToken(tokens)
@@ -113,26 +185,47 @@ function GT.comm.onTimestampsReceived(prefix, tokens, distribution, sender)
 		charactersReceived[characterName] = {}
 		table.insert(charactersReceived[characterName], professionName)
 
-		local profession = GT.database.getProfession(
+		local character = GT.database.getCharacter(
 			GT_Character.realmName,
 			GT_Character.factionName,
 			GT_Character.guildName,
-			characterName,
-			professionName
+			characterName
 		)
-		if profession == nil then
-			charactersToGet[characterName] = {}
-			table.insert(charactersToGet[characterName], professionName)
+		if character == nil then
+			character = GT.database.addCharacter(
+				GT_Character.realmName,
+				GT_Character.factionName,
+				GT_Character.guildName,
+				characterName
+			)
+		end
+		if characterName == GT_Character.characterName and GT.tableUtils.tableContains(character.deletedProfessions, professionName) then
+			if professionsToDelete[characterName] == nil then
+				professionsToDelete[characterName] = {}
+			end
+			table.insert(professionsToDelete[characterName], professionName)
 		else
-			-- if lastUpdate < profession.lastUpdate then
-			if lastUpdate < time() then
-				charactersToPost[characterName] = {}
-				table.insert(charactersToPost[characterName], professionName)
-			elseif lastUpdate > profession.lastUpdate then
+			local profession = GT.database.getProfession(
+				GT_Character.realmName,
+				GT_Character.factionName,
+				GT_Character.guildName,
+				characterName,
+				professionName
+			)
+			if profession == nil then
 				charactersToGet[characterName] = {}
 				table.insert(charactersToGet[characterName], professionName)
 			else
-				GT.logging.info('No update: ' .. characterName, ', ' .. professionName)
+				-- if lastUpdate < profession.lastUpdate then
+				if lastUpdate < time() then
+					charactersToPost[characterName] = {}
+					table.insert(charactersToPost[characterName], professionName)
+				elseif lastUpdate > profession.lastUpdate then
+					charactersToGet[characterName] = {}
+					table.insert(charactersToGet[characterName], professionName)
+				else
+					GT.logging.info('No update: ' .. characterName, ', ' .. professionName)
+				end
 			end
 		end
 	end
@@ -154,6 +247,17 @@ function GT.comm.onTimestampsReceived(prefix, tokens, distribution, sender)
 				table.insert(charactersToPost[characterName], professionName)
 			end
 		end
+	end
+
+	local msg = GT.comm.COMMAND_DELETE
+	for characterName, _ in pairs(professionsToDelete) do
+		local professions = professionsToDelete[characterName]
+		for _, professionName in pairs(professions) do
+			msg = msg .. GT.comm.DELIMITER .. characterName .. GT.comm.DELIMITER .. professionName
+		end
+	end
+	if msg ~= GT.comm.COMMAND_DELETE then
+		GT.comm.aceComm:SendCommMessage(GT.comm.PREFIX, msg, 'WHISPER', sender, 'NORMAL')
 	end
 
 	local msg = GT.comm.COMMAND_GET
@@ -199,6 +303,18 @@ function GT.comm.sendPost(characterName, professionName, recipient)
 		return
 	end
 
+	local character = GT.database.getCharacter(
+		GT_Character.realmName,
+		GT_Character.factionName,
+		GT_Character.guildName,
+		characterName
+	)
+	if GT.tableUtils.tableContains(character.deletedProfessions, professionName) then
+		GT.logging.info(characterName .. ' profession ' .. professionName .. ' is deleted. Canceling post.')
+		local msg = GT.comm.COMMAND_DELETE .. GT.comm.DELIMITER .. characterName .. GT.comm.DELIMITER .. professionName
+		GT.comm.aceComm:SendCommMessage(GT.comm.PREFIX, msg, 'WHISPER', sender, 'NORMAL')
+		return
+	end
 	local profession = GT.database.getProfession(
 		GT_Character.realmName,
 		GT_Character.factionName,
@@ -228,13 +344,12 @@ function GT.comm.sendPost(characterName, professionName, recipient)
 			end
 		end
 		if msg ~= GT.comm.COMMAND_POST .. GT.comm.DELIMITER .. characterName .. GT.comm.DELIMITER .. professionName .. GT.comm.DELIMITER .. profession.lastUpdate then
-			GT.comm.aceComm:SendCommMessage(GT.comm.PREFIX, msg, 'WHISPER', recipient, 'ALERT')
+			GT.comm.aceComm:SendCommMessage(GT.comm.PREFIX, msg, 'WHISPER', recipient, 'NORMAL')
 		end
 	end
 end
 
 function GT.comm.onPostReceived(prefix, tokens, distribution, sender)
-	GT.logging.info('GT_Comm_OnPostReceived: ' .. prefix .. ', ' .. distribution .. ', ' .. sender)
 	if not GT.comm.state.enabled then
 		GT.logging.info('GT_Comm_OnPostReceived_Dropped')
 		return
@@ -245,6 +360,8 @@ function GT.comm.onPostReceived(prefix, tokens, distribution, sender)
 	tokens = GT.tableUtils.removeToken(tokens)
 	local lastUpdate = tonumber(tokens[1])
 	tokens = GT.tableUtils.removeToken(tokens)
+
+	GT.logging.info('GT_Comm_OnPostReceived: ' .. prefix .. ', ' .. distribution .. ', ' .. sender .. ', ' .. characterName .. ', ' .. professionName)
 
 	local character = GT.database.getCharacter(
 		GT_Character.realmName,
@@ -260,6 +377,13 @@ function GT.comm.onPostReceived(prefix, tokens, distribution, sender)
 			GT_Character.guildName,
 			characterName
 		)
+	end
+
+	if characterName == GT_Character.characterName and GT.tableUtils.tableContains(character.deletedProfessions, professionName) then
+		GT.logging.info(characterName .. ' profession ' .. professionName .. ' is deleted. Canceling post receiving.')
+		local msg = GT.comm.COMMAND_DELETE .. GT.comm.DELIMITER .. characterName .. GT.comm.DELIMITER .. professionName
+		GT.comm.aceComm:SendCommMessage(GT.comm.PREFIX, msg, 'WHISPER', sender, 'NORMAL')
+		return
 	end
 
 	local professions = character.professions

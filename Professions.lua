@@ -6,11 +6,17 @@ GT.professions.state.initialized = false
 GT.professions.state.adding = false
 
 function GT.professions.initAdd()
-	GT.logging.playerInfo(GT.L['PROFESSION_ADD_INIT'])
-	GT.professions.state.adding = true
+	if not GT.professions.state.adding then
+		GT.logging.playerInfo(GT.L['PROFESSION_ADD_INIT'])
+		GT.professions.state.adding = true
+	else
+		GT.logging.playerInfo(GT.L['PROFESSION_ADD_CANCEL'])
+		GT.professions.state.adding = false
+	end
 end
 
 function GT.professions.addProfession()
+	GT.logging.info('GT_Professions_AddProfession')
 	local professionName = GetTradeSkillLine()
 	if professionName == 'UNKNOWN' then
 		professionName = GetCraftDisplaySkillLine()
@@ -44,6 +50,10 @@ function GT.professions.addProfession()
 	end
 
 	GT.professions.updateProfession(professionName)
+	if GT.professions.state.adding then
+	    CloseTradeSkill()
+	    CloseCraft()
+	end
 
 	GT.professions.state.adding = false
 end
@@ -78,7 +88,6 @@ function GT.professions.updateProfession(professionName)
 		GT_Character.characterName,
 		professionName
 	)
-	GT.logging.info(profession, 2)
 	if profession == nil then
 		return
 	end
@@ -142,59 +151,46 @@ function GT.professions.updateProfession(professionName)
 end
 
 function GT.professions.removeProfession(tokens)
+	GT.player.init()
+	GT.database.init()
+	local professionNameToRemove = tokens[1]
 	tokens = GT.tableUtils.removeToken(tokens)
-	local characterName = tokens[1]
-	tokens = GT.tableUtils.removeToken(tokens)
-	if characterName == nil then
-		GT.logging.playerError(GT.L['PROFESSION_REMOVE_NIL_CHARACTER'])
-		return
-	end
-
-	local professionName = tokens[1]
-	tokens = GT.tableUtils.removeToken(tokens)
-	if professionName == nil then
+	if professionNameToRemove == nil then
 		GT.logging.playerError(GT.L['PROFESSION_REMOVE_NIL_PROFESSION'])
 		return
 	end
-	GT.logging.info('GT_Professions_RemoveProfession: ' .. characterName .. ', ' .. professionName)
+	GT.logging.info('GT_Professions_RemoveProfession: ' .. GT_Character.characterName .. ', ' .. professionNameToRemove)
 
 	local character = GT.database.getCharacter(
 		GT_Character.realmName,
 		GT_Character.factionName,
 		GT_Character.guildName,
-		characterName
+		GT_Character.characterName
 	)
-	if character == nil then
-		local msg = GT.L['PROFESSION_REMOVE_CHARACTER_NOT_FOUND']
-		msg = string.gsub(msg, '%{{character_name}}', characterName)
-		GT.logging.playerError(msg)
-		return
+	local professions = character.professions
+	local professionRemoved = false
+	for professionName, _ in pairs(professions) do
+		if string.lower(professionName) == string.lower(professionNameToRemove) then
+			GT.database.removeProfession(
+				GT_Character.realmName,
+				GT_Character.factionName,
+				GT_Character.guildName,
+				GT_Character.characterName,
+				professionName
+			)
+			professionRemoved = true
+		end
 	end
-
-	local profession = GT.database.getProfession(
-		GT_Character.realmName,
-		GT_Character.factionName,
-		GT_Character.guildName,
-		characterName,
-		professionName
-	)
-	if profession == nil then
+	if professionRemoved then
+		local msg = GT.L['PROFESSION_REMOVE_SUCCESS']
+		msg = string.gsub(msg, '%{{character_name}}', GT_Character.characterName)
+		msg = string.gsub(msg, '%{{profession_name}}', professionNameToRemove)
+		GT.logging.playerInfo(msg)
+		GT.comm.sendDeletions()
+	else
 		local msg = GT.L['PROFESSION_REMOVE_PROFESSION_NOT_FOUND']
-		msg = string.gsub(msg, '%{{character_name}}', characterName)
-		msg = string.gsub(msg, '%{{profession_name}}', professionName)
+		msg = string.gsub(msg, '%{{character_name}}', GT_Character.characterName)
+		msg = string.gsub(msg, '%{{profession_name}}', professionNameToRemove)
 		GT.logging.playerError(msg)
-		return
 	end
-
-	GT.database.removeProfession(
-		GT_Character.realmName,
-		GT_Character.factionName,
-		GT_Character.guildName,
-		characterName,
-		professionName
-	)
-	local msg = GT.L['PROFESSION_REMOVE_SUCCESS']
-	msg = string.gsub(msg, '%{{character_name}}', characterName)
-	msg = string.gsub(msg, '%{{profession_name}}', professionName)
-	GT.logging.playerInfo(msg)
 end
