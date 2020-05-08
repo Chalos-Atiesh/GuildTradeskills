@@ -32,7 +32,6 @@
 </h3>
 <p>&nbsp;</p>
 <ul>
-	<li>Update API calls for enchanting.</li>
 	<li>Add whisper support for people that don't have the addon.</li>
 	<li>Add support for non-guild members.</li>
 	<li>Add version checking.</li>
@@ -44,7 +43,6 @@
 </h3>
 <p>&nbsp;</p>
 <ul>
-	<li>Enchanting currently does not work.</li>
 	<li>Right clicking a character's name is supposed to send them a whisper about the last skill that was clicked. Currently no whisper is sent.</li>
 	<li>Removing a profession won't propagate that removal through the network so it may be added back to the database.</li>
 </ul>
