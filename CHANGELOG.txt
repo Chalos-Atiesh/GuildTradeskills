@@ -1,3 +1,11 @@
+0.0.5
+	Removed character and profession reset stubs in favor of just ability to remove profession.
+	Added back end for removing profession and having it propagate through the network.
+	Removed log info localizations. The end user shouldn't ever see these.
+	Moved GUI profession check box states up to SavedCharacterVars instead of local. It's super annoying to have to check them every time you reload the UI.
+	Adding a profession will now auto-close the profession after it is done adding.
+	Added ability to remove from a table by value or if a table is not integer indexed.
+
 0.0.4
 	Added support for enchanting.
 	Added ability to toggle comms. Non localized as this shouldn't be regularly used by end users.

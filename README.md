@@ -44,7 +44,6 @@
 <p>&nbsp;</p>
 <ul>
 	<li>Right clicking a character's name is supposed to send them a whisper about the last skill that was clicked. Currently no whisper is sent.</li>
-	<li>Removing a profession won't propagate that removal through the network so it may be added back to the database.</li>
 </ul>
 <p>&nbsp;</p>
 <h3>
