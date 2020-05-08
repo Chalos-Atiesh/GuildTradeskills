@@ -12,73 +12,78 @@ function GT.database.init(force)
 	GT.logging.info('GT_Database_Init')
 
 	if GT_DB == nil then
-		GT.logging.info(GT.L['DATABASE_CREATE'])
+		GT.logging.info('Current database is nil. Creating it.')
 		GT_DB = {}
 	end
 
 	local realmName = GetRealmName()
 	if realmName == nil then
-		GT.logging.error(GT.L['ERROR_NIL_REALM'])
+		GT.logging.error('Character realm is nil.')
 		return
 	end
 	if GT_DB.realms == nil then
-		GT.logging.info(GT.L['DATABASE_REALM_CREATE'])
+		GT.logging.info('Database realm list is nil. Creating it.')
 		GT_DB.realms = {}
 	end
 	if GT_DB.realms[realmName] == nil then
-		GT.logging.info(GT.L['DATABASE_REALM_UPDATE'] .. realmName)
+		GT.logging.info('Updating database realm: ' .. realmName)
 		GT_DB.realms[realmName] = {}
 	end
 
 	local realm = GT_DB.realms[realmName]
 	local _, factionName = UnitFactionGroup('player')
 	if factionName == nil then
-		GT.logging.error(GT.L['ERROR_NIL_FACTION'])
+		GT.logging.error('Character faction is nil.')
 		return
 	end
 	if realm.factions == nil then
-		GT.logging.info(GT.L['DATABASE_FACTION_CREATE'])
+		GT.logging.info('Database faction list is nil. Creating it.')
 		realm.factions = {}
 	end
 	if realm.factions[factionName] == nil then
-		GT.logging.info(GT.L['DATABASE_FACTION_UPDATE'] .. factionName)
+		GT.logging.info('Updating database faction: ' .. factionName)
 		realm.factions[factionName] = {}
 	end
 
 	local faction = realm.factions[factionName]
 	local guildName = GetGuildInfo('player')
 	if guildName == nil then
-		GT.logging.error(GT.L['ERROR_NIL_GUILD'])
+		GT.logging.error('Could not find a guild for current character.')
 		return
 	end
 	if faction.guilds == nil then
-		GT.logging.info(GT.L['DATABASE_GUILD_CREATE'])
+		GT.logging.info('Database guild list is nil. Creating it.')
 		faction.guilds = {}
 	end
 	if faction.guilds[guildName] == nil then
-		GT.logging.info(GT.L['DATABASE_GUILD_UPDATE'] .. guildName)
+		GT.logging.info('Updating database guild: ' .. guildName)
 		faction.guilds[guildName] = {}
 	end
 
 	local guild = faction.guilds[guildName]
 	local characterName = UnitName('player')
 	if characterName == nil then
-		GT.logging.error(GT.L['ERROR_NIL_NAME'])
+		GT.logging.error('Could not find character name.')
 		return
 	end
 	if guild.characters == nil then
-		GT.logging.info(GT.L['DATABASE_CHARACTER_CREATE'])
+		GT.logging.info('Database character list is nil. Creating it.')
 		guild.characters = {}
 	end
 	if guild.characters[characterName] == nil then
-		GT.logging.info(GT.L['DATABASE_CHARACTER_UPDATE'] .. characterName)
+		GT.logging.info('Updating database character: ' .. characterName)
 		guild.characters[characterName] = {}
 	end
 
 	local character = guild.characters[characterName]
 	if character.professions == nil then
-		GT.logging.info(GT.L['DATABASE_PROFESSION_CREATE'])
+		GT.logging.info('Database profession list is nil. Creating it.')
 		character.professions = {}
+	end
+
+	if character.deletedProfessions == nil then
+		GT.logging.info('Deleted professions list is nil. Creating it.')
+		character.deletedProfessions = {}
 	end
 
 	GT.database.state.initialized = true
@@ -125,6 +130,7 @@ function GT.database.addCharacter(realmName, factionName, guildName, characterNa
 	GT.logging.info('GT_Database_AddCharacter: ' .. guildName .. ', ' .. characterName)
 	local characters = GT.database.drillDown(realmName, factionName, guildName).characters
 	characters[characterName] = {}
+	characters[characterName].deletedProfessions = {}
 	characters[characterName].professions = {}
 	return characters[characterName]
 end
@@ -145,6 +151,7 @@ end
 function GT.database.addProfession(realmName, factionName, guildName, characterName, professionName)
 	GT.logging.info('GT_Database_AddProfession: ' .. guildName .. ', ' .. characterName .. ', ' .. professionName)
 	local character = GT.database.getCharacter(realmName, factionName, guildName, characterName)
+	character.deletedProfessions = GT.tableUtils.removeByValue(character.deletedProfessions, professionName)
 	character.professions[professionName] = {}
 	local profession = character.professions[professionName]
 	profession.skills = {}
@@ -153,9 +160,15 @@ function GT.database.addProfession(realmName, factionName, guildName, characterN
 end
 
 function GT.database.removeProfession(realmName, factionName, guildName, characterName, professionName)
+	GT.database.init()
 	GT.logging.info('GT_Database_RemoveProfession: ' .. guildName .. ', ' .. characterName .. ', ' .. professionName)
 	local character = GT.database.getCharacter(realmName, factionName, guildName, characterName)
-	table.remove(character.professions, professionName)
+	if not GT.tableUtils.tableContains(character.deletedProfessions, professionName) then
+		table.insert(character.deletedProfessions, professionName)
+	end
+	local professions = character.professions
+	professions = GT.tableUtils.removeByValue(professions, professionName, true)
+	character.professions = professions
 end
 
 function GT.database.getSkills(realmName, factionName, guildName, characterName, professionName)
