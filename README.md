@@ -36,6 +36,7 @@
 	<li>Add support for non-guild members.</li>
 	<li>Add version checking.</li>
 	<li>Add log archive and log dump capabilities.</li>
+	<li>Add dropdown for online characters in the character search field.</li>
 </ul>
 <p>&nbsp;</p>
 <h3>
