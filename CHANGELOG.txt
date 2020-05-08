@@ -1,0 +1,16 @@
+0.0.4
+	Added ability to toggle comms. Non localized as this shouldn't be regularly used by end users.
+	Reset last skill clicked in the GUI when necessary.
+
+0.0.3
+	Fixed issue where only one character was being displayed in the results
+
+0.0.2
+	Fixed DB error on new launches
+
+0.0.1
+	Init
+	Added database
+	Added ability to add professions
+	Added sync capabilities
+	Added GUI
