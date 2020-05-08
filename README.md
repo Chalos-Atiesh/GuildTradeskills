@@ -35,6 +35,7 @@
 	<li>Add whisper support for people that don't have the addon.</li>
 	<li>Add support for non-guild members.</li>
 	<li>Add version checking.</li>
+	<li>Add log archive and log dump capabilities.</li>
 </ul>
 <p>&nbsp;</p>
 <h3>
