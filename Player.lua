@@ -12,41 +12,45 @@ function GT.player.init(force)
 	GT.logging.info('GT_Player_Init')
 
 	if GT_Character == nil then
-		GT.logging.info(GT.L['CHARACTER_CREATE'])
+		GT.logging.info('Current character is nil. Creating it.')
 		GT_Character = {}
+	end
+
+	if GT_Character.search == nil then
+		GT_Character.search = {}
 	end
 
 	local realmName = GetRealmName()
 	if realmName == nil then
-		GT.logging.error(GT.L['ERROR_NIL_REALM'])
+		GT.logging.error('Realm name is nil.')
 		return
 	elseif GT_Character.realm == nil then
-		GT.logging.info(GT.L['CHARACTER_REALM_UPDATE'] .. realmName)
+		GT.logging.info('Updating character realm: ' .. realmName)
 		GT_Character.realmName = realmName
 	end
 
 	local _, factionName = UnitFactionGroup('player')
 	if factionName == nil then
-		GT.logging.error(GT.L['ERROR_NIL_FACTION'])
+		GT.logging.error('Faction is nil.')
 	elseif GT_Character.faction == nil then
-		GT.logging.info(GT.L['CHARACTER_FACTION_UPDATE'] .. factionName)
+		GT.logging.info('Updating character faction: ' .. factionName)
 		GT_Character.factionName = factionName
 	end
 	local guildName = GetGuildInfo('player')
 	if guildName == nil then
-		GT.logging.playerWarn(GT.L['ERROR_NIL_GUILD'])
+		GT.logging.error('Guild is nil.')
 	elseif GT_Character.guildName == nil then
-		GT.logging.info(GT.L['CHARACTER_GUILD_UPDATE'] .. guildName)
+		GT.logging.info('Updating character guild: ' .. guildName)
 		GT_Character.guildName = guildName
 	end
 
 	local characterName = UnitName('player')
 	if GT_Character.characterName == nil then
-		GT.logging.info(GT.L['CHARACTER_NAME_UPDATE'] .. characterName)
+		GT.logging.info('Updating character name: ' .. characterName)
 		GT_Character.characterName = characterName
 	end
 
-	GT.logging.info(GT.L['CHARACTER_SET'] .. GT_Character.characterName)
+	GT.logging.info('Setting current character: ' .. GT_Character.characterName)
 	GT.player.state.currentCharacter = GT.database.getCharacter(
 		realmName,
 		factionName,
@@ -60,13 +64,13 @@ end
 function GT.player.guildUpdate()
 	local guildName = GetGuildInfo('player')
 	if guildName ~= nil then
-		GT.logging.info(GT.L['CHARACTER_GUILD_UPDATE'] .. guildName)
+		GT.logging.info('Updating character guild: ' .. guildName)
 		GT_Character.guildName = guildName
 	end
 end
 
 function GT.player.reset()
 	GT.logging.info('GT_Player_Reset')
-	GT_Character = {}
+	GT_Character = nil
 	GT.player.init(true)
 end

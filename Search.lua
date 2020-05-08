@@ -41,9 +41,6 @@ function GT.search.openSearch(tokens)
 	if GT.search.state == nil then
 		GT.search.state = {}
 	end
-	if GT.search.state.professions == nil then
-		GT.search.state.professions = {}
-	end
 
 	if GT.search.mainFrame ~= nil then
 		GT.search.mainFrame:Hide()
@@ -214,10 +211,10 @@ function GT.search.openSearch(tokens)
 		profCheckBox:SetFullWidth(true)
 		profCheckBox:SetLabel(profName)
 		local checked = true
-		if GT.search.state.professions[profName] == nil then
-			GT.search.state.professions[profName] = true
+		if GT_Character.search[profName] == nil then
+			GT_Character.search[profName] = true
 		else
-			checked = GT.search.state.professions[profName]
+			checked = GT_Character.search[profName]
 		end
 		profCheckBox:SetValue(checked)
 		profCheckBox:SetCallback('OnValueChanged', function(widget, callback, value)
@@ -226,7 +223,9 @@ function GT.search.openSearch(tokens)
 			GT.search.lastSkillLinkClicked = nil
 			GT.search.lastReagentClicked = nil
 			GT.search.lastCharacterClicked = nil
-			GT.search.state.professions[professionName] = value
+
+			GT_Character.search[professionName] = value
+
 			GT.search.populateSkills(true)
 		end)
 		profScrollFrame:AddChild(profCheckBox)
@@ -289,7 +288,7 @@ function GT.search.populateSkills(shouldCascade)
 		for characterName, _ in pairs(characters) do
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
-				if GT.search.state.professions[professionName] then
+				if GT_Character.search[professionName] then
 					local skills = professions[professionName].skills
 					for skillName, _ in pairs(skills) do
 						local reagents = skills[skillName].reagents
@@ -314,7 +313,7 @@ function GT.search.populateSkills(shouldCascade)
 		for characterName, _ in pairs(characters) do
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
-				if GT.search.state.professions[professionName] then
+				if GT_Character.search[professionName] then
 					local skills = professions[professionName].skills
 					for skillName, _ in pairs(skills) do
 						local skill = skills[skillName]
@@ -334,7 +333,7 @@ function GT.search.populateSkills(shouldCascade)
 		for characterName, _ in pairs(characters) do
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
-				if GT.search.state.professions[professionName] then
+				if GT_Character.search[professionName] then
 					local skills = professions[professionName].skills
 					for skillName, _ in pairs(skills) do
 						local skill = skills[skillName]
