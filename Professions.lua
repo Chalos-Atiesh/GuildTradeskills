@@ -16,7 +16,6 @@ function GT.professions.initAdd()
 end
 
 function GT.professions.addProfession()
-	GT.logging.info('GT_Professions_AddProfession')
 	local professionName = GetTradeSkillLine()
 	if professionName == 'UNKNOWN' then
 		professionName = GetCraftDisplaySkillLine()
@@ -24,6 +23,7 @@ function GT.professions.addProfession()
 	if professionName == nil then
 		return
 	end
+	GT.logging.info('GT_Professions_AddProfession: ' .. professionName)
 	if GT.professions.state.adding then
 		GT.player.init()
 		GT.database.init()
@@ -54,6 +54,9 @@ function GT.professions.addProfession()
 	    CloseTradeSkill()
 	    CloseCraft()
 	end
+
+	GT.comm.sendDeletions()
+	GT.comm.sendTimestamps()
 
 	GT.professions.state.adding = false
 end
@@ -147,7 +150,6 @@ function GT.professions.updateProfession(professionName)
 			end
 		end
 	end
-	GT.comm.sendTimestamps()
 end
 
 function GT.professions.removeProfession(tokens)

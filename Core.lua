@@ -82,13 +82,21 @@ end
 
 function GT_TradeSkillUpdate(frame, event, ...)
 	GT.professions.addProfession()
-	GT.comm.sendDeletions()
-	GT.comm.sendTimestamps()
 end
 
 function GT_GuildUpdate(frame, event, ...)
 	GT.player.guildUpdate()
 end
+
+local mainFrame = CreateFrame('Frame')
+mainFrame:RegisterEvent('PLAYER_LOGIN')
+mainFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
+mainFrame:RegisterEvent('ADDON_LOADED')
+mainFrame:RegisterEvent('TRADE_SKILL_UPDATE')
+mainFrame:RegisterEvent('CRAFT_UPDATE')
+mainFrame:RegisterEvent('PLAYER_GUILD_UPDATE')
+
+mainFrame:SetScript('OnEvent', GT_MainEventHandler)
 
 ---------- END EVENT HANDLERS ----------
 ---------- START SLASH COMMAND HANDLERS ----------
@@ -111,16 +119,6 @@ function SlashCmdList.GT_SLASHCOMMAND(msg)
 		GT.logging.playerError(string.gsub(GT.L['COMMAND_INVALID'], '%{{command}}', msg))
 	end
 end
-
-local mainFrame = CreateFrame('Frame')
-mainFrame:RegisterEvent('PLAYER_LOGIN')
-mainFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
-mainFrame:RegisterEvent('ADDON_LOADED')
-mainFrame:RegisterEvent('TRADE_SKILL_UPDATE')
-mainFrame:RegisterEvent('CRAFT_UPDATE')
-mainFrame:RegisterEvent('PLAYER_GUILD_UPDATE')
-
-mainFrame:SetScript('OnEvent', GT_MainEventHandler)
 
 function GT_SlashCommandHelp()
 	GT.logging.playerInfo(GT.L['HELP_INTRO'])
