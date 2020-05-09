@@ -3,6 +3,7 @@
 	Added ability to change default output chat window.
 	Fixed an issue that was causing skill filter to fail when clicking a character's name.
 	Fixed an issue that was causing whispers to fail when a character was right clicked.
+	Adding a hard cap to the number of items displayed in the scroll lists. It would be better if this could dynamically create and release.
 
 0.0.5
 	Removed character and profession reset stubs in favor of just ability to remove profession.
