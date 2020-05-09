@@ -49,3 +49,42 @@ function GT.textUtils.textValue(value)
     end
     return value
 end
+
+function GT.textUtils.concat(start, delimiter, ...)
+    local txt = start
+    local args = {...}
+    local actualDelimiter = nil
+    for i = 1, #args do
+        if start == nil and actualDelimiter == nil then
+            txt = ''
+            actualDelimiter = ''
+        else
+            actualDelimiter = delimiter
+        end
+        local arg = args[i]
+        if arg == nil then
+            txt = txt .. actualDelimiter .. 'nil'
+        elseif type(arg) == 'string' then
+            txt = txt .. actualDelimiter .. args[i]
+        elseif type(arg) == 'boolean' then
+            if arg then
+                txt = txt .. actualDelimiter .. 'true'
+            else
+                txt = txt .. actualDelimiter .. 'false'
+            end
+        elseif type(arg) == 'number' then
+            txt = txt .. actualDelimiter .. tostring(arg)
+        elseif type(arg) == 'table' then
+            txt = txt .. actualDelimiter .. '{'
+            for k, v in pairs(arg) do
+                local key = GT.textUtils.concat(nil, ',', k)
+                local value = GT.textUtils.concat(nil, ',', v)
+                txt = txt .. '{' .. key .. ':' .. value .. '}'
+            end
+            txt = txt .. '}'
+        elseif type(arg) == 'function' then
+            txt = txt .. actualDelimiter .. 'function'
+        end
+    end
+    return txt
+end
