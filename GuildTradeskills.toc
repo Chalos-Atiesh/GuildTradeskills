@@ -2,7 +2,9 @@
 ## Title: |cff3ce13fGuild|rTradeskills
 ## Notes: Allows guild members to search each other's tradeskills.
 ## Author: Chalos
-## Version: 0.1.0
+## Version: @project-version@
+## X-Curse-Project_ID: 381775
+## X-WoWI-ID: 25573
 ## SavedVariablesPerCharacter: GT_Character
 ## SavedVariables: GT_DB
 
