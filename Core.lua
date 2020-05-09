@@ -45,7 +45,7 @@ local function GT_Init()
 
 	GT.logging.info('GT_Core_Init')
 
-	GT.logging.playerInfo(GT.L['WELCOME'])
+	GT.logging.playerInfo(GT.L['WELCOME'], nil, true)
 
 	GT.state.initialized = true
 end

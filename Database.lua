@@ -234,22 +234,25 @@ function GT.database.reset()
 	GT.database.init(true)
 end
 
-function GT.database.getChatFrame()
+function GT.database.getChatFrame(chatFrameIndex)
 	if GT_DB.options ~= nil and GT_DB.options.chatFrame ~= nil then
-		return _G['ChatFrame' .. GT_DB.options.chatFrame]
+		if chatFrameIndex ~= nil then
+			return _G['ChatFrame' .. chatFrameIndex]
+		else
+			return _G['ChatFrame' .. GT_DB.options.chatFrame]
+		end
 	else
 		return _G['ChatFrame1']
 	end
 end
 
 function GT.database.setChatFrame(chatFrameName)
-	GT_DB.options.chatFrame = 1
 	for i = 1, NUM_CHAT_WINDOWS do
 		local name = string.lower(GetChatWindowInfo(i) or '')
 		if name ~= "" and name == string.lower(chatFrameName) then
 			GT_DB.options.chatFrame = i
-			break
+			return true
 		end
 	end
-	return GT_DB.options.chatFrame
+	return false
 end

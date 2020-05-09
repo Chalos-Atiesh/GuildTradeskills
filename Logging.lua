@@ -40,7 +40,7 @@ function GT.logging.init(force)
 	GT.logging.initialized = true
 end
 
-function GT.logging.print(msg, logLevel, limit)
+function GT.logging.print(msg, logLevel, limit, forceDefaultChatFrame)
 	if logLevel == nil then
 		logLevel = GT.logging.state.logLevelDefault
 	end
@@ -56,6 +56,9 @@ function GT.logging.print(msg, logLevel, limit)
 			GT.logging._printTable(msg, color, 0, limit)
 		else
 			local chatFrame = GT.database.getChatFrame()
+			if forceDefaultChatFrame then
+				chatFrame = GT.database.getChatFrame(1)
+			end
 			chatFrame:AddMessage(GT.L['LOG_TAG'] .. '|cff' .. color .. msg .. '|r')
 		end
 	else
@@ -100,32 +103,32 @@ function GT.logging._printTable(tbl, color, depth, limit)
 	end
 end
 
-function GT.logging.info(msg, limit)
-	GT.logging.print(msg, GT.logging.INFO, limit)
+function GT.logging.info(msg, limit, forceDefaultChatFrame)
+	GT.logging.print(msg, GT.logging.INFO, limit, forceDefaultChatFrame)
 end
 
-function GT.logging.debug(msg, limit)
-	GT.logging.print(msg, GT.logging.DEBUG, limit)
+function GT.logging.debug(msg, limit, forceDefaultChatFrame)
+	GT.logging.print(msg, GT.logging.DEBUG, limit, forceDefaultChatFrame)
 end
 
-function GT.logging.warn(msg, limit)
-	GT.logging.print(msg, GT.logging.WARN, limit)
+function GT.logging.warn(msg, limit, forceDefaultChatFrame)
+	GT.logging.print(msg, GT.logging.WARN, limit, forceDefaultChatFrame)
 end
 
-function GT.logging.error(msg, limit)
-	GT.logging.print(msg, GT.logging.ERROR, limit)
+function GT.logging.error(msg, limit, forceDefaultChatFrame)
+	GT.logging.print(msg, GT.logging.ERROR, limit, forceDefaultChatFrame)
 end
 
-function GT.logging.playerInfo(msg, limit)
-	GT.logging.print(msg, GT.logging.PLAYER_INFO, limit)
+function GT.logging.playerInfo(msg, limit, forceDefaultChatFrame)
+	GT.logging.print(msg, GT.logging.PLAYER_INFO, limit, forceDefaultChatFrame)
 end
 
-function GT.logging.playerWarn(msg, limit)
-	GT.logging.print(msg, GT.logging.PLAYER_WARN, limit)
+function GT.logging.playerWarn(msg, limit, forceDefaultChatFrame)
+	GT.logging.print(msg, GT.logging.PLAYER_WARN, limit, forceDefaultChatFrame)
 end
 
-function GT.logging.playerError(msg, limit)
-	GT.logging.print(msg, GT.logging.PLAYER_ERROR, limit)
+function GT.logging.playerError(msg, limit, forceDefaultChatFrame)
+	GT.logging.print(msg, GT.logging.PLAYER_ERROR, limit, forceDefaultChatFrame)
 end
 
 function GT.logging.reset()
@@ -133,5 +136,15 @@ function GT.logging.reset()
 end
 
 function GT.logging.setChatFrame(tokens)
-	GT.database.setChatFrame(tokens[1])
+	local frameName = tokens[1]
+	if frameName then
+		local frameSet = GT.database.setChatFrame(tokens[1])
+		if frameSet then
+			GT.logging.playerInfo(string.gsub(GT.L['CHAT_WINDOW_SUCCESS'], '%{{frame_name}}', frameName))
+		else
+			GT.logging.playerWarn(string.gsub(GT.L['CHAT_WINDOW_INVALID'], '%{{frame_name}}', frameName))
+		end
+	else
+		GT.logging.playerWarn(GT.L['CHAT_WINDOW_NIL'])
+	end
 end

@@ -70,6 +70,9 @@ if LOCALE == 'enUS' or LOCALE == 'enGB' or GT.L == nil then
 	}
 
 	L['COMMAND_INVALID'] = 'Sorry! \'' .. SLASH_GT_SLASHCOMMAND1 .. ' {{command}}\' is an invalid command. Get help with \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_HELP']['command'] .. '\'.'
+	L['CHAT_WINDOW_NIL'] = 'Looks like you didn\'t pass a chat window name. You can do so with \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_CHAT_WINDOW']['command'] .. ' {window_name}\'.'
+	L['CHAT_WINDOW_INVALID'] = 'Sorry! We couldn\'t find a chat window with name \'{{frame_name}}\'.'
+	L['CHAT_WINDOW_SUCCESS'] = 'Set ouput chat window to \'{{frame_name}}\'.'
 
 	L['COMMAND_RESET_CONFIRM'] = 'confirm'
 	L['COMMAND_RESET_CANCEL'] = 'cancel'
