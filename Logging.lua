@@ -1,9 +1,35 @@
 local GT_Name, GT = ...
 
 GT.logging = {}
+GT.logging.LOG_LINE_LENGTH_LIMIT = 127
 GT.logging.state = {}
 GT.logging.initialized = false
 GT.logging.TABLE_SPACING = '  '
+GT.logging.LOG_FORMAT = '{{tag}}{{start_color}}{{message}}{{end_color}}'
+
+GT.logging.INFO = 0
+GT.logging.DEBUG = 1
+GT.logging.WARN = 2
+GT.logging.ERROR = 3
+GT.logging.PLAYER_INFO = 4
+GT.logging.PLAYER_WARN = 5
+GT.logging.PLAYER_ERROR = 6
+
+GT.logging.COLOR_INFO = '|cff7f7f7f'
+GT.logging.COLOR_DEBUG = '|cffffffff'
+GT.logging.COLOR_WARN = '|cffff9900'
+GT.logging.COLOR_ERROR = '|cffff0000'
+GT.logging.COLOR_PLAYER_INFO = ''
+GT.logging.COLOR_PLAYER_WARN = '|cffff9900'
+GT.logging.COLOR_PLAYER_ERROR = '|cffff9900'
+
+GT.logging.state.logLevelFilter = GT.logging.PLAYER_INFO
+--@debug@ 
+GT.logging.state.logLevelFilter = GT.logging.INFO
+--@end-debug@
+GT.logging.state.logLevelDefault = GT.logging.INFO
+
+GT.logging.DELIMITER = ': '
 
 local LOG_COLOR_MAP = {}
 
@@ -11,29 +37,14 @@ function GT.logging.init(force)
 	if GT.logging.initialized and not force then
 		return
 	end
-	GT.logging.INFO = 0
-	GT.logging.DEBUG = 1
-	GT.logging.WARN = 2
-	GT.logging.ERROR = 3
-	GT.logging.PLAYER_INFO = 4
-	GT.logging.PLAYER_WARN = 5
-	GT.logging.PLAYER_ERROR = 6
 
-	GT.logging.PLAYER = GT.logging.PLAYER_INFO
-
-	GT.logging.state.logLevelFilter = GT.logging.PLAYER_INFO
-	--@debug@ 
-	GT.logging.state.logLevelFilter = GT.logging.INFO
-	--@end-debug@
-	GT.logging.state.logLevelDefault = GT.logging.INFO
-
-	LOG_COLOR_MAP[GT.logging.INFO] = '7f7f7f'
-	LOG_COLOR_MAP[GT.logging.DEBUG] = 'ffffff'
-	LOG_COLOR_MAP[GT.logging.WARN] = 'ff9900'
-	LOG_COLOR_MAP[GT.logging.ERROR] = 'ff9900'
-	LOG_COLOR_MAP[GT.logging.PLAYER_INFO] = 'ffffff'
-	LOG_COLOR_MAP[GT.logging.PLAYER_WARN] = 'ff9900'
-	LOG_COLOR_MAP[GT.logging.PLAYER_ERROR] = 'ff9900'
+	LOG_COLOR_MAP[GT.logging.INFO] = GT.logging.COLOR_INFO
+	LOG_COLOR_MAP[GT.logging.DEBUG] = GT.logging.COLOR_DEBUG
+	LOG_COLOR_MAP[GT.logging.WARN] = GT.logging.COLOR_WARN
+	LOG_COLOR_MAP[GT.logging.ERROR] = GT.logging.COLOR_ERROR
+	LOG_COLOR_MAP[GT.logging.PLAYER_INFO] = GT.logging.COLOR_PLAYER_INFO
+	LOG_COLOR_MAP[GT.logging.PLAYER_WARN] = GT.logging.COLOR_PLAYER_WARN
+	LOG_COLOR_MAP[GT.logging.PLAYER_ERROR] = GT.logging.COLOR_PLAYER_ERROR
 
 	GT.logging.info('GT_Logging_Init')
 
@@ -51,19 +62,63 @@ function GT.logging.print(msg, logLevel, limit, forceDefaultChatFrame)
 	if msg == nil then
 		msg = 'nil'
 	end
-	if GT.logging.initialized and logLevel >= GT.logging.state.logLevelFilter then
-		if type(msg) == 'table' then
-			GT.logging._printTable(msg, color, 0, limit)
+
+	local chatFrame = _G['ChatFrame1']
+	if GT.logging.initialized then
+		if forceDefaultChatFrame then
+			chatFrame = GT.database.getChatFrame(1)
 		else
-			local chatFrame = GT.database.getChatFrame()
-			if forceDefaultChatFrame then
-				chatFrame = GT.database.getChatFrame(1)
-			end
-			chatFrame:AddMessage(GT.L['LOG_TAG'] .. '|cff' .. color .. msg .. '|r')
+			chatFrame = GT.database.getChatFrame()
 		end
-	else
-		
 	end
+
+	if not GT.logging.initialized or logLevel < GT.logging.state.logLevelFilter then
+		-- Send it to the archive but don't print it.
+		return
+	end
+
+	if type(msg) == 'table' then
+		GT.logging._printTable(msg, color, 0, limit)
+		return
+	end
+
+	if logLevel < GT.logging.PLAYER_INFO then
+		msg = string.gsub(msg, '%|r', '')
+		local startColorIndex, endColorIndex = string.find(msg, '%|cff')
+		while startColorIndex do
+			local colorString = string.sub(msg, startColorIndex, endColorIndex + 6)
+			msg = string.gsub(msg, colorString, '', 1)
+			startColorIndex, endColorIndex = string.find(msg, '%|cff')
+		end
+
+		if string.find(msg, '%|H') then
+			local tempMessage = nil
+			local tokens = GT.textUtils.tokenize(msg, GT.comm.DELIMITER)
+			for _, token in pairs(tokens) do
+				itemString, itemName = token:match("|H(.*)|h%[(.*)%]|h")
+				if itemName ~= nil then
+					tempMessage = GT.textUtils.concat(tempMessage, GT.comm.DELIMITER, '[' .. itemName .. ']')
+				else
+					tempMessage = GT.textUtils.concat(tempMessage, GT.comm.DELIMITER, token)
+				end
+			end
+			msg = tempMessage
+		end
+
+		if #msg >= GT.logging.LOG_LINE_LENGTH_LIMIT then
+			msg = string.sub(msg, 1, GT.logging.LOG_LINE_LENGTH_LIMIT - 3) .. '...'
+		end
+	end
+
+	msg = string.gsub(GT.logging.LOG_FORMAT, '%{{message}}', msg)
+	msg = string.gsub(msg, '%{{tag}}', GT.L['LOG_TAG'])
+	msg = string.gsub(msg, '%{{start_color}}', color)
+	if color == '' then
+		msg = string.gsub(msg, '%{{end_color}}', '')
+	else
+		msg = string.gsub(msg, '%{{end_color}}', '|r')
+	end
+	chatFrame:AddMessage(msg)
 end
 
 function GT.logging._printTable(tbl, color, depth, limit)

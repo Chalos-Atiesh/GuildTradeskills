@@ -3,8 +3,9 @@ local GT_Name, GT = ...
 GT.tableUtils = {}
 
 function GT.tableUtils.removeToken(tokens)
+	local token = tokens[1]
 	table.remove(tokens, 1)
-	return tokens
+	return token, tokens
 end
 
 function GT.tableUtils.removeByValue(tbl, value, valueIsKey)

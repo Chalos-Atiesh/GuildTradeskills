@@ -155,8 +155,7 @@ end
 function GT.professions.removeProfession(tokens)
 	GT.player.init()
 	GT.database.init()
-	local professionNameToRemove = tokens[1]
-	tokens = GT.tableUtils.removeToken(tokens)
+	local professionNameToRemove, tokens = GT.tableUtils.removeToken(tokens)
 	if professionNameToRemove == nil then
 		GT.logging.playerError(GT.L['PROFESSION_REMOVE_NIL_PROFESSION'])
 		return

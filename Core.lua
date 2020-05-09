@@ -4,6 +4,7 @@ local EVENT_MAP = {}
 local SLASH_COMMAND_MAP = {}
 local RESET_COMMAND_MAP = {}
 local SLASH_COMMAND_DELIMITER = ' '
+GT.version = 'beta_0.1.0'
 GT.state = {}
 GT.state.initialized = false
 GT.state.resetWarned = false
@@ -20,6 +21,9 @@ local function GT_Init()
 		TRADE_SKILL_UPDATE = GT_TradeSkillUpdate,
 		CRAFT_UPDATE = GT_TradeSkillUpdate,
 		PLAYER_GUILD_UPDATE = GT_GuildUpdate
+		--@debug@
+		,CHAT_MSG_SYSTEM = GT_AFK
+		--@end-debug@
 	}
 
 	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_HELP']['command']] = GT_SlashCommandHelp
@@ -44,8 +48,6 @@ local function GT_Init()
 	GT.search.init()
 
 	GT.logging.info('GT_Core_Init')
-
-	GT.logging.playerInfo(GT.L['WELCOME'], nil, true)
 
 	GT.state.initialized = true
 end
@@ -73,9 +75,11 @@ function GT_AddonLoaded(frame, event, ...)
 end
 
 function GT_PlayerLogin(frame, event, ...)
+	GT.logging.playerInfo(GT.L['WELCOME'], nil, true)
 	GT.player.init()
 	GT.comm.sendDeletions()
 	GT.comm.sendTimestamps()
+	GT.comm.sendVersion()
 end
 
 function GT_PlayerEnteringWorld(frame, event, ...)
@@ -90,6 +94,14 @@ function GT_GuildUpdate(frame, event, ...)
 	GT.player.guildUpdate()
 end
 
+--@debug@
+function GT_AFK(frame, event, message)
+	if message ~= nil and message == IDLE_MESSAGE then
+		ForceQuit()
+	end
+end
+--@end-debug@
+
 local mainFrame = CreateFrame('Frame')
 mainFrame:RegisterEvent('PLAYER_LOGIN')
 mainFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
@@ -97,6 +109,9 @@ mainFrame:RegisterEvent('ADDON_LOADED')
 mainFrame:RegisterEvent('TRADE_SKILL_UPDATE')
 mainFrame:RegisterEvent('CRAFT_UPDATE')
 mainFrame:RegisterEvent('PLAYER_GUILD_UPDATE')
+--@debug@
+mainFrame:RegisterEvent("CHAT_MSG_SYSTEM")
+--@end-debug@
 
 mainFrame:SetScript('OnEvent', GT_MainEventHandler)
 
@@ -107,8 +122,7 @@ SLASH_GT_SLASHCOMMAND1 = '/gt'
 
 function SlashCmdList.GT_SLASHCOMMAND(msg)
 	local tokens = GT.textUtils.tokenize(msg, SLASH_COMMAND_DELIMITER)
-	local command = tokens[1]
-	tokens = GT.tableUtils.removeToken(tokens)
+	local command, tokens = GT.tableUtils.removeToken(tokens)
 	local commandFound = false
 	for mapCommand, fn in pairs(SLASH_COMMAND_MAP) do
 		if mapCommand == string.lower(command) then

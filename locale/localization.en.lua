@@ -132,6 +132,7 @@ if LOCALE == 'enUS' or LOCALE == 'enGB' or GT.L == nil then
 	L['GUILD_ONLINE'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00Online|r'
 
 	L['WELCOME'] = 'Welcome to ' .. L['LONG_TAG'] .. '! For help getting started you can type \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_HELP']['command'] .. '\'.'
+	L['UPDATE_AVAILABLE'] = L['LONG_TAG'] .. ' is out of date. Your version is {{local_version}} and {{remote_version}} is available.'
 
 	GT.L = L
 end
