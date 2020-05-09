@@ -20,6 +20,11 @@ GT.search.skillSearchBox = nil
 GT.search.reagentSearchBox = nil
 GT.search.characterSearchBox = nil
 
+-- Who in the hell measures RGB values 0-1?
+GT.search.labelR = 255/255
+GT.search.labelG = 209/255
+GT.search.labelB = 0
+
 local AceGUI = LibStub('AceGUI-3.0')
 
 local PROFESSIONS = {}
@@ -112,6 +117,7 @@ function GT.search.openSearch(tokens)
 	skillSearchContainer:AddChild(skillSearchBox)
 	skillSearchBox:ClearAllPoints()
 	GT.search.skillSearchBox = skillSearchBox
+	print(skillSearchBox.label:GetTextColor())
 
 	local reagentSearchContainer = AceGUI:Create('SimpleGroup')
 	reagentSearchContainer:SetRelativeWidth(1/4)
@@ -165,30 +171,30 @@ function GT.search.openSearch(tokens)
 	mainFrame:AddChild(labelLine)
 
 	local profLabel = AceGUI:Create('Label')
-	profLabel:SetText('Professions')
+	profLabel:SetText(GT.L['LABEL_PROFESSIONS'])
 	profLabel:SetRelativeWidth(1/4)
-	profLabel:SetColor(255, 255, 0)
+	profLabel:SetColor(GT.search.labelR, GT.search.labelG, GT.search.labelB)
 	labelLine:AddChild(profLabel)
 	profLabel:ClearAllPoints()
 
 	local skillLabel = AceGUI:Create('Label')
 	skillLabel:SetText(GT.L['LABEL_SKILLS'])
 	skillLabel:SetRelativeWidth(1/4)
-	skillLabel:SetColor(255, 255, 0)
+	skillLabel:SetColor(1, 0.82, 0)
 	labelLine:AddChild(skillLabel)
 	skillLabel:ClearAllPoints()
 
 	local reagentLabel = AceGUI:Create('Label')
 	reagentLabel:SetText(GT.L['LABEL_REAGENTS'])
 	reagentLabel:SetRelativeWidth(1/4)
-	reagentLabel:SetColor(255, 255, 0)
+	reagentLabel:SetColor(GT.search.labelR, GT.search.labelG, GT.search.labelB)
 	labelLine:AddChild(reagentLabel)
 	reagentLabel:ClearAllPoints()
 
 	local characterLabel = AceGUI:Create('Label')
 	characterLabel:SetText(GT.L['LABEL_CHARACTERS'])
 	characterLabel:SetRelativeWidth(1/4)
-	characterLabel:SetColor(255, 255, 0)
+	characterLabel:SetColor(GT.search.labelR, GT.search.labelG, GT.search.labelB)
 	labelLine:AddChild(characterLabel)
 	characterLabel:ClearAllPoints()
 	characterLabel:SetPoint('RIGHT')
@@ -583,17 +589,16 @@ function GT.search.populateCharacters(shouldCascade)
 				online = string.sub(online, 24)
 				online = string.sub(online, 0, #online - 2)
 				if string.lower(online) == 'online' and GT.search.lastSkillLinkClicked ~= nil then
-					local msg = GT.L['WHISPER_REQUEST']
-					msg = string.gsub(msg, '%{{character_name}}', characterName)
-					msg = string.gsub(msg, '%{{item_link}}', GT.search.lastSkillLinkClicked)
-
 					local whisperSent = false
 					local totalGuildMembers = GetNumGuildMembers()
 					for i = 1, totalGuildMembers do
 						local guildCharacterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
 						local tempCharacterName = GT.textUtils.convertCharacterName(guildCharacterName)
 						if online and tempCharacterName == characterName then
-							SendChatMessage(msg, 'WHISPER', 7, guildCharacterName)
+							local msg = GT.L['WHISPER_REQUEST']
+							msg = string.gsub(msg, '%{{character_name}}', characterName)
+							msg = string.gsub(msg, '%{{item_link}}', GT.search.lastSkillLinkClicked)
+							ChatThrottleLib:SendChatMessage('ALERT', GT.comm.PREFIX, msg, 'WHISPER', 'Common', guildCharacterName)
 							whisperSent = true
 						end
 					end
@@ -604,14 +609,14 @@ function GT.search.populateCharacters(shouldCascade)
 				elseif GT.search.lastSkillLinkClicked == nil then
 					GT.logging.playerWarn(GT.L['WHISPER_SELECT_REQUIRED'])
 				end
+			else
+				GT.search.lastSkillClicked = nil
+				GT.search.lastSkillLinkClicked = nil
+				GT.search.lastReagentClicked = nil
+				GT.search.lastCharacterClicked = characterName
+				GT.search.populateSkills(false)
+				GT.search.populateReagents(false)
 			end
-			GT.logging.info('\'' .. characterName .. '\'')
-			GT.search.lastSkillClicked = nil
-			GT.search.lastSkillLinkClicked = nil
-			GT.search.lastReagentClicked = nil
-			GT.search.lastCharacterClicked = characterName
-			GT.search.populateSkills(false)
-			GT.search.populateReagents(false)
 		end)
 		GT.search.characterScrollFrame:AddChild(characterLabel)
 	end

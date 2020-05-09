@@ -56,7 +56,7 @@ function GT.logging.print(msg, logLevel, limit)
 			GT.logging._printTable(msg, color, 0, limit)
 		else
 			local chatFrame = GT.database.getChatFrame()
-			chatFrame:AddMessage(GT.L['CHAT_TAG'] .. '|cff' .. color .. msg .. '|r')
+			chatFrame:AddMessage(GT.L['LOG_TAG'] .. '|cff' .. color .. msg .. '|r')
 		end
 	else
 		
@@ -76,27 +76,27 @@ function GT.logging._printTable(tbl, color, depth, limit)
 	i = 0
 	for k, v in pairs(tbl) do
 		if type(v) == 'table' then
-			print(spacing .. GT.L['CHAT_TAG'] .. '|cff' .. color .. k .. '|r')
+			print(spacing .. GT.L['LOG_TAG'] .. '|cff' .. color .. k .. '|r')
 			GT.logging._printTable(v, color, depth + 1, limit)
 		elseif type(v) == 'function' then
-			print(GT.L['CHAT_TAG'] .. '|cff' .. color .. spacing .. type(v) .. '|r')
+			print(GT.L['LOG_TAG'] .. '|cff' .. color .. spacing .. type(v) .. '|r')
 		elseif type(v) == 'boolean' then
 			if v then
-				print(GT.L['CHAT_TAG'] .. '|cff' .. color .. spacing  .. 'true|r')
+				print(GT.L['LOG_TAG'] .. '|cff' .. color .. spacing  .. 'true|r')
 			else
-				print(GT.L['CHAT_TAG'] .. '|cff' .. color .. spacing  .. 'false|r')
+				print(GT.L['LOG_TAG'] .. '|cff' .. color .. spacing  .. 'false|r')
 			end
 		else
 			if type(k) == 'table' then
 				GT.logging._printTable(k, color, depth + 1, limit)
 			else
-				print(spacing .. GT.L['CHAT_TAG'] .. '|cff' .. color .. k .. ', ' .. v .. '|r')
+				print(spacing .. GT.L['LOG_TAG'] .. '|cff' .. color .. k .. ', ' .. v .. '|r')
 			end
 		end
 		i = i + 1
 	end
 	if i <= 0 then
-		print(spacing .. GT.L['CHAT_TAG'] .. '|cff' .. color .. 'Empty|r')
+		print(spacing .. GT.L['LOG_TAG'] .. '|cff' .. color .. 'Empty|r')
 	end
 end
 

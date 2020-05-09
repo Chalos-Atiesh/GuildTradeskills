@@ -1,12 +1,42 @@
 local GT_Name, GT = ...
 local LOCALE = GetLocale()
 
+local GREEN = '|cff3ce13f'
+local YELLOW = '|cfffcba03'
+local COLOR_END = '|r'
+
 if LOCALE == 'enUS' or LOCALE == 'enGB' or GT.L == nil then
 	local L = {}
 
-	L['SHORT_TAG'] = '|cff3ce13fG|rT'
-	L['CHAT_TAG'] = L['SHORT_TAG'] .. ': '
-	L['LONG_TAG'] = '|cff3ce13fGuild|r Tradeskills'
+	local tagTemplate = '{{first_color_start}}{{first_text}}{{first_color_end}}{{second_color_start}}{{second_text}}{{second_color_end}}{{end_text}}'
+
+	local whisperTag = string.gsub(tagTemplate, '%{{first_color_start}}', '')
+	whisperTag = string.gsub(whisperTag, '%{{first_text}}', 'G')
+	whisperTag = string.gsub(whisperTag, '%{{first_color_end}}', '')
+	whisperTag = string.gsub(whisperTag, '%{{second_color_start}}', '')
+	whisperTag = string.gsub(whisperTag, '%{{second_text}}', 'T')
+	whisperTag = string.gsub(whisperTag, '%{{second_color_end}}', '')
+	whisperTag = string.gsub(whisperTag, '%{{end_text}}', ': ')
+
+	local logTag = string.gsub(tagTemplate, '%{{first_color_start}}', GREEN)
+	logTag = string.gsub(logTag, '%{{first_text}}', 'G')
+	logTag = string.gsub(logTag, '%{{first_color_end}}', COLOR_END)
+	logTag = string.gsub(logTag, '%{{second_color_start}}', YELLOW)
+	logTag = string.gsub(logTag, '%{{second_text}}', 'T')
+	logTag = string.gsub(logTag, '%{{second_color_end}}', COLOR_END)
+	logTag = string.gsub(logTag, '%{{end_text}}', ': ')
+
+	local longTag = string.gsub(tagTemplate, '%{{first_color_start}}', GREEN)
+	longTag = string.gsub(longTag, '%{{first_text}}', 'Guild')
+	longTag = string.gsub(longTag, '%{{first_color_end}}', COLOR_END)
+	longTag = string.gsub(longTag, '%{{second_color_start}}', YELLOW)
+	longTag = string.gsub(longTag, '%{{second_text}}', 'Tradeskills')
+	longTag = string.gsub(longTag, '%{{second_color_end}}', COLOR_END)
+	longTag = string.gsub(longTag, '%{{end_text}}', '')
+
+	L['WHISPER_TAG'] = whisperTag
+	L['LOG_TAG'] = logTag
+	L['LONG_TAG'] = longTag
 
 	---------- SLASH COMMANDS START ----------
 
@@ -75,13 +105,14 @@ if LOCALE == 'enUS' or LOCALE == 'enGB' or GT.L == nil then
 	L['SEARCH_SKILLS'] = 'Search for skills:'
     L['SEARCH_REAGENTS'] = 'Search for reagents:'
     L['SEARCH_CHARACTERS'] = 'Search for characters:'
+    L['LABEL_PROFESSIONS'] = 'Professions'
     L['LABEL_SKILLS'] = 'Skills'
     L['LABEL_REAGENTS'] = 'Reagents'
     L['LABEL_CHARACTERS'] = 'Characters'
 
     L['BUTTON_FILTERS_RESET'] = 'Clear Filters'
 
-    L['WHISPER_REQUEST'] = L['CHAT_TAG'] .. 'Hey {{character_name}}! Could you craft {{item_link}} for me?'
+    L['WHISPER_REQUEST'] = L['WHISPER_TAG'] .. 'Hey {{character_name}}! Could you craft {{item_link}} for me?'
     L['WHISPER_SELECT_REQUIRED'] = 'No selected skill found. You must select a skill first.'
     L['WHISPER_NO_CHARACTER_FOUND'] = 'It doesn\'t look like the character \'{{character_name}}\' is online.'
 
