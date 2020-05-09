@@ -3,7 +3,6 @@ local GT_Name, GT = ...
 GT.comm = {}
 GT.comm.state = {}
 GT.comm.state.initialized = false
-GT.comm.logMessageLimit = 32
 --@debug@
 GT.comm.state.enabled = true
 --@end-debug@
