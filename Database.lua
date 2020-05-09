@@ -16,16 +16,6 @@ function GT.database.init(force)
 		GT_DB = {}
 	end
 
-	if GT_DB.lastReleaseNotification == nil
-		or GT_DB.lastBetaNotification == nil
-		or GT_DB.lastAlphaNotification == nil
-	then
-		local releaseVersion, betaVersion, alphaVersion = GT.database.getCurrentVersion()
-		GT_DB.lastReleaseNotification = releaseVersion
-		GT_DB.lastBetaNotification = betaVersion
-		GT_DB.lastAlphaNotification = alphaVersion
-	end
-
 	if GT_DB.options == nil then
 		GT.logging.info('Options are nil. Creating them.')
 		GT_DB.options = {}
@@ -268,11 +258,6 @@ function GT.database.setChatFrame(chatFrameName)
 end
 
 function GT.database.getCurrentVersion()
-	--@debug@
-	if true then
-		return 98, 99, 99
-	end
-	--@end-debug@
 	local version = GT.version
 	local underscoreIndex = string.find(version, '_')
 	local version = string.sub(version, underscoreIndex + 1, #version)
@@ -281,10 +266,31 @@ function GT.database.getCurrentVersion()
 	local secondDotIndex = string.find(version, '%.', firstDotIndex + 1)
 	local betaVersion = string.sub(version, firstDotIndex + 1, secondDotIndex - 1)
 	local alphaVersion = string.sub(version, secondDotIndex + 1, #version)
+
+	if GT_DB.lastReleaseNotification == nil
+		or GT_DB.lastBetaNotification == nil
+		or GT_DB.lastAlphaNotification == nil
+	then
+		GT_DB.lastReleaseNotification = releaseVersion
+		GT_DB.lastBetaNotification = betaVersion
+		GT_DB.lastAlphaNotification = alphaVersion
+	end
+
+	--@debug@
+	if true then
+		return 99, 99, 99
+	end
+	--@end-debug@
+
 	return tonumber(releaseVersion), tonumber(betaVersion), tonumber(alphaVersion)
 end
 
 function GT.database.shouldNotifyUpdate(releaseVersion, betaVersion, alphaVersion)
+	--@debug@
+	if true then
+		return false
+	end
+	--@end-debug@
 	if GT_DB.lastReleaseNotification < releaseVersion
 		--@debug@
 		or GT_DB.lastBetaNotification < betaVersion
