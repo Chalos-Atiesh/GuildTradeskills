@@ -1,3 +1,10 @@
+0.1.1
+	Expanded logging capabilities to be more flexible.
+	Added version checking.
+	Added concat ability to text utils.
+	Updated table utils remove token to return the token and the table.
+	Added function in comms to be able to broadcast to entire online guild one by one.
+
 0.1.0
 	Moved LICENSE->LICENSE.txt
 	Added FAQ
