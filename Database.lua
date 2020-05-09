@@ -295,7 +295,7 @@ function GT.database.shouldNotifyUpdate(releaseVersion, betaVersion, alphaVersio
 		--@debug@
 		or GT_DB.lastBetaNotification < betaVersion
 		or GT_DB.lastAlphaNotification < alphaVersion
-		--@end-debug
+		--@end-debug@
 	then
 		return true
 	end
