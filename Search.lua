@@ -25,6 +25,8 @@ GT.search.labelR = 255/255
 GT.search.labelG = 209/255
 GT.search.labelB = 0
 
+GT.search.scrollLimit = 200
+
 local AceGUI = LibStub('AceGUI-3.0')
 
 local PROFESSIONS = {}
@@ -117,7 +119,6 @@ function GT.search.openSearch(tokens)
 	skillSearchContainer:AddChild(skillSearchBox)
 	skillSearchBox:ClearAllPoints()
 	GT.search.skillSearchBox = skillSearchBox
-	print(skillSearchBox.label:GetTextColor())
 
 	local reagentSearchContainer = AceGUI:Create('SimpleGroup')
 	reagentSearchContainer:SetRelativeWidth(1/4)
@@ -290,6 +291,7 @@ function GT.search.populateSkills(shouldCascade)
 	).characters
 
 	skillsToAdd = {}
+	local count = 0
 	if GT.search.lastReagentClicked ~= nil then
 		for characterName, _ in pairs(characters) do
 			local professions = characters[characterName].professions
@@ -306,7 +308,8 @@ function GT.search.populateSkills(shouldCascade)
 								if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
 									searchMatch = false
 								end
-								if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch then
+								if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch and count < GT.search.scrollLimit then
+									count = count + 1
 									skillsToAdd[tempSkillName] = skill.skillLink
 								end
 							end
@@ -329,8 +332,9 @@ function GT.search.populateSkills(shouldCascade)
 							if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
 								searchMatch = false
 							end
-							if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch then
+							if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch and count < GT.search.scrollLimit then
 								skillsToAdd[tempSkillName] = skill.skillLink
+								count = count + 1
 							end
 						end
 					end
@@ -350,8 +354,9 @@ function GT.search.populateSkills(shouldCascade)
 						if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
 							searchMatch = false
 						end
-						if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch then
+						if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch and count < GT.search.scrollLimit then
 							skillsToAdd[tempSkillName] = skill.skillLink
+							count = count + 1
 						end
 					end
 				end
@@ -512,6 +517,7 @@ function GT.search.populateCharacters(shouldCascade)
 	end
 
 	local charactersToAdd = {}
+	local count = 0
 	if GT.search.lastSkillClicked ~= nil then
 		local characters = GT.database.getGuild(
 			GT_Character.realmName,
@@ -532,8 +538,9 @@ function GT.search.populateCharacters(shouldCascade)
 					end
 				end
 			end
-			if addCharacter and not GT.tableUtils.tableContains(charactersToAdd, characterName) then
+			if addCharacter and not GT.tableUtils.tableContains(charactersToAdd, characterName) and count < GT.search.scrollLimit then
 				table.insert(charactersToAdd, characterName)
+				count = count + 1
 			end
 		end
 	elseif GT.search.lastReagentClicked ~= nil then
@@ -549,8 +556,9 @@ function GT.search.populateCharacters(shouldCascade)
 			if GT.search.characterSearchText ~= nil and string.find(string.lower(characterName), string.lower(GT.search.characterSearchText)) then
 				searchMatch = true
 			end
-			if searchMatch and not GT.tableUtils.tableContains(charactersToAdd, characterName) then
+			if searchMatch and not GT.tableUtils.tableContains(charactersToAdd, characterName) and count < GT.search.scrollLimit then
 				table.insert(charactersToAdd, characterName)
+				count = count + 1
 			end
 		end
 	end
