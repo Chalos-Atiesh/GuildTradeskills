@@ -17,12 +17,11 @@
 	<li>Add support for non-guild members.</li>
 	<li>Add version checking.</li>
 	<li>Add log archive and log dump capabilities.</li>
-	<li>Add dropdown for online characters in the character search field.<br />&nbsp;</li>
+	<li>Add dropdown for online characters in the character search field.<br /></li>
 </ul>
 <h2>Known Issues</h2>
 <ul>
-	<li>Right clicking a character's name is supposed to send them a whisper about the last skill that was clicked. Currently no whisper is sent.</li>
-	<li>Left clicking a character name causes the game to stutter and does not filter the skills.<br />&nbsp;</li>
+	<li>None</li>
 </ul>
 <h2>Links</h2>
 <ul>
