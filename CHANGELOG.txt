@@ -1,6 +1,7 @@
 0.0.6
 	Fixed issue where timestamps were being posted twice when the player opens a profession.
 	Added ability to change default output chat window.
+	Fixed an issue that was causing skill filter to fail when clicking a character's name.
 
 0.0.5
 	Removed character and profession reset stubs in favor of just ability to remove profession.

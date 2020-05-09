@@ -311,19 +311,21 @@ function GT.search.populateSkills(shouldCascade)
 		end
 	elseif GT.search.lastCharacterClicked ~= nil then
 		for characterName, _ in pairs(characters) do
-			local professions = characters[characterName].professions
-			for professionName, _ in pairs(professions) do
-				if GT_Character.search[professionName] then
-					local skills = professions[professionName].skills
-					for skillName, _ in pairs(skills) do
-						local skill = skills[skillName]
-						local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
-						local searchMatch = true
-						if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
-							searchMatch = false
-						end
-						if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch then
-							skillsToAdd[tempSkillName] = skill.skillLink
+			if characterName == GT.search.lastCharacterClicked then
+				local professions = characters[characterName].professions
+				for professionName, _ in pairs(professions) do
+					if GT_Character.search[professionName] then
+						local skills = professions[professionName].skills
+						for skillName, _ in pairs(skills) do
+							local skill = skills[skillName]
+							local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
+							local searchMatch = true
+							if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
+								searchMatch = false
+							end
+							if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch then
+								skillsToAdd[tempSkillName] = skill.skillLink
+							end
 						end
 					end
 				end
@@ -603,7 +605,7 @@ function GT.search.populateCharacters(shouldCascade)
 					GT.logging.playerWarn(GT.L['WHISPER_SELECT_REQUIRED'])
 				end
 			end
-			
+			GT.logging.info('\'' .. characterName .. '\'')
 			GT.search.lastSkillClicked = nil
 			GT.search.lastSkillLinkClicked = nil
 			GT.search.lastReagentClicked = nil

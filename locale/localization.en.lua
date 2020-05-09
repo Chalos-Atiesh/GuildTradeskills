@@ -94,7 +94,7 @@ if LOCALE == 'enUS' or LOCALE == 'enGB' or GT.L == nil then
 	L['RESET_FINAL'] = 'Resetting entire addon. We warned you.'
 	L['RESET_CANCEL'] = 'Canceling addon reset.'
 
-	L['GUILD_OFFLINE'] = '|cff7f7f7f{{guild_member}} - Offline|r'
+	L['GUILD_OFFLINE'] = '|cff7f7f7f{{guild_member}}|r - |cff7f7f7fOffline|r'
 	L['GUILD_ONLINE'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00Online|r'
 
 	L['WELCOME'] = 'Welcome to ' .. L['LONG_TAG'] .. '! For help getting started you can type \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_HELP']['command'] .. '\'.'
