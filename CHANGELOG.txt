@@ -1,3 +1,7 @@
+0.1.0
+	Moved LICENSE->LICENSE.txt
+	Added FAQ
+
 0.0.6
 	Fixed issue where timestamps were being posted twice when the player opens a profession.
 	Added ability to change default output chat window.
