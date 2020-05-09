@@ -16,6 +16,16 @@ function GT.database.init(force)
 		GT_DB = {}
 	end
 
+	if GT_DB.options == nil then
+		GT.logging.info('Options are nil. Creating them.')
+		GT_DB.options = {}
+	end
+
+	if GT_DB.options.chatFrame == nil then
+		GT.logging.info('Chat frame is not set. Setting to default.')
+		GT_DB.options.chatFrame = 1
+	end
+
 	local realmName = GetRealmName()
 	if realmName == nil then
 		GT.logging.error('Character realm is nil.')
@@ -222,4 +232,24 @@ function GT.database.reset()
 	GT.logging.info('GT_Database_Reset')
 	GT_DB = nil
 	GT.database.init(true)
+end
+
+function GT.database.getChatFrame()
+	if GT_DB.options ~= nil and GT_DB.options.chatFrame ~= nil then
+		return _G['ChatFrame' .. GT_DB.options.chatFrame]
+	else
+		return _G['ChatFrame1']
+	end
+end
+
+function GT.database.setChatFrame(chatFrameName)
+	GT_DB.options.chatFrame = 1
+	for i = 1, NUM_CHAT_WINDOWS do
+		local name = string.lower(GetChatWindowInfo(i) or '')
+		if name ~= "" and name == string.lower(chatFrameName) then
+			GT_DB.options.chatFrame = i
+			break
+		end
+	end
+	return GT_DB.options.chatFrame
 end

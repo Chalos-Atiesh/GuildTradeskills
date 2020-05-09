@@ -30,9 +30,11 @@ local function GT_Init()
 	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_PROFESSION_REMOVE']['command']] = GT.professions.removeProfession
 
 	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command']] = GT_Reset
+	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_CHAT_WINDOW']['command']] = GT.logging.setChatFrame
 
 	--@debug@
 	SLASH_COMMAND_MAP['togglecomms'] = GT.comm.toggleComms
+	SLASH_COMMAND_MAP['delimit'] = GT_Delimit
 	--@end-debug@
 
 	GT.logging.init()
@@ -151,5 +153,11 @@ function GT_Reset(tokens)
 		GT.logging.playerWarn(string.gsub(GT.L['RESET_UNKNOWN'], '%{{command}}', tokens[#tokens]))
 	end
 end
+
+--@debug@
+function GT_Delimit()
+	GT.logging.info('----------')
+end
+--@end-debug@
 
 ---------- END SLASH COMMAND HANDLERS ----------

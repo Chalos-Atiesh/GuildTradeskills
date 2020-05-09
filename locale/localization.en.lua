@@ -32,6 +32,10 @@ if LOCALE == 'enUS' or LOCALE == 'enGB' or GT.L == nil then
 		SLASH_COMMAND_RESET = {
 			command = 'reset',
 			help = 'Reset everything. Yes, the entire addon: ' .. SLASH_GT_SLASHCOMMAND1 .. ' reset'
+		},
+		SLASH_COMMAND_CHAT_WINDOW = {
+			command = 'chatwindow',
+			help = 'Set the chat window that this addon prints to: ' ..SLASH_GT_SLASHCOMMAND1 .. ' chatwindow {chat_window_name}'
 		}
 	}
 
