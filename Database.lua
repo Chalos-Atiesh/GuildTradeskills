@@ -258,6 +258,13 @@ function GT.database.setChatFrame(chatFrameName)
 end
 
 function GT.database.getCurrentVersion()
+
+	--@debug@
+	if true then
+		return 99, 99, 99
+	end
+	--@end-debug@
+	
 	local version = GT.version
 	local underscoreIndex = string.find(version, '_')
 	local version = string.sub(version, underscoreIndex + 1, #version)
@@ -275,12 +282,6 @@ function GT.database.getCurrentVersion()
 		GT_DB.lastBetaNotification = betaVersion
 		GT_DB.lastAlphaNotification = alphaVersion
 	end
-
-	--@debug@
-	if true then
-		return 99, 99, 99
-	end
-	--@end-debug@
 
 	return tonumber(releaseVersion), tonumber(betaVersion), tonumber(alphaVersion)
 end
