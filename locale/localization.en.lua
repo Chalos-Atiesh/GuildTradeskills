@@ -120,7 +120,23 @@ if LOCALE == 'enUS' or LOCALE == 'enGB' or GT.L == nil then
     L['WHISPER_NO_CHARACTER_FOUND'] = 'It doesn\'t look like the character \'{{character_name}}\' is online.'
 
 	---------- GUI MESSAGES END ----------
+	---------- WHISPER MESSAGES START ----------
 
+	L['WHISPER_PROFESSION_NOT_FOUND'] = L['WHISPER_TAG'] .. 'Whoops! Looks like I don\'t have \'{{profession_name}}\'. Available professions are {{profession_names}}.'
+	L['WHISPER_HEADER'] = L['WHISPER_TAG'] .. 'Page {{current_page}} of {{total_pages}}. I have {{total_skills}} skills.'
+	L['WHISPER_ITEM'] = L['WHISPER_TAG'] .. '{{number}}. {{skill_link}}'
+	L['WHISPER_FOOTER'] = L['WHISPER_TAG'] .. 'You can get the next page by replying \'!{{profession_name}} {{next_page}}\' or jump to a page by replying \'!{{profession_name}} {page_number}\'.'
+	L['WHISPER_FOOTER_LAST_PAGE'] = L['WHISPER_TAG'] .. 'You can jump to a page by replying \'!{{profession_name}} {page_number}\'.'
+
+	L['WHISPER_NOT_STARTED'] = L['WHISPER_TAG'] .. 'Looks like you haven\'t started a search. You can start one by whispering \'!{{profession_name}}\' or \'!{{profession_name}} {search_term}\''
+	L['WHISPER_INVALID_PAGE'] = L['WHISPER_TAG'] .. 'Oops! Page {{page}} isn\'t a valid page. I only have {{max_pages}} pages.'
+
+	L['WHISPER_HELP_ME'] = 'help'
+	L['WHISPER_FIRST_PROFESSION'] = ' I currently have {{skill_count}} {{profession_name}} skills'
+	L['WHISPER_SECOND_PROFESSION'] = ' and {{skill_count}} {{profession_name}} skills'
+	L['WHISPER_HELP'] = 'You can search my skills with \'!{profession_name} {search_term}\' or just \'!{profession_name}\'.{{first_profession}}{{second_profession}}'
+
+	---------- WHISPER MESSAGES END ----------
 
 	L['RESET_WARN'] = 'Are you sure? This will reset the entire addon. Type \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command'] .. ' ' .. L['COMMAND_RESET_CONFIRM'] .. '\' to confirm or \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command'] .. ' ' .. L['COMMAND_RESET_CANCEL'] .. '\' to cancel.'
 	L['RESET_CHARACTER_WARN'] = 'Are you sure? This will delete all profession data for the current character. Type \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command'] .. ' ' .. L['COMMAND_RESET_CONFIRM'] .. '\' to confirm or \'' .. SLASH_GT_SLASHCOMMAND1 .. ' ' .. L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command'] .. ' ' .. L['COMMAND_RESET_CANCEL'] .. '\' to cancel.'

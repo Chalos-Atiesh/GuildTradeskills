@@ -4,10 +4,10 @@ GT.comm = {}
 GT.comm.state = {}
 GT.comm.state.initialized = false
 --@debug@
-GT.comm.state.enabled = true
+GT.comm.state.enabled = false
 --@end-debug@
 
-GT.comm.aceComm = LibStub("AceAddon-3.0"):NewAddon("TSWL", "AceComm-3.0")
+GT.comm.aceComm = LibStub('AceComm-3.0')
 
 GT.comm.PREFIX = 'GT'
 GT.comm.DELIMITER = '?'

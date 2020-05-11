@@ -235,7 +235,7 @@ function GT.database.reset()
 end
 
 function GT.database.getChatFrame(chatFrameIndex)
-	if GT_DB.options ~= nil and GT_DB.options.chatFrame ~= nil then
+	if GT.database.state.initialized and GT_DB.options ~= nil and GT_DB.options.chatFrame ~= nil then
 		if chatFrameIndex ~= nil then
 			return _G['ChatFrame' .. chatFrameIndex]
 		else
