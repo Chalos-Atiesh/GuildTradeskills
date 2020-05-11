@@ -18,11 +18,8 @@
 <p>A: The addon does not have a complete list of trade skills. It only tracks the skills it has been told about. Additionally the number of results is currently capped at 200 alphabetically sorted. Try searching for the skill in the text search box.</p>
 <h2>ToDo</h2>
 <ul>
-	<li>Add whisper support for people that don't have the addon.</li>
 	<li>Add support for non-guild members.</li>
-	<li>Add version checking.</li>
-	<li>Add log archive and log dump capabilities.</li>
-	<li>Add dropdown for online characters in the character search field.<br /></li>
+	<li>Add dropdown for online characters in the character search field.</li>
 </ul>
 <h2>Known Issues</h2>
 <ul>

@@ -1,14 +1,15 @@
-local GT_Name, GT = ...
+local majorVersion = 'GTTable'
+local minorVersion = 1
 
-GT.tableUtils = {}
+local lib, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
 
-function GT.tableUtils.removeToken(tokens)
+function lib:RemoveToken(tokens)
 	local token = tokens[1]
 	table.remove(tokens, 1)
 	return token, tokens
 end
 
-function GT.tableUtils.removeByValue(tbl, value, valueIsKey)
+function lib:RemoveByValue(tbl, value, valueIsKey)
 	local returnTable = {}
 	for k, v in pairs(tbl) do
 		if valueIsKey and k ~= value then
@@ -20,7 +21,20 @@ function GT.tableUtils.removeByValue(tbl, value, valueIsKey)
 	return returnTable
 end
 
-function GT.tableUtils.getSortedKeys(tbl, sortFunction, sortByKey)
+function lib:Contains(tbl, value)
+	if tbl == nil then
+		return false
+	end
+	for i, v in ipairs(tbl) do
+		if v == value or i == value then
+			return true
+		end
+	end
+
+	return false
+end
+
+function lib:GetSortedKeys(tbl, sortFunction, sortByKey)
 	local keys = {}
 	for key in pairs(tbl) do
 		table.insert(keys, key)
@@ -37,17 +51,4 @@ function GT.tableUtils.getSortedKeys(tbl, sortFunction, sortByKey)
 	end
 
 	return keys
-end
-
-function GT.tableUtils.tableContains(tbl, value)
-	if tbl == nil then
-		return false
-	end
-	for i, v in ipairs(tbl) do
-		if v == value or i == value then
-			return true
-		end
-	end
-
-	return false
 end

@@ -1,78 +1,85 @@
-local GT_Name, GT = ...
+local AddOnName = ...
 RCC = RAID_CLASS_COLORS
 
-GT.search = {}
-GT.search.mainFrame = nil
-GT.search.skillScrollFrame = nil
-GT.search.reagentScrollFrame = nil
-GT.search.characterScrollFrame = nil
+local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
-GT.search.lastSkillClicked = nil
-GT.search.lastSkillLinkClicked = nil
-GT.search.lastReagentClicked = nil
-GT.search.lastCharacterClicked = nil
+local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
 
-GT.search.skillSearchText = nil
-GT.search.reagentSearchText = nil
-GT.search.characterSearchText = nil
+local Search = GT:NewModule('Search')
+GT.Search = Search
 
-GT.search.skillSearchBox = nil
-GT.search.reagentSearchBox = nil
-GT.search.characterSearchBox = nil
+Search.mainFrame = nil
+Search.skillScrollFrame = nil
+Search.reagentScrollFrame = nil
+Search.characterScrollFrame = nil
+
+Search.lastSkillClicked = nil
+Search.lastSkillLinkClicked = nil
+Search.lastReagentClicked = nil
+Search.lastCharacterClicked = nil
+
+Search.skillSearchText = nil
+Search.reagentSearchText = nil
+Search.characterSearchText = nil
+
+Search.skillSearchBox = nil
+Search.reagentSearchBox = nil
+Search.characterSearchBox = nil
 
 -- Who in the hell measures RGB values 0-1?
-GT.search.labelR = 255/255
-GT.search.labelG = 209/255
-GT.search.labelB = 0
+Search.labelR = 255/255
+Search.labelG = 209/255
+Search.labelB = 0
 
-GT.search.scrollLimit = 200
+Search.scrollLimit = 200
 
 local AceGUI = LibStub('AceGUI-3.0')
 
 local PROFESSIONS = {}
 
-function GT.search.init()
+function Search:OnEnable()
+	GT.Log:Info('Search_OnEnable')
 	PROFESSIONS = {
-		GT.L['ALCHEMY'],
-		GT.L['BLACKSMITHING'],
-		GT.L['ENCHANTING'],
-		GT.L['ENGINEERING'],
-		GT.L['LEATHERWORKING'],
-		GT.L['TAILORING'],
-		GT.L['COOKING']
+		L['ALCHEMY'],
+		L['BLACKSMITHING'],
+		L['ENCHANTING'],
+		L['ENGINEERING'],
+		L['LEATHERWORKING'],
+		L['TAILORING'],
+		L['COOKING']
 	}
 end
 
-function GT.search.openSearch(tokens)
-	GT.logging.info('GT_Search_OpenSearch: ' .. table.concat(tokens, ', '))
-	if GT.search.state == nil then
-		GT.search.state = {}
+function Search:OpenSearch(tokens)
+	GT.Log:Info('GT_Search_OpenSearch', tokens)
+	if Search.state == nil then
+		Search.state = {}
 	end
 
-	if GT.search.mainFrame ~= nil then
-		GT.search.mainFrame:Hide()
-		GT.search.mainFrame = nil
-		GT.search.skillScrollFrame = nil
-		GT.search.reagentScrollFrame = nil
-		GT.search.characterScrollFrame = nil
+	if Search.mainFrame ~= nil then
+		Search.mainFrame:Hide()
+		Search.mainFrame = nil
+		Search.skillScrollFrame = nil
+		Search.reagentScrollFrame = nil
+		Search.characterScrollFrame = nil
 		return
 	end
 
 	local mainFrame = AceGUI:Create('Frame')
 	mainFrame:SetCallback('OnClose',function(widget) AceGUI:Release(widget) end)
-	mainFrame:SetTitle(GT.L['LONG_TAG'])
+	mainFrame:SetTitle(L['LONG_TAG'])
 	mainFrame:SetLayout('Flow')
 	mainFrame:ClearAllPoints()
 	mainFrame:SetCallback('OnClose', function()
-		GT.search.lastSkillClicked = nil
-		GT.search.lastSkillLinkClicked = nil
-		GT.search.lastReagentClicked = nil
-		GT.search.lastCharacterClicked = nil
+		Search.lastSkillClicked = nil
+		Search.lastSkillLinkClicked = nil
+		Search.lastReagentClicked = nil
+		Search.lastCharacterClicked = nil
 
-		GT.search.mainFrame = nil
-		GT.search.skillScrollFrame = nil
-		GT.search.reagentScrollFrame = nil
-		GT.search.characterScrollFrame = nil
+		Search.mainFrame = nil
+		Search.skillScrollFrame = nil
+		Search.reagentScrollFrame = nil
+		Search.characterScrollFrame = nil
 	end)
 	_G['GT_SearchMainFrame'] = mainFrame.frame
 	tinsert(UISpecialFrames, 'GT_SearchMainFrame')
@@ -84,18 +91,18 @@ function GT.search.openSearch(tokens)
 
 	local resetFiltersButton = AceGUI:Create('Button')
 	resetFiltersButton:SetRelativeWidth(1/4)
-	resetFiltersButton:SetText(GT.L['BUTTON_FILTERS_RESET'])
+	resetFiltersButton:SetText(L['BUTTON_FILTERS_RESET'])
 	resetFiltersButton:SetCallback('OnClick', function()
-		GT.search.lastSkillClicked = nil
-		GT.search.lastSkillLinkClicked = nil
-		GT.search.lastReagentClicked = nil
-		GT.search.lastCharacterClicked = nil
+		Search.lastSkillClicked = nil
+		Search.lastSkillLinkClicked = nil
+		Search.lastReagentClicked = nil
+		Search.lastCharacterClicked = nil
 
-		GT.search.skillSearchBox:SetText(nil)
-		GT.search.reagentSearchBox:SetText(nil)
-		GT.search.characterSearchBox:SetText(nil)
+		Search.skillSearchBox:SetText(nil)
+		Search.reagentSearchBox:SetText(nil)
+		Search.characterSearchBox:SetText(nil)
 
-		GT.search.populateSkills(true)
+		Search:PopulateSkills(true)
 	end)
 	editLine:AddChild(resetFiltersButton)
 
@@ -107,18 +114,18 @@ function GT.search.openSearch(tokens)
 	skillSearchContainer:ClearAllPoints()
 
 	local skillSearchBox = AceGUI:Create('EditBox')
-	skillSearchBox:SetLabel(GT.L['SEARCH_SKILLS'])
+	skillSearchBox:SetLabel(L['SEARCH_SKILLS'])
 	skillSearchBox:DisableButton(true)
-	if GT.search.skillSearchText ~= nil then
-		skillSearchBox:SetText(GT.search.skillSearchText)
+	if Search.skillSearchText ~= nil then
+		skillSearchBox:SetText(Search.skillSearchText)
 	end
 	skillSearchBox:SetCallback('OnTextChanged', function(widget, event, value)
-		GT.search.skillSearchText = value
-		GT.search.populateSkills(true)
+		Search.skillSearchText = value
+		Search:PopulateSkills(true)
 	end)
 	skillSearchContainer:AddChild(skillSearchBox)
 	skillSearchBox:ClearAllPoints()
-	GT.search.skillSearchBox = skillSearchBox
+	Search.skillSearchBox = skillSearchBox
 
 	local reagentSearchContainer = AceGUI:Create('SimpleGroup')
 	reagentSearchContainer:SetRelativeWidth(1/4)
@@ -128,18 +135,18 @@ function GT.search.openSearch(tokens)
 	reagentSearchContainer:ClearAllPoints()
 
 	local reagentSearchBox = AceGUI:Create('EditBox')
-	reagentSearchBox:SetLabel(GT.L['SEARCH_REAGENTS'])
+	reagentSearchBox:SetLabel(L['SEARCH_REAGENTS'])
 	reagentSearchBox:DisableButton(true)
-	if GT.search.reagentSearchText ~= nil then
-		reagentSearchBox:SetText(GT.search.reagentSearchText, true)
+	if Search.reagentSearchText ~= nil then
+		reagentSearchBox:SetText(Search.reagentSearchText, true)
 	end
 	reagentSearchBox:SetCallback('OnTextChanged', function(widget, event, value)
-		GT.search.reagentSearchText = value
-		GT.search.populateReagents(true)
+		Search.reagentSearchText = value
+		Search:PopulateReagents(true)
 	end)
 	reagentSearchContainer:AddChild(reagentSearchBox)
 	reagentSearchBox:ClearAllPoints()
-	GT.search.reagentSearchBox = reagentSearchBox
+	Search.reagentSearchBox = reagentSearchBox
 
 	local characterSearchContainer = AceGUI:Create('SimpleGroup')
 	characterSearchContainer:SetRelativeWidth(1/4)
@@ -149,22 +156,22 @@ function GT.search.openSearch(tokens)
 	characterSearchContainer:ClearAllPoints()
 
 	local characterSearchBox = AceGUI:Create('EditBox')
-	characterSearchBox:SetLabel(GT.L['SEARCH_CHARACTERS'])
+	characterSearchBox:SetLabel(L['SEARCH_CHARACTERS'])
 	characterSearchBox:DisableButton(true)
-	if GT.search.characterSearchText ~= nil then
-		characterSearchBox:SetText(GT.search.characterSearchText)
+	if Search.characterSearchText ~= nil then
+		characterSearchBox:SetText(Search.characterSearchText)
 	end
 	characterSearchBox:SetCallback('OnTextChanged', function(widget, event, value)
-		GT.search.characterSearchText = value
-		GT.search.lastSkillClicked = nil
-		GT.search.lastSkillLinkClicked = nil
-		GT.search.lastReagentClicked = nil
-		GT.search.lastCharacterClicked = nil
-		GT.search.populateCharacters(true)
+		Search.characterSearchText = value
+		Search.lastSkillClicked = nil
+		Search.lastSkillLinkClicked = nil
+		Search.lastReagentClicked = nil
+		Search.lastCharacterClicked = nil
+		Search:PopulateCharacters(true)
 	end)
 	characterSearchContainer:AddChild(characterSearchBox)
 	characterSearchBox:ClearAllPoints()
-	GT.search.characterSearchBox = characterSearchBox
+	Search.characterSearchBox = characterSearchBox
 
 	local labelLine = AceGUI:Create('SimpleGroup')
 	labelLine:SetFullWidth(true)
@@ -172,30 +179,30 @@ function GT.search.openSearch(tokens)
 	mainFrame:AddChild(labelLine)
 
 	local profLabel = AceGUI:Create('Label')
-	profLabel:SetText(GT.L['LABEL_PROFESSIONS'])
+	profLabel:SetText(L['LABEL_PROFESSIONS'])
 	profLabel:SetRelativeWidth(1/4)
-	profLabel:SetColor(GT.search.labelR, GT.search.labelG, GT.search.labelB)
+	profLabel:SetColor(Search.labelR, Search.labelG, Search.labelB)
 	labelLine:AddChild(profLabel)
 	profLabel:ClearAllPoints()
 
 	local skillLabel = AceGUI:Create('Label')
-	skillLabel:SetText(GT.L['LABEL_SKILLS'])
+	skillLabel:SetText(L['LABEL_SKILLS'])
 	skillLabel:SetRelativeWidth(1/4)
 	skillLabel:SetColor(1, 0.82, 0)
 	labelLine:AddChild(skillLabel)
 	skillLabel:ClearAllPoints()
 
 	local reagentLabel = AceGUI:Create('Label')
-	reagentLabel:SetText(GT.L['LABEL_REAGENTS'])
+	reagentLabel:SetText(L['LABEL_REAGENTS'])
 	reagentLabel:SetRelativeWidth(1/4)
-	reagentLabel:SetColor(GT.search.labelR, GT.search.labelG, GT.search.labelB)
+	reagentLabel:SetColor(Search.labelR, Search.labelG, Search.labelB)
 	labelLine:AddChild(reagentLabel)
 	reagentLabel:ClearAllPoints()
 
 	local characterLabel = AceGUI:Create('Label')
-	characterLabel:SetText(GT.L['LABEL_CHARACTERS'])
+	characterLabel:SetText(L['LABEL_CHARACTERS'])
 	characterLabel:SetRelativeWidth(1/4)
-	characterLabel:SetColor(GT.search.labelR, GT.search.labelG, GT.search.labelB)
+	characterLabel:SetColor(Search.labelR, Search.labelG, Search.labelB)
 	labelLine:AddChild(characterLabel)
 	characterLabel:ClearAllPoints()
 	characterLabel:SetPoint('RIGHT')
@@ -218,22 +225,20 @@ function GT.search.openSearch(tokens)
 		profCheckBox:SetFullWidth(true)
 		profCheckBox:SetLabel(profName)
 		local checked = true
-		if GT_Character.search[profName] == nil then
-			GT_Character.search[profName] = true
-		else
-			checked = GT_Character.search[profName]
+		if GT.DB:GetSearch(profName) == nil then
+			GT.DB:SetSearch(profName, true)
 		end
-		profCheckBox:SetValue(checked)
+		profCheckBox:SetValue(GT.DB:GetSearch(profName))
 		profCheckBox:SetCallback('OnValueChanged', function(widget, callback, value)
 			local professionName = widget.text:GetText()
-			GT.search.lastSkillClicked = nil
-			GT.search.lastSkillLinkClicked = nil
-			GT.search.lastReagentClicked = nil
-			GT.search.lastCharacterClicked = nil
+			Search.lastSkillClicked = nil
+			Search.lastSkillLinkClicked = nil
+			Search.lastReagentClicked = nil
+			Search.lastCharacterClicked = nil
 
-			GT_Character.search[professionName] = value
+			GT.DB:SetSearch(professionName, value)
 
-			GT.search.populateSkills(true)
+			Search:PopulateSkills(true)
 		end)
 		profScrollFrame:AddChild(profCheckBox)
 	end
@@ -271,44 +276,41 @@ function GT.search.openSearch(tokens)
 	characterScrollFrame:SetLayout('Flow')
 	characterScrollContainer:AddChild(characterScrollFrame)
 
-	GT.search.mainFrame = mainFrame
-	GT.search.skillScrollFrame = skillScrollFrame
-	GT.search.reagentScrollFrame = reagentScrollFrame
-	GT.search.characterScrollFrame = characterScrollFrame
+	Search.mainFrame = mainFrame
+	Search.skillScrollFrame = skillScrollFrame
+	Search.reagentScrollFrame = reagentScrollFrame
+	Search.characterScrollFrame = characterScrollFrame
 
-	GT.search.populateSkills(true)
+	Search:PopulateSkills(true)
 end
 
-function GT.search.populateSkills(shouldCascade)
-	GT.logging.info('GT_Search_PopulateSkills: ' .. GT.textUtils.textValue(shouldCascade))
+function Search:PopulateSkills(shouldCascade)
+	GT.Log:Info('GT_Search_PopulateSkills', shouldCascade)
 
-	GT.search.skillScrollFrame:ReleaseChildren()
+	Search.skillScrollFrame:ReleaseChildren()
 
-	local characters = GT.database.getGuild(
-		GT_Character.realmName,
-		GT_Character.factionName,
-		GT_Character.guildName
-	).characters
+	local characters = GT.DB:GetCharacters()
 
 	skillsToAdd = {}
 	local count = 0
-	if GT.search.lastReagentClicked ~= nil then
+	if Search.lastReagentClicked ~= nil then
 		for characterName, _ in pairs(characters) do
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
-				if GT_Character.search[professionName] then
+				if GT.DB:GetSearch(professionName) then
 					local skills = professions[professionName].skills
-					for skillName, _ in pairs(skills) do
-						local reagents = skills[skillName].reagents
+					for _, skillName in pairs(skills) do
+						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+						local reagents = skill.reagents
 						for reagentName, _ in pairs(reagents) do
-							if reagentName == GT.search.lastReagentClicked then
-								local skill = skills[skillName]
-								local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
+							if reagentName == Search.lastReagentClicked then
+								local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+								local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
 								local searchMatch = true
-								if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
+								if Search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(Search.skillSearchText)) then
 									searchMatch = false
 								end
-								if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch and count < GT.search.scrollLimit then
+								if not GT.Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
 									count = count + 1
 									skillsToAdd[tempSkillName] = skill.skillLink
 								end
@@ -318,21 +320,21 @@ function GT.search.populateSkills(shouldCascade)
 				end
 			end
 		end
-	elseif GT.search.lastCharacterClicked ~= nil then
+	elseif Search.lastCharacterClicked ~= nil then
 		for characterName, _ in pairs(characters) do
-			if characterName == GT.search.lastCharacterClicked then
+			if characterName == Search.lastCharacterClicked then
 				local professions = characters[characterName].professions
 				for professionName, _ in pairs(professions) do
-					if GT_Character.search[professionName] then
+					if GT.DB:GetSearch(professionName) then
 						local skills = professions[professionName].skills
-						for skillName, _ in pairs(skills) do
-							local skill = skills[skillName]
-							local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
+						for _, skillName in pairs(skills) do
+							local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+							local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
 							local searchMatch = true
-							if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
+							if Search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(Search.skillSearchText)) then
 								searchMatch = false
 							end
-							if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch and count < GT.search.scrollLimit then
+							if not GT.Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
 								skillsToAdd[tempSkillName] = skill.skillLink
 								count = count + 1
 							end
@@ -345,16 +347,16 @@ function GT.search.populateSkills(shouldCascade)
 		for characterName, _ in pairs(characters) do
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
-				if GT_Character.search[professionName] then
+				if GT.DB:GetSearch(professionName) then
 					local skills = professions[professionName].skills
-					for skillName, _ in pairs(skills) do
-						local skill = skills[skillName]
-						local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
+					for _, skillName in pairs(skills) do
+						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+						local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
 						local searchMatch = true
-						if GT.search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(GT.search.skillSearchText)) then
+						if Search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(Search.skillSearchText)) then
 							searchMatch = false
 						end
-						if not GT.tableUtils.tableContains(skillsToAdd, tempSkillName) and searchMatch and count < GT.search.scrollLimit then
+						if not GT.Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
 							skillsToAdd[tempSkillName] = skill.skillLink
 							count = count + 1
 						end
@@ -364,7 +366,7 @@ function GT.search.populateSkills(shouldCascade)
 		end
 	end
 
-	local sortedKeys = GT.tableUtils.getSortedKeys(skillsToAdd, function(a, b) return a < b end, true)
+	local sortedKeys = GT.Table:GetSortedKeys(skillsToAdd, function(a, b) return a < b end, true)
 	for _, key in ipairs(sortedKeys) do
 		local skillLink = skillsToAdd[key]
 		local skillLabel = AceGUI:Create('InteractiveLabel')
@@ -372,53 +374,49 @@ function GT.search.populateSkills(shouldCascade)
 		skillLabel:SetHighlight("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 		skillLabel:SetCallback('OnClick', function(widget, event, button)
 			local skillLink = widget.label:GetText()
-			local skillName = GT.textUtils.getTextBetween(skillLink, '%[', ']')
+			local skillName = GT.Text:GetTextBetween(skillLink, '%[', ']')
 
-			GT.search.lastSkillClicked = skillName
-			GT.search.lastSkillLinkClicked = skillLink
-			GT.search.lastReagentClicked = nil
-			GT.search.lastCharacterClicked = nil
+			Search.lastSkillClicked = skillName
+			Search.lastSkillLinkClicked = skillLink
+			Search.lastReagentClicked = nil
+			Search.lastCharacterClicked = nil
 
-			GT.search.populateReagents(false)
-			GT.search.populateCharacters(false)
+			Search:PopulateReagents(false)
+			Search:PopulateCharacters(false)
 		end) 
-		GT.search.skillScrollFrame:AddChild(skillLabel)
+		Search.skillScrollFrame:AddChild(skillLabel)
 	end
 
 	if shouldCascade then
-		GT.search.populateReagents(false)
-		GT.search.populateCharacters(false)
+		Search:PopulateReagents(false)
+		Search:PopulateCharacters(false)
 	end
 end
 
-function GT.search.populateReagents(shouldCascade)
-	GT.logging.info('GT_Search_PopulateReagents: ' .. GT.textUtils.textValue(shouldCascade))
+function Search:PopulateReagents(shouldCascade)
+	GT.Log:Info('GT_Search_PopulateReagents', shouldCascade)
 
-	if GT.search.lastReagentClicked == nil then
-		GT.search.reagentScrollFrame:ReleaseChildren()
+	if Search.lastReagentClicked == nil then
+		Search.reagentScrollFrame:ReleaseChildren()
 	end
 
 	local reagentsToAdd = {}
-	if GT.search.lastSkillClicked ~= nil then
-		local characters = GT.database.getGuild(
-			GT_Character.realmName,
-			GT_Character.factionName,
-			GT_Character.guildName
-		).characters
+	if Search.lastSkillClicked ~= nil then
+		local characters = GT.DB:GetCharacters()
 		local reagentsAdded = false
 		for characterName, _ in pairs(characters) do
 			if not reagentsAdded then
 				local professions = characters[characterName].professions
 				for professionName, _ in pairs(professions) do
 					local skills = professions[professionName].skills
-					for skillName, _ in pairs(skills) do
-						local skill = skills[skillName]
-						local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
-						if tempSkillName == GT.search.lastSkillClicked then
-							local reagents = skills[skillName].reagents
+					for _, skillName in pairs(skills) do
+						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+						local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+						if tempSkillName == Search.lastSkillClicked then
+							local reagents = skill.reagents
 							for reagentName, _ in pairs(reagents) do
 								local searchMatch = true
-								if GT.search.reagentSearchText ~= nil and not string.find(string.lower(reagentName), string.lower(GT.search.reagentSearchText)) then
+								if Search.reagentSearchText ~= nil and not string.find(string.lower(reagentName), string.lower(Search.reagentSearchText)) then
 									searchMatch = false
 								end
 								if searchMatch then
@@ -438,28 +436,24 @@ function GT.search.populateReagents(shouldCascade)
 				break
 			end
 		end
-	elseif GT.search.lastCharacterClicked ~= nil then
-	elseif GT.search.lastReagentClicked ~= nil then
+	elseif Search.lastCharacterClicked ~= nil then
+	elseif Search.lastReagentClicked ~= nil then
 	else
-		local characters = GT.database.getGuild(
-			GT_Character.realmName,
-			GT_Character.factionName,
-			GT_Character.guildName
-		).characters
+		local characters = GT.DB:GetCharacters()
 		local reagentsAdded = false
 		for characterName, _ in pairs(characters) do
 			if not reagentsAdded then
 				local professions = characters[characterName].professions
 				for professionName, _ in pairs(professions) do
 					local skills = professions[professionName].skills
-					for skillName, _ in pairs(skills) do
-						local skill = skills[skillName]
-						local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
-						if tempSkillName == GT.search.lastSkillClicked then
+					for _, skillName in pairs(skills) do
+						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+						local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+						if tempSkillName == Search.lastSkillClicked then
 							local reagents = skills[skillName].reagents
 							for reagentName, _ in pairs(reagents) do
 								local searchMatch = false
-								if GT.search.reagentSearchText ~= nil and string.find(string.lower(reagentName), string.lower(GT.search.reagentSearchText)) then
+								if Search.reagentSearchText ~= nil and string.find(string.lower(reagentName), string.lower(Search.reagentSearchText)) then
 									searchMatch = true
 								end
 								if searchMatch then
@@ -481,7 +475,7 @@ function GT.search.populateReagents(shouldCascade)
 		end
 	end
 
-	local sortedKeys = GT.tableUtils.getSortedKeys(reagentsToAdd, function(a, b) return a < b end, true)
+	local sortedKeys = GT.Table:GetSortedKeys(reagentsToAdd, function(a, b) return a < b end, true)
 	for _, reagentName in ipairs(sortedKeys) do
 		local reagentCount = reagentsToAdd[reagentName]
 		local reagentLabel = AceGUI:Create('InteractiveLabel')
@@ -489,74 +483,66 @@ function GT.search.populateReagents(shouldCascade)
 		reagentLabel:SetHighlight("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 		reagentLabel:SetCallback('OnClick', function(widget, event, button)
 			local text = widget.label:GetText()
-			local tokens = GT.textUtils.tokenize(text, ' ')
+			local tokens = GT.Text:Tokenize(text, ' ')
 			table.remove(tokens, #tokens)
 			local reagentName = table.concat(tokens, ' ')
 
-			GT.search.lastSkillClicked = nil
-			GT.search.lastSkillLinkClicked = nil
-			GT.search.lastReagentClicked = reagentName
-			GT.search.lastCharacterClicked = nil
+			Search.lastSkillClicked = nil
+			Search.lastSkillLinkClicked = nil
+			Search.lastReagentClicked = reagentName
+			Search.lastCharacterClicked = nil
 
-			GT.search.populateSkills(false)
-			GT.search.populateCharacters(false)
+			Search:PopulateSkills(false)
+			Search:PopulateCharacters(false)
 		end)
-		GT.search.reagentScrollFrame:AddChild(reagentLabel)
+		Search.reagentScrollFrame:AddChild(reagentLabel)
 	end
 	if shouldCascade then
-		GT.search.populateSkills(false)
-		GT.search.populateCharacters(false)
+		Search:PopulateSkills(false)
+		Search:PopulateCharacters(false)
 	end
 end
 
-function GT.search.populateCharacters(shouldCascade)
-	GT.logging.info('GT_Search_PopulateCharacters: ' .. GT.textUtils.textValue(shouldCascade))
+function Search:PopulateCharacters(shouldCascade)
+	GT.Log:Info('GT_Search_PopulateCharacters', shouldCascade)
 
-	if GT.search.lastCharacterClicked == nil then
-		GT.search.characterScrollFrame:ReleaseChildren()
+	if Search.lastCharacterClicked == nil then
+		Search.characterScrollFrame:ReleaseChildren()
 	end
 
 	local charactersToAdd = {}
 	local count = 0
-	if GT.search.lastSkillClicked ~= nil then
-		local characters = GT.database.getGuild(
-			GT_Character.realmName,
-			GT_Character.factionName,
-			GT_Character.guildName
-		).characters
+	if Search.lastSkillClicked ~= nil then
+		local characters = GT.DB:GetCharacters()
 		for characterName, _ in pairs(characters) do
 			local addCharacter = false
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
 				local skills = professions[professionName].skills
-				for skillName, _ in pairs(skills) do
-					local skill = skills[skillName]
-					local tempSkillName = GT.textUtils.getTextBetween(skill.skillLink, '%[', ']')
-					if tempSkillName == GT.search.lastSkillClicked then
+				for _, skillName in pairs(skills) do
+					local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+					local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+					if tempSkillName == Search.lastSkillClicked then
 						addCharacter = true
 						break
 					end
 				end
 			end
-			if addCharacter and not GT.tableUtils.tableContains(charactersToAdd, characterName) and count < GT.search.scrollLimit then
+			if addCharacter and not GT.Table:Contains(charactersToAdd, characterName) and count < Search.scrollLimit then
 				table.insert(charactersToAdd, characterName)
 				count = count + 1
 			end
 		end
-	elseif GT.search.lastReagentClicked ~= nil then
-	elseif GT.search.lastCharacterClicked ~= nil then
+	elseif Search.lastReagentClicked ~= nil then
+	elseif Search.lastCharacterClicked ~= nil then
 	else
-		local characters = GT.database.getGuild(
-			GT_Character.realmName,
-			GT_Character.factionName,
-			GT_Character.guildName
-		).characters
+		local characters = GT.DB:GetCharacters()
 		for characterName, _ in pairs(characters) do
 			local searchMatch = false
-			if GT.search.characterSearchText ~= nil and string.find(string.lower(characterName), string.lower(GT.search.characterSearchText)) then
+			if Search.characterSearchText ~= nil and string.find(string.lower(characterName), string.lower(Search.characterSearchText)) then
 				searchMatch = true
 			end
-			if searchMatch and not GT.tableUtils.tableContains(charactersToAdd, characterName) and count < GT.search.scrollLimit then
+			if searchMatch and not GT.Table:Contains(charactersToAdd, characterName) and count < Search.scrollLimit then
 				table.insert(charactersToAdd, characterName)
 				count = count + 1
 			end
@@ -569,26 +555,26 @@ function GT.search.populateCharacters(shouldCascade)
 	for i=1,countTotalMembers do
 		local characterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
 		if online then
-			characterName = GT.textUtils.convertCharacterName(characterName)
+			characterName = GT.Text:ConvertCharacterName(characterName)
 			table.insert(onlineGuildMembers, characterName)
 			classColors[characterName] = RCC[string.upper(class)]['colorStr']
 		end
 	end
 
-	local sortedKeys = GT.tableUtils.getSortedKeys(charactersToAdd, function(a, b) return a < b end)
+	local sortedKeys = GT.Table:GetSortedKeys(charactersToAdd, function(a, b) return a < b end)
 	for _, key in ipairs(sortedKeys) do
 		local characterName = charactersToAdd[key]
 		local characterLabel = AceGUI:Create('InteractiveLabel')
-		local labelText = string.gsub(GT.L['GUILD_OFFLINE'], '%{{guild_member}}', characterName)
-		if GT.tableUtils.tableContains(onlineGuildMembers, characterName) then
-			labelText = string.gsub(GT.L['GUILD_ONLINE'], '%{{guild_member}}', characterName)
+		local labelText = string.gsub(L['GUILD_OFFLINE'], '%{{guild_member}}', characterName)
+		if GT.Table:Contains(onlineGuildMembers, characterName) then
+			labelText = string.gsub(L['GUILD_ONLINE'], '%{{guild_member}}', characterName)
 			labelText = string.gsub(labelText, '%{{class_color}}', classColors[characterName])
 		end
 		characterLabel:SetText(labelText)
 		characterLabel:SetHighlight("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 		characterLabel:SetCallback('OnClick', function(widget, event, button)
 			local labelText = widget.label:GetText()
-			local characterName = GT.textUtils.convertCharacterName(labelText)
+			local characterName = GT.Text:ConvertCharacterName(labelText)
 			characterName = string.sub(characterName, 11)
 			characterName = string.sub(characterName, 0, #characterName - 3)
 			if button == 'RightButton' then
@@ -596,41 +582,41 @@ function GT.search.populateCharacters(shouldCascade)
 				online = string.gsub(online, '- ' , '')
 				online = string.sub(online, 24)
 				online = string.sub(online, 0, #online - 2)
-				if string.lower(online) == 'online' and GT.search.lastSkillLinkClicked ~= nil then
+				if string.lower(online) == 'online' and Search.lastSkillLinkClicked ~= nil then
 					local whisperSent = false
 					local totalGuildMembers = GetNumGuildMembers()
 					for i = 1, totalGuildMembers do
 						local guildCharacterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
-						local tempCharacterName = GT.textUtils.convertCharacterName(guildCharacterName)
+						local tempCharacterName = GT.Text:ConvertCharacterName(guildCharacterName)
 						if online and tempCharacterName == characterName then
-							local msg = GT.L['WHISPER_REQUEST']
+							local msg = L['WHISPER_REQUEST']
 							msg = string.gsub(msg, '%{{character_name}}', characterName)
-							msg = string.gsub(msg, '%{{item_link}}', GT.search.lastSkillLinkClicked)
-							ChatThrottleLib:SendChatMessage('ALERT', GT.comm.PREFIX, msg, 'WHISPER', 'Common', guildCharacterName)
+							msg = string.gsub(msg, '%{{item_link}}', Search.lastSkillLinkClicked)
+							ChatThrottleLib:SendChatMessage('ALERT', 'GT', msg, 'WHISPER', 'Common', guildCharacterName)
 							whisperSent = true
 						end
 					end
 					if not whisperSent then
-						GT.logging.playerWarn(string.gsub(GT.L['WHISPER_NO_CHARACTER_FOUND'], '%{{character_name}}', characterName))
+						GT.Log:PlayerWarn(string.gsub(L['WHISPER_NO_CHARACTER_FOUND'], '%{{character_name}}', characterName))
 					end
 
-				elseif GT.search.lastSkillLinkClicked == nil then
-					GT.logging.playerWarn(GT.L['WHISPER_SELECT_REQUIRED'])
+				elseif Search.lastSkillLinkClicked == nil then
+					GT.Log:PlayerWarn(L['WHISPER_SELECT_REQUIRED'])
 				end
 			else
-				GT.search.lastSkillClicked = nil
-				GT.search.lastSkillLinkClicked = nil
-				GT.search.lastReagentClicked = nil
-				GT.search.lastCharacterClicked = characterName
-				GT.search.populateSkills(false)
-				GT.search.populateReagents(false)
+				Search.lastSkillClicked = nil
+				Search.lastSkillLinkClicked = nil
+				Search.lastReagentClicked = nil
+				Search.lastCharacterClicked = characterName
+				Search:PopulateSkills(false)
+				Search:PopulateReagents(false)
 			end
 		end)
-		GT.search.characterScrollFrame:AddChild(characterLabel)
+		Search.characterScrollFrame:AddChild(characterLabel)
 	end
 
 	if shouldCascade then
-		GT.search.populateSkills(false)
-		GT.search.populateReagents(false)
+		Search:PopulateSkills(false)
+		Search:PopulateReagents(false)
 	end
 end
