@@ -1,4 +1,4 @@
-1.1.0
+2.0.0
 	Ripped apart the entire thing and converted it to an Ace3 addon.
 	Included dependencies that other addons were loading.
 
