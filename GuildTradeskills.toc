@@ -1,22 +1,17 @@
 ## Interface: 11304
-## Title: |cff3ce13fGuild|rTradeskills
+## Title: |cff3ce13fGuild|r|cfffcba03Tradeskills|r
 ## Notes: Allows guild members to search each other's tradeskills.
 ## Author: Chalos
 ## Version: @project-version@
 ## X-Curse-Project_ID: 381775
 ## X-WoWI-ID: 25573
-## SavedVariablesPerCharacter: GT_Character
-## SavedVariables: GT_DB
+## SavedVariablesPerCharacter: GTCDB
+## SavedVariables: GTDB
+
+Libs\LoadLibraries.xml
+
+Locale\localization.en.lua
 
 Core.lua
-Logging.lua
-Professions.lua
-Database.lua
-Player.lua
-Comm.lua
-Search.lua
 
-TextUtils.lua
-TableUtils.lua
-
-locale\localization.en.lua
+Modules\LoadModules.xml

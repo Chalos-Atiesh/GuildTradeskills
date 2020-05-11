@@ -1,177 +1,59 @@
-local GT_Name, GT = ...
+local AddOnName, GT = ...
 
-local EVENT_MAP = {}
-local SLASH_COMMAND_MAP = {}
-local RESET_COMMAND_MAP = {}
-local SLASH_COMMAND_DELIMITER = ' '
+GT = LibStub('AceAddon-3.0'):NewAddon(AddOnName, 'AceComm-3.0', 'AceConsole-3.0', 'AceEvent-3.0')
+
+local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
+
+---------- START LOAD LIBRARIES ----------
+
+GT.Text = LibStub:GetLibrary('GTText')
+GT.Table = LibStub:GetLibrary('GTTable')
+
+---------- END LOAD LIBRARIES ----------
+
+GT.resetWarned = false
 GT.version = '@project-version@'
-GT.state = {}
-GT.state.initialized = false
-GT.state.resetWarned = false
 
-local function GT_Init()
-	if GT.state.initialized then
+function GT:OnInitialize()
+	GT.Log:Enable()
+
+	GT.Log:Info('GT_OnInitialize')
+
+	GT.Command:Enable()
+	GT.Event:Enable()
+end
+
+function GT:OnDisable()
+	GT.Log:Info('GT_OnDisable')
+end
+
+function GT:InitReset(tokens)
+	if not GT.resetWarned then
+		GT.Log:PlayerWarn(L['RESET_WARN'])
+		GT.resetWarned = true
+		return
+	end
+	GT.resetWarned = false
+
+	local token = GT.Table:RemoveToken(tokens)
+	if token == nil then
+		GT.Log:PlayerWarn(L['RESET_NO_TOKEN'])
+		return
+	end
+	if string.lower(token) == string.lower(L['RESET_EXPECT_CANCEL']) then
+		GT.Log:PlayerInfo(L['RESET_CANCEL'])
+		return
+	end
+	if string.lower(token) == string.lower(L['RESET_EXPECT_COMFIRM']) then
+		GT.Log:PlayerWarn(L['RESET_FINAL'])
+
+		GT.Log:OnEnable(true)
+		GT.Command:OnEnable(true)
+		GT.DB:OnEnable(true)
+		GT.Event:OnEnable(true)
 		return
 	end
 
-	EVENT_MAP = {
-		PLAYER_LOGIN = GT_PlayerLogin,
-		PPLAYER_ENTERING_WORLD = GT_PlayerEnteringWorld,
-		ADDON_LOADED = GT_AddonLoaded,
-		TRADE_SKILL_UPDATE = GT_TradeSkillUpdate,
-		CRAFT_UPDATE = GT_TradeSkillUpdate,
-		PLAYER_GUILD_UPDATE = GT_GuildUpdate
-		--@debug@
-		,CHAT_MSG_SYSTEM = GT_AFK
-		--@end-debug@
-	}
-
-	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_HELP']['command']] = GT_SlashCommandHelp
-
-	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_SEARCH']['command']] = GT.search.openSearch
-
-	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_PROFESSION_ADD']['command']] = GT.professions.initAdd
-	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_PROFESSION_REMOVE']['command']] = GT.professions.removeProfession
-
-	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_RESET']['command']] = GT_Reset
-	SLASH_COMMAND_MAP[GT.L['SLASH_COMMANDS']['SLASH_COMMAND_CHAT_WINDOW']['command']] = GT.logging.setChatFrame
-
-	--@debug@
-	SLASH_COMMAND_MAP['togglecomms'] = GT.comm.toggleComms
-	SLASH_COMMAND_MAP['delimit'] = GT_Delimit
-	--@end-debug@
-
-	GT.logging.init()
-	GT.database.init()
-	GT.comm.init()
-	GT.player.init()
-	GT.search.init()
-
-	GT.logging.info('GT_Core_Init')
-
-	GT.state.initialized = true
+	local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', token)
+	GT.Log:PlayerWarn(message)
 end
-
----------- START EVENT HANDLERS ----------
-
-local function GT_MainEventHandler(frame, event, ...)
-	if event == 'ADDON_LOADED' then
-		GT_AddonLoaded(frame, event, ...)
-		return
-	end
-	for mapEvent, fn in pairs(EVENT_MAP) do
-		if event == mapEvent then
-			GT.logging.info(event)
-			fn(frame, event, ...)
-		end
-	end
-end
-
-function GT_AddonLoaded(frame, event, ...)
-	local name = ...
-	if name == GT_Name then
-		GT_Init()
-	end
-end
-
-function GT_PlayerLogin(frame, event, ...)
-	GT.logging.playerInfo(GT.L['WELCOME'], nil, true)
-	GT.player.init()
-	GT.comm.sendDeletions()
-	GT.comm.sendTimestamps()
-	GT.comm.sendVersion()
-end
-
-function GT_PlayerEnteringWorld(frame, event, ...)
-	GT.player.guildUpdate()
-end
-
-function GT_TradeSkillUpdate(frame, event, ...)
-	GT.professions.addProfession()
-end
-
-function GT_GuildUpdate(frame, event, ...)
-	GT.player.guildUpdate()
-end
-
---@debug@
-function GT_AFK(frame, event, message)
-	if message ~= nil and message == IDLE_MESSAGE then
-		ForceQuit()
-	end
-end
---@end-debug@
-
-local mainFrame = CreateFrame('Frame')
-mainFrame:RegisterEvent('PLAYER_LOGIN')
-mainFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
-mainFrame:RegisterEvent('ADDON_LOADED')
-mainFrame:RegisterEvent('TRADE_SKILL_UPDATE')
-mainFrame:RegisterEvent('CRAFT_UPDATE')
-mainFrame:RegisterEvent('PLAYER_GUILD_UPDATE')
---@debug@
-mainFrame:RegisterEvent("CHAT_MSG_SYSTEM")
---@end-debug@
-
-mainFrame:SetScript('OnEvent', GT_MainEventHandler)
-
----------- END EVENT HANDLERS ----------
----------- START SLASH COMMAND HANDLERS ----------
-
-SLASH_GT_SLASHCOMMAND1 = '/gt'
-
-function SlashCmdList.GT_SLASHCOMMAND(msg)
-	local tokens = GT.textUtils.tokenize(msg, SLASH_COMMAND_DELIMITER)
-	local command, tokens = GT.tableUtils.removeToken(tokens)
-	local commandFound = false
-	for mapCommand, fn in pairs(SLASH_COMMAND_MAP) do
-		if mapCommand == string.lower(command) then
-			fn(tokens)
-			commandFound = true
-			break
-		end
-	end
-	if not commandFound then
-		GT.logging.playerError(string.gsub(GT.L['COMMAND_INVALID'], '%{{command}}', msg))
-	end
-end
-
-function GT_SlashCommandHelp()
-	GT.logging.playerInfo(GT.L['HELP_INTRO'])
-	for _, slashCommand in pairs(GT.L['SLASH_COMMANDS']) do
-		GT.logging.playerInfo(slashCommand['help'])
-	end
-end
-
-function GT_Reset(tokens)
-	if not GT.state.resetWarned then
-		if #tokens <= 0 then
-			GT.logging.playerWarn(GT.L['RESET_WARN'])
-		else
-
-		end
-		GT.state.resetWarned = true
-		return
-	end
-	
-	if string.lower(tokens[#tokens]) == GT.L['COMMAND_RESET_CONFIRM'] then
-		GT.logging.playerWarn(GT.L['RESET_FINAL'])
-		GT.database.reset()
-		GT.logging.reset()
-		GT.player.reset()
-		GT.state.resetWarned = false
-	elseif string.lower(tokens[#tokens]) == GT.L['COMMAND_RESET_CANCEL'] then
-		GT.logging.playerInfo(GT.L['RESET_CANCEL'])
-		GT.state.resetWarned = false
-	else
-		GT.logging.playerWarn(string.gsub(GT.L['RESET_UNKNOWN'], '%{{command}}', tokens[#tokens]))
-	end
-end
-
---@debug@
-function GT_Delimit()
-	GT.logging.info('----------')
-end
---@end-debug@
-
----------- END SLASH COMMAND HANDLERS ----------

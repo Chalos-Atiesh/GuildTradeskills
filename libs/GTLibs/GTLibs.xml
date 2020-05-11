@@ -1,0 +1,4 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+	<Script file='GTTable.lua'/>
+	<Script file='GTText.lua'/>
+</Ui>

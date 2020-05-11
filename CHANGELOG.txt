@@ -1,3 +1,10 @@
+1.1.0
+	Ripped apart the entire thing and converted it to an Ace3 addon.
+	Included dependencies that other addons were loading.
+
+1.0.0
+	Added whisper support.	
+
 0.1.2
 	Emergency fix for database function.
 
