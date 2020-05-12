@@ -95,9 +95,7 @@ function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 				GT.Log:Info('Comm_OnTimestampsReceived_LocalNil', characterName, professionName)
 				table.insert(toGet[characterName], professionName)
 			end
-		end
-
-		if profession.lastUpdate < timestamp then
+		elseif profession.lastUpdate < timestamp then
 			if toGet[characterName] == nil then
 				toGet[characterName] = {}
 			end
@@ -105,9 +103,7 @@ function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 				GT.Log:Info('Comm_OnTimestampsReceived_LocalOutOfDate', characterName, professionName, profession.lastUpdate, timestamp)
 				table.insert(toGet[characterName], professionName)
 			end
-		end
-
-		if profession.lastUpdate > timestamp then
+		elseif profession.lastUpdate > timestamp then
 			if toPost[characterName] == nil then
 				toPost[characterName] = {}
 			end
@@ -115,24 +111,26 @@ function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 				GT.Log:Info('Comm_OnTimestampsReceived_RemoteOutOfDate', characterName, professionName, profession.lastUpdate, timestamp)
 				table.insert(toPost[characterName], professionName)
 			end
+		else
+			GT.Log:Info('Comm_OnTimestampsReceived_UpToDate', characterName, professionName, profession.lastUpdate, timestamp)
 		end
 
 		local characters = GT.DB:GetCharacters()
 		for characterName, _ in pairs(characters) do
 			if all[characterName] == nil then
-				if toPost[characterName] == nil then
-					toPost[characterName] = {}
-				end
+				all[characterName] = {}
 			end
 
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
-				if not GT.Table:Contains(all[characterName], professionName) and
-					not GT.Table:Contains(toPost[characterName], professionName)
-				then
-					if not GT.Table:Contains(toPost[characterName], professionName) then
-						GT.Log:Info('Comm_OnTimestampsReceived_RemoteNil', characterName, professionName)
-						table.insert(toPost[characterName], professionName)
+				if not GT.Table:Contains(all[characterName], professionName) then
+					if toPost[characterName] == nil or not GT.Table:Contains(toPost[characterName], professionName) then
+						if toPost[characterName] == nil then
+							toPost[characterName] = {}
+						end
+						if not GT.Table:Contains(toPost[characterName], professionName) then
+							table.insert(toPost[characterName], professionName)
+						end
 					end
 				end
 			end
@@ -146,8 +144,10 @@ function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 	end
 
 	for characterName, _ in pairs(toPost) do
-		for _, professionName in pairs(toPost[characterName]) do
-			Comm:SendPost(characterName, professionName, sender)
+		if characterName ~= sender then
+			for _, professionName in pairs(toPost[characterName]) do
+				Comm:SendPost(characterName, professionName, sender)
+			end
 		end
 	end
 end
@@ -161,12 +161,39 @@ function Comm:SendGet(characterName, professionName, recipient)
 	Comm:SendCommMessage(GET, message, 'WHISPER', recipient, 'NORMAL')
 end
 
+function Comm:GetAll()
+	GT.Log:Info('Comm_GetAll')
+	Comm:_SendToOnline(GET, 'ALL')
+end
+
 function Comm:OnGetReceived(prefix, message, distribution, sender)
 	GT.Log:Info('Comm_OnGetReceived', prefix, distribution, sender, message)
+	local tokens = GT.Text:Tokenize(message, DELIMITER)
+	while #tokens > 0 do
+		local characterName, tokens = GT.Table:RemoveToken(tokens)
+		local professionName, tokens = GT.Table:RemoveToken(tokens)
+
+		if characterName == 'ALL' then
+			local characters = GT.DB:GetCharacters()
+			for tempCharacterName, _ in pairs(characters) do
+				for professionName, _ in pairs(characters[tempCharacterName]) do
+					Comm:SendPost(tempCharacterName, professionName)
+				end
+			end
+			return
+		end
+
+		Comm:SendPost(characterName, professionName, sender)
+	end
 end
 
 function Comm:SendPost(characterName, professionName, recipient)
 	GT.Log:Info('Comm_SendPost', characterName, professionName, recipient)
+
+	if characterName == recipient then
+		GT.Log:Info('Comm_SendPost_AboutThemselves', characterName, professionName, recipient)
+		return
+	end
 
 	local profession = GT.DB:GetProfession(characterName, professionName)
 
@@ -202,6 +229,11 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 	local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
 	lastUpdate = tonumber(lastUpdate)
 
+	local localCharacterName = UnitName('player')
+	if characterName == localCharacterName then
+		GT.Log:Info('Comm_OnPostReceived_AboutMe', prefix, distribution, sender, message)
+		return
+	end
 
 	local update = false
 	local profession = GT.DB:GetProfession(characterName, professionName)
@@ -212,7 +244,6 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 	elseif profession == nil or profession.lastUpdate < lastUpdate then
 		GT.Log:Info('Comm_OnPostReceived_LocalOutOfDate', characterName, professionName)
 		profession = GT.DB:AddProfession(characterName, professionName)
-		profession.lastUpdate = lastUpdate
 		update = true
 	end
 
@@ -227,12 +258,13 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 
 			for i = 1, reagentCount do
 				local reagentName, tokens = GT.Table:RemoveToken(tokens)
-				local reagentCount, tokens = GT.Table:RemoveToken()
+				local reagentCount, tokens = GT.Table:RemoveToken(tokens)
 
 				GT.DB:AddReagent(professionName, skillName, skillLink)
 			end
 		end
 	end
+	profession.lastUpdate = lastUpdate
 end
 
 function Comm:SendDeletions()
@@ -267,9 +299,9 @@ function Comm:SendVersion()
 	local version = GT:GetCurrentVersion()
 	GT.Log:Info('Comm_SendVersion', version)
 
-	--[==[@non-debug@
+	--[===[@non-debug@
 	Comm:_SendToOnline(VERSION, tostring(version))
-	--@end-non-debug@]==]
+	--@end-non-debug@]===]
 end
 
 function Comm:OnVersionReceived(prefix, message, distribution, sender)
@@ -280,9 +312,9 @@ function Comm:OnVersionReceived(prefix, message, distribution, sender)
 
 	if lVersion > rVersion then
 		GT.Log:Info('Comm_OnVersionReceived_RemoteUpdate', lVersion, rVersion)
-		--[==[@non-debug@
+		--[===[@non-debug@
 		Comm:_SendToOnline(VERSION, tostring(version))
-		--@end-non-debug@]==]
+		--@end-non-debug@]===]
 		return
 	end
 
@@ -310,14 +342,11 @@ function Comm:_SendToOnline(prefix, msg)
 	for i = 1, totalGuildMembers do
 		local characterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
 		if online then
-			--[==[@non-debug@
-			if not GT.Text:ConvertCharacterName(characterName) == currentCharacter then
-			--@end-non-debug@]==]
-				GT.Log:Info('GT_Comm_SendToOnline', prefix, characterName, msg)
+			local tempCharacterName = GT.Text:ConvertCharacterName(characterName)
+			if tempCharacterName ~= currentCharacter then
+				GT.Log:Info('GT_Comm_SendToOnline', prefix, tempCharacterName, msg)
 				Comm:SendCommMessage(prefix, msg, 'WHISPER', characterName, 'NORMAL')
-			--[==[@non-debug@
 			end
-			--@end-non-debug@]==]
 		end
 	end
 end

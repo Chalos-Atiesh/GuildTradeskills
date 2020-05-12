@@ -47,10 +47,7 @@ function GT:InitReset(tokens)
 	if string.lower(token) == string.lower(L['RESET_EXPECT_COMFIRM']) then
 		GT.Log:PlayerWarn(L['RESET_FINAL'])
 
-		GT.Log:OnEnable(true)
-		GT.Command:OnEnable(true)
-		GT.DB:OnEnable(true)
-		GT.Event:OnEnable(true)
+		GT.DB:Reset()
 		return
 	end
 
@@ -90,7 +87,7 @@ function GT:GetCurrentVersion()
 	--@end-debug@
 	local tokens = GT.Text:Tokenize(GT.version, '_')
 	local version = tokens[2]
-	tokens = GT.Text:Tokenize(version, '%.')
+	tokens = GT.Text:Tokenize(version, '.')
 	rVersion, tokens = GT.Table:RemoveToken(tokens)
 	bVersion, tokens = GT.Table:RemoveToken(tokens)
 	aVersion, tokens = GT.Table:RemoveToken(tokens)
