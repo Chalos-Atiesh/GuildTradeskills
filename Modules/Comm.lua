@@ -287,7 +287,7 @@ end
 function Comm:OnDeleteReceived(prefix, message, distribution, sender)
 	GT.Log:Info('Comm_OnDeleteReceived', prefix, distribution, sender, message)
 
-	local tokens = GT.Text:Tokenize(message)
+	local tokens = GT.Text:Tokenize(message, DELIMITER)
 	local characterName, tokens = GT.Table:RemoveToken(tokens)
 	while #tokens > 0 do
 		local professionName, tokens = GT.Table:RemoveToken(tokens)

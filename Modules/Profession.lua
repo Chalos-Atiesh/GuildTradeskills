@@ -116,19 +116,19 @@ function Profession:UpdateProfession(profession)
 	return updated
 end
 
-function Profession:RemoveProfession(professionName)
+function Profession:DeleteProfession(characterName, professionName)
+	GT.Log:Info('Profession_RemoveProfession', characterName, professionName)
 	if professionName == nil then
 		GT.Log:PlayerError(L['PROFESSION_REMOVE_NIL_PROFESSION'])
 		return
 	end
 
-	local characterName = UnitName('player')
 	local professions = GT.DB:GetCharacter(characterName).professions
 
 	local removed = false
 	for dbProfessionName, _ in pairs(professions) do
 		if string.lower(dbProfessionName) == string.lower(professionName) then
-			removed = GT.DB:RemoveProfession(characterName, dbProfessionName)
+			removed = GT.DB:DeleteProfession(characterName, dbProfessionName)
 			professionName = dbProfessionName
 			break
 		end
