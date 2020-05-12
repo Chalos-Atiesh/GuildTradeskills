@@ -43,7 +43,7 @@ if L then
 					methodName = 'Reset',
 					help = '/gt reset: Resets all stored character info. |cffff0000This cannot be undone.|r'
 				}
-				--[===[@debug@
+				--@debug@
 				,delimit = {
 					methodName = 'Delimit',
 					help = '/gt delimit: Prints a delimit line.'
@@ -55,8 +55,12 @@ if L then
 				recap = {
 					methodName = 'Recap',
 					help = '/gt recap: Prints stored logs.'
+				},
+				versioncheck = {
+					methodName = 'VerionCheck',
+					help = '/gt versioncheck: Performs a version check.'
 				}
-				--@end-debug@]===]
+				--@end-debug@
 			}
 		}
 	}
