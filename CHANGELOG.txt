@@ -1,3 +1,6 @@
+4.0.1
+	Fixing an issue where localizations weren't loaded when we tried to print the welcome message.
+
 4.0.0
 	I accidentally reverted that entire thing.
 
