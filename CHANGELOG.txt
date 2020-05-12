@@ -1,3 +1,7 @@
+4.0.2
+	Fixed the way multiple tradeskill timestamps were posted.
+	Fixed version checking.
+
 4.0.1
 	Fixing an issue where localizations weren't loaded when we tried to print the welcome message.
 
