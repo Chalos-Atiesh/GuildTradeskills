@@ -45,6 +45,11 @@ function DB:OnEnable(force)
 	GT.Log:PlayerInfo(L['WELCOME'])
 end
 
+function DB:Reset()
+	GT.Log:Info('DB_Reset')
+	DB.db.char.characters = {}
+end
+
 function DB:GetSearch(searchField)
 	if DB.db.char.search[searchField] == nil then
 		return nil

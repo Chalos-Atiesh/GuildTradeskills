@@ -1,3 +1,7 @@
+4.0.3
+	Fixed the way the version number was being parsed.
+	Fixed a few bugs in comms about players posting to themselves.
+
 4.0.2
 	Fixed the way multiple tradeskill timestamps were posted.
 	Fixed version checking.
