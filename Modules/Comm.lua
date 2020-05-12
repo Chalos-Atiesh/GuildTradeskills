@@ -113,24 +113,29 @@ function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 			end
 		else
 			GT.Log:Info('Comm_OnTimestampsReceived_UpToDate', characterName, professionName, profession.lastUpdate, timestamp)
-		end
-
-		local characters = GT.DB:GetCharacters()
-		for characterName, _ in pairs(characters) do
 			if all[characterName] == nil then
 				all[characterName] = {}
 			end
+			if not GT.Table:Contains(all[characterName], professionName) then
+				table.insert(all[characterName], professionName)
+			end
+		end
+	end
 
-			local professions = characters[characterName].professions
-			for professionName, _ in pairs(professions) do
-				if not GT.Table:Contains(all[characterName], professionName) then
-					if toPost[characterName] == nil or not GT.Table:Contains(toPost[characterName], professionName) then
-						if toPost[characterName] == nil then
-							toPost[characterName] = {}
-						end
-						if not GT.Table:Contains(toPost[characterName], professionName) then
-							table.insert(toPost[characterName], professionName)
-						end
+	local characters = GT.DB:GetCharacters()
+	for characterName, _ in pairs(characters) do
+		if all[characterName] == nil then
+			all[characterName] = {}
+		end
+		local professions = characters[characterName].professions
+		for professionName, _ in pairs(professions) do
+			if not GT.Table:Contains(all[characterName], professionName) then
+				if toPost[characterName] == nil or not GT.Table:Contains(toPost[characterName], professionName) then
+					if toPost[characterName] == nil then
+						toPost[characterName] = {}
+					end
+					if not GT.Table:Contains(toPost[characterName], professionName) then
+						table.insert(toPost[characterName], professionName)
 					end
 				end
 			end
@@ -176,8 +181,9 @@ function Comm:OnGetReceived(prefix, message, distribution, sender)
 		if characterName == 'ALL' then
 			local characters = GT.DB:GetCharacters()
 			for tempCharacterName, _ in pairs(characters) do
-				for professionName, _ in pairs(characters[tempCharacterName]) do
-					Comm:SendPost(tempCharacterName, professionName)
+				local professions = characters[tempCharacterName].professions
+				for tempProfessionName, _ in pairs(professions) do
+					Comm:SendPost(tempCharacterName, tempProfessionName, sender)
 				end
 			end
 			return
