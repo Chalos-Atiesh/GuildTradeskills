@@ -35,7 +35,7 @@ function Comm:OnEnable()
 	}
 
 	for command, functionName in pairs(COMMAND_MAP) do
-		GT.Log:Info('Comm_RegisterComm', command, functionName)
+		-- GT.Log:Info('Comm_RegisterComm', command, functionName)
 		Comm:RegisterComm(command, functionName)
 	end
 end
@@ -263,52 +263,43 @@ function Comm:OnDeleteReceived(prefix, message, distribution, sender)
 end
 
 function Comm:SendVersion()
-	local releaseVersion, betaVersion, alphaVersion = GT.DB:GetCurrentVersion()
-	GT.Log:Info('Comm_SendVersion', releaseVersion, betaVersion, alphaVersion)
+	local version = GT:GetCurrentVersion()
+	GT.Log:Info('Comm_SendVersion', version)
 
-	local message = GT.Text:Concat(DELIMITER, releaseVersion, betaVersion, alphaVersion)
-	--@non-debug@
-	Comm:_SendToOnline(VERSION, message)
-	--@end-non-debug@
+	--[==[@non-debug@
+	Comm:_SendToOnline(VERSION, tostring(version))
+	--@end-non-debug@]==]
 end
 
 function Comm:OnVersionReceived(prefix, message, distribution, sender)
 	GT.Log:Info('Comm_OnVersionReceived', prefix, distribution, sender, message)
 
-	local lReleaseV, lBetaV, lAlphaV = GT.DB:GetCurrentVersion()
+	local lVersion = GT:GetCurrentVersion()
+	local rVersion = tonumber(message)
 
-	local tokens = GT.Text:Tokenize(message)
-	local rReleaseV, tokens = GT.Table:RemoveToken(tokens)
-	local rBetaV, tokens = GT.Table:RemoveToken(tokens)
-	local rAlphaV, tokens = GT.Table:RemoveToken(tokens)
-
-	rReleaseV = tonumber(rReleaseV)
-	rBetaV = tonumber(rBetaV)
-	rAlphaV = tonumber(rAlphaV)
-
-	local lStringV = GT.Text:Concat('.', lReleaseV, lBetaV, lAlphaV)
-	local rStingV = GT.Text:Concat('.', rReleaseV, rBetaV, rAlphaV)
-
-	if lReleaseV > rReleaseV then
-		GT.Log:Info('Comm_OnVersionReceived_RemoteUpdate', lStringV, rStingV)
-		local message = GT.Text:Concat(DELIMITER, lReleaseV, lBetaV, lAlphaV)
-		Comm:SendCommMessage(VERSION, message)
+	if lVersion > rVersion then
+		GT.Log:Info('Comm_OnVersionReceived_RemoteUpdate', lVersion, rVersion)
+		--[==[@non-debug@
+		Comm:_SendToOnline(VERSION, tostring(version))
+		--@end-non-debug@]==]
 		return
 	end
 
-	if lReleaseV < rReleaseV then
-		GT.Log:Info('Comm_OnVersionReceived_LocalUpdate', lStringV, rStingV)
-		if GT.DB:ShouldNotifyUpdate(rReleaseV, rBetaV, rAlphaV) then
-			local message = string.gsub(L['UPDATE_AVAILABLE'], '%{{local_version}}', lStringV)
-			message = string.gsub(message, '%{{remote_version}}', rStingV)
+	if lVersion < rVersion then
+		GT.Log:Info('Comm_OnVersionReceived_LocalUpdate', lVersion, rVersion)
+		if GT.DB:ShouldNotifyUpdate(rVersion) then
+			local lrVersion, lbVersion, laVersion = GT:DeconvertVersion(lVersion)
+			local rrVersion, rbVersion, raVersion = GT:DeconvertVersion(rVersion)
+			local message = string.gsub(L['UPDATE_AVAILABLE'], '%{{local_version}}', GT.Text:Concat('.', lrVersion, lbVersion, laVersion))
+			message = string.gsub(message, '%{{remote_version}}', GT.Text:Concat('.', rrVersion, rbVersion, raVersion))
 			GT.Log:PlayerInfo(message)
-			GT.DB:UpdateNotified(rReleaseV, rBetaV, rAlphaV)
+			GT.DB:UpdateNotified(rVersion)
 		else
-			GT.Log:Info('Comm_OnVersionReceived_AlreadyNotified', lStringV, rStingV)
+			GT.Log:Info('Comm_OnVersionReceived_AlreadyNotified', lVersion, rVersion)
 		end
 		return
 	end
-	GT.Log:Info('Comm_OnVersionReceived_UpToDate', lStringV, rStingV)
+	GT.Log:Info('Comm_OnVersionReceived_UpToDate', lVersion, rVersion)
 end
 
 function Comm:_SendToOnline(prefix, msg)
@@ -318,14 +309,14 @@ function Comm:_SendToOnline(prefix, msg)
 	for i = 1, totalGuildMembers do
 		local characterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
 		if online then
-			--@non-debug@
+			--[==[@non-debug@
 			if not GT.Text:ConvertCharacterName(characterName) == currentCharacter then
-			--@end-non-debug@
+			--@end-non-debug@]==]
 				GT.Log:Info('GT_Comm_SendToOnline', prefix, characterName, msg)
 				Comm:SendCommMessage(prefix, msg, 'WHISPER', characterName, 'NORMAL')
-			--@non-debug@
+			--[==[@non-debug@
 			end
-			--@end-non-debug@
+			--@end-non-debug@]==]
 		end
 	end
 end

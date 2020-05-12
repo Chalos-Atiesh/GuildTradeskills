@@ -97,4 +97,8 @@ end
 function Command:Recap()
 	GT.Log:Recap()
 end
+
+function Command:VersionCheck()
+	GT.Comm:SendVersion()
+end
 --@end-debug@

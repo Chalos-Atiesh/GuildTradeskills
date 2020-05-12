@@ -244,48 +244,27 @@ function DB:SetChatFrameNumber(frameNumber)
 	DB.db.global.chatFrameNumber = frameNumber
 end
 
-function DB:GetCurrentVersion()
-	--@debug@
-	if true then
-		return 99, 99, 99
+function DB:InitVersion(version)
+	GT.Log:Info('DB_InitVersion', version)
+	if DB.db.global.versionNotification == nil then
+		DB.db.global.versionNotification = version
 	end
-	--@end-debug@
-	
-	local version = GT.version
-	local underscoreIndex = string.find(version, '_')
-	local version = string.sub(version, underscoreIndex + 1, #version)
-	local firstDotIndex = string.find(version, '%.')
-	local releaseVersion = string.sub(version, 1, firstDotIndex - 1)
-	local secondDotIndex = string.find(version, '%.', firstDotIndex + 1)
-	local betaVersion = string.sub(version, firstDotIndex + 1, secondDotIndex - 1)
-	local alphaVersion = string.sub(version, secondDotIndex + 1, #version)
-
-	if DB.db.global.rNotificaion == nil
-		or DB.db.global.bNotificaion == nil
-		or DB.db.global.aNotificaion == nil
-	then
-		DB.db.global.rNotificaion = releaseVersion
-		DB.db.global.bNotificaion = betaVersion
-		DB.db.global.aNotificaion = alphaVersion
-	end
-
-	return tonumber(releaseVersion), tonumber(betaVersion), tonumber(alphaVersion)
 end
 
-function DB:ShouldNotifyUpdate(releaseVersion, betaVersion, alphaVersion)
+function DB:ShouldNotifyUpdate(version)
 	--@debug@
 	if true then
 		return false
 	end
 	--@end-debug@
-	if DB.db.global.rNotificaion < releaseVersion then
+	local vNotification = DB.db.global.versionNotification
+	GT.Log:Info('DB_ShouldNotifyUpdate', vNotification, version)
+	if vNotification < version then
 		return true
 	end
 	return false
 end
 
-function DB:UpdateNotified(releaseVersion, betaVersion, alphaVersion)
-	DB.db.global.rNotificaion = releaseVersion
-	DB.db.global.bNotificaion = betaVersion
-	DB.db.global.aNotificaion = alphaVersion
+function DB:UpdateNotified(version)
+	DB.db.global.versionNotification = version
 end
