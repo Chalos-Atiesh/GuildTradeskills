@@ -57,13 +57,7 @@ function Profession:AddProfession()
 
 	local updated = Profession:UpdateProfession(profession)
 
-	--[===[@non-debug@
-	if updated then
-	--@end-non-debug@]===]
-		GT.Comm:SendTimestamps()
-	--[===[@non-debug@
-	end
-	--@end-non-debug@]===]
+	GT.Comm:SendTimestamps()
 
 	Profession.adding = false
 end
