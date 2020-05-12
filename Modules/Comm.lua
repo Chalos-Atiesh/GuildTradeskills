@@ -44,15 +44,16 @@ function Comm:SendTimestamps()
 	GT.Log:Info('Comm_SendTimestamps')
 
 	local characters = GT.DB:GetCharacters()
-	local msg = ''
+	local professionStrings = {}
 	for characterName, _ in pairs(characters) do
 		local professions = characters[characterName].professions
 		for professionName, _ in pairs(professions) do
 			local profession = professions[professionName]
-			msg = msg .. GT.Text:Concat(DELIMITER, characterName, professionName, profession.lastUpdate)
+			local professionString = GT.Text:Concat(DELIMITER, characterName, professionName, profession.lastUpdate)
+			table.insert(professionStrings, professionString)
 		end
 	end
-	Comm:_SendToOnline(TIMESTAMP, msg)
+	Comm:_SendToOnline(TIMESTAMP, table.concat(professionStrings, DELIMITER))
 end
 
 function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
