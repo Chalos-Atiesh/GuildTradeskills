@@ -241,11 +241,11 @@ function DB:SetChatFrameNumber(frameNumber)
 end
 
 function DB:GetCurrentVersion()
-	--[===[@debug@
+	--@debug@
 	if true then
 		return 99, 99, 99
 	end
-	--@end-debug@]===]
+	--@end-debug@
 	
 	local version = GT.version
 	local underscoreIndex = string.find(version, '_')
@@ -269,11 +269,11 @@ function DB:GetCurrentVersion()
 end
 
 function DB:ShouldNotifyUpdate(releaseVersion, betaVersion, alphaVersion)
-	--[===[@debug@
+	--@debug@
 	if true then
 		return false
 	end
-	--@end-debug@]===]
+	--@end-debug@
 	if DB.db.global.rNotificaion < releaseVersion then
 		return true
 	end
