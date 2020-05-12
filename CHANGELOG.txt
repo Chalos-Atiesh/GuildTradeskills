@@ -1,3 +1,6 @@
+4.0.5
+	Fixing the ability to delete a profession.
+
 4.0.4
 	Now has the capacity to send timestamps on every profession interaction.
 
