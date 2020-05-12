@@ -10,7 +10,7 @@ LibStub('AceEvent-3.0'):Embed(Event)
 local EVENT_MAP = {}
 
 function Event:OnEnable()
-	GT.Log:Info('Event_OnEnable')
+	-- GT.Log:Info('Event_OnEnable')
 	
 	EVENT_MAP = {
 		PLAYER_LOGIN = 'PlayerLogin',
@@ -22,7 +22,7 @@ function Event:OnEnable()
 	}
 
 	for event, methodName in pairs(EVENT_MAP) do
-		GT.Log:Info('Event_RegisterEvent', event, methodName)
+		-- GT.Log:Info('Event_RegisterEvent', event, methodName)
 		Event:RegisterEvent(event, methodName)
 	end
 end
