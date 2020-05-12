@@ -57,3 +57,48 @@ function GT:InitReset(tokens)
 	local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', token)
 	GT.Log:PlayerWarn(message)
 end
+
+function GT:ConvertVersion(releaseVersion, betaVersion, alphaVersion)
+	local rVersion = tonumber(releaseVersion) * 10000
+	local bVersion = tonumber(betaVersion) * 100
+	local aVersion = tonumber(alphaVersion)
+
+	return rVersion + bVersion + aVersion
+end
+
+function GT:DeconvertVersion(version)
+	GT.Log:Info('v', version)
+	local rVersion = math.floor(version / 10000)
+	GT.Log:Info('rVersion', rVersion)
+	version = version - (rVersion * 10000)
+	GT.Log:Info('v', version)
+	local bVersion = math.floor(version / 100)
+	GT.Log:Info('bVersion', bVersion)
+	local aVersion = version - (bVersion * 100)
+	GT.Log:Info('aVersion', aVersion)
+	return rVersion, bVersion, aVersion
+end
+
+function GT:GetCurrentVersion()
+	local version = GT:ConvertVersion(98, 99, 99)
+	--@debug@
+	if true then
+		GT.DB:InitVersion(version)
+		GT.Log:Info('GT_GetCurrentVersion', version)
+		return version
+	end
+	--@end-debug@
+	local tokens = GT.Text:Tokenize(GT.version, '_')
+	local version = tokens[2]
+	tokens = GT.Text:Tokenize(version, '%.')
+	rVersion, tokens = GT.Table:RemoveToken(tokens)
+	bVersion, tokens = GT.Table:RemoveToken(tokens)
+	aVersion, tokens = GT.Table:RemoveToken(tokens)
+
+	version = GT:ConvertVersion(rVersion, bVersion, aVersion)
+	GT.Log:Info('GT_GetCurrentVersion', version)
+
+	GT.DB:InitVersion(version)
+
+	return version
+end
