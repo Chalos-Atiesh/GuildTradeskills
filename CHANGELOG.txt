@@ -1,3 +1,6 @@
+4.0.4
+	Now has the capacity to send timestamps on every profession interaction.
+
 4.0.3
 	Fixed the way the version number was being parsed.
 	Fixed a few bugs in comms about players posting to themselves.
