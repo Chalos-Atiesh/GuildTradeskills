@@ -2,6 +2,8 @@ local AddOnName = ...
 
 local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
+local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
+
 local DB = GT:NewModule('Database')
 GT.DB = DB
 
@@ -39,6 +41,8 @@ function DB:OnEnable(force)
 
 	GT.Comm:SendTimestamps()
 	GT.Comm:SendVersion()
+
+	GT.Log:PlayerInfo(L['WELCOME'])
 end
 
 function DB:GetSearch(searchField)

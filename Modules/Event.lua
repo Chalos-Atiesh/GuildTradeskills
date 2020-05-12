@@ -29,7 +29,6 @@ end
 
 function Event:PlayerLogin()
 	GT.Log:Info('Event_PlayerLogin')
-	GT.Log.PlayerInfo(GT.L['WELCOME'])
 end
 
 function Event:PlayerEnteringWorld()
