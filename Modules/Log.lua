@@ -117,8 +117,9 @@ function Log:_Log(logLevel, ...)
 	end
 
 	local stripped = GT.Text:Strip(message, GT.Comm:GetDelimiter())
+	local printMessage = message
 	if logLevel < PLAYER_INFO and #stripped >= LOG_LINE_LENGTH_LIMIT then
-		message = string.sub(stripped, 1, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
+		printMessage = string.sub(stripped, 1, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
 	end
 
 	if GTDB ~= nil and GTDB.log ~= nil then
@@ -137,7 +138,7 @@ function Log:_Log(logLevel, ...)
 	end
 
 	local chatFrame = _G['ChatFrame' .. GT.DB:GetChatFrameNumber()]
-	chatFrame:AddMessage(message)
+	chatFrame:AddMessage(printMessage)
 end
 
 --@debug@
