@@ -21,6 +21,10 @@ function GT:OnInitialize()
 
 	GT.Command:Enable()
 	GT.Event:Enable()
+
+	--@debug@
+	GT.Log:SetChatFrame('GT')
+	--@end-debug@
 end
 
 function GT:OnDisable()
