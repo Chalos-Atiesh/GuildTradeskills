@@ -126,7 +126,7 @@ function Log:_Log(logLevel, ...)
 		local log = {}
 		log.timeStamp = time()
 		log.logLevel = logLevel
-		log.message = message
+		log.message = stripped
 		while #GTDB.log > LOG_ARCHIVE_LIMIT do
 			table.remove(GTDB.log, 1)
 		end
