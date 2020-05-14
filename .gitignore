@@ -1,1 +1,4 @@
 /_Media
+/libs/Ace*
+/libs/CallbackHandler*
+/libs/LibStub*
