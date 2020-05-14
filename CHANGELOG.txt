@@ -1,3 +1,6 @@
+4.0.9
+	Let's give automatic packaging a shot.
+
 4.0.8
 	Added the ability to logdump to a copy/pastable window.
 	Added the ability to dbdump to a copy/pastable window.
