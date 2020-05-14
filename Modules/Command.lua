@@ -94,8 +94,9 @@ function Command:PrintDB()
 	GT.Log:Info(GT.DB:GetProfessions())
 end
 
-function Command:Recap()
-	GT.Log:Recap()
+function Command:LogDump()
+	GT.Log:Info('Command_LogDump')
+	GT.Log:LogDump()
 end
 
 function Command:VersionCheck()

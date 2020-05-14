@@ -52,9 +52,9 @@ if L then
 					methodName = 'PrintDB',
 					help = '/gt printdb: Prints the database.'
 				},
-				recap = {
-					methodName = 'Recap',
-					help = '/gt recap: Prints stored logs.'
+				logdump = {
+					methodName = 'LogDump',
+					help = '/gt recap: Dumps the stored logs.'
 				},
 				versioncheck = {
 					methodName = 'VerionCheck',
@@ -93,10 +93,11 @@ if L then
 
 	L['LOG_TAG'] = GREEN .. 'G' .. COLOR_END .. YELLOW .. 'T' .. COLOR_END .. ': '
 
-	--[===[@debug@
+	--@debug@
 	L['RECAP_HEADER'] = '---------- RECAP START ----------'
 	L['RECAP_FOOTER'] = '---------- RECAP END ----------'
-	--@end-debug@]===]
+	L['LOG_DUMP'] = 'Log Dump'
+	--@end-debug@
 
 	---------- LOG END ----------
 	---------- PROFESSION START ----------
