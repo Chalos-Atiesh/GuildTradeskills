@@ -28,6 +28,13 @@ function GT:OnDisable()
 end
 
 function GT:InitReset(tokens)
+	local token = GT.Table:RemoveToken(tokens)
+	--@debug@
+	if string.lower(token) == L['FORCE'] then
+		GT.Reset()
+		return
+	end
+	--@end-debug@
 	if not GT.resetWarned then
 		GT.Log:PlayerWarn(L['RESET_WARN'])
 		GT.resetWarned = true
@@ -35,7 +42,6 @@ function GT:InitReset(tokens)
 	end
 	GT.resetWarned = false
 
-	local token = GT.Table:RemoveToken(tokens)
 	if token == nil then
 		GT.Log:PlayerWarn(L['RESET_NO_TOKEN'])
 		return
@@ -45,15 +51,19 @@ function GT:InitReset(tokens)
 		return
 	end
 	if string.lower(token) == string.lower(L['RESET_EXPECT_COMFIRM']) then
-		GT.Log:PlayerWarn(L['RESET_FINAL'])
-
-		GT.Log:Reset()
-		GT.DB:Reset()
+		GT:Reset()
 		return
 	end
 
 	local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', token)
 	GT.Log:PlayerWarn(message)
+end
+
+function GT:Reset()
+	GT.Log:PlayerWarn(L['RESET_FINAL'])
+
+	GT.Log:Reset()
+	GT.DB:Reset()
 end
 
 function GT:ConvertVersion(releaseVersion, betaVersion, alphaVersion)

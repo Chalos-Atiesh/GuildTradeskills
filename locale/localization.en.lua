@@ -13,6 +13,9 @@ if L then
 	---------- COMMAND START ----------
 
 	L['UNKNOWN_COMMAND'] = 'Sorry! Couldn\'t find the command \'{{command}}\'. Type \'/gt help\' to get a list of available commands.'
+	--@debug@
+	L['FORCE'] = 'force'
+	--@end-debug@
 
 	L['SLASH_COMMANDS'] = {
 		gt = {

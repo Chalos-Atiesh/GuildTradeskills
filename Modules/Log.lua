@@ -167,7 +167,7 @@ function Log:LogDump()
 		end
 		editBox:SetText(text)
 	end
-	editBox:HighlightText(1, #text)
+	editBox:HighlightText(0, #text)
 	
 	editBox:SetDisabled(false)
 end
@@ -178,7 +178,9 @@ function Log:DBDump()
 	local editBox = Log:GetEditBox()
 	local characterDump = GT.Text:FormatTable(GT.DB:GetCharacters())
 	local professionDump = GT.Text:FormatTable(GT.DB:GetProfessions())
-	editBox:SetText(GT.Text:Concat('\n', L['CHARACTERS'], characterDump, L['PROFESSIONS'], professionDump))
+	local text = GT.Text:Concat('\n', L['CHARACTERS'], characterDump, L['PROFESSIONS'], professionDump)
+	editBox:SetText(text)
+	editBox:HighlightText(0, #text)
 end
 
 function Log:GetEditBox()
