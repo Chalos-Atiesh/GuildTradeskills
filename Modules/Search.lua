@@ -288,7 +288,7 @@ function Search:OpenSearch(tokens)
 end
 
 function Search:PopulateSkills(shouldCascade)
-	GT.Log:Info('GT_Search_PopulateSkills', shouldCascade)
+	-- GT.Log:Info('GT_Search_PopulateSkills', shouldCascade)
 
 	Search.skillScrollFrame:ReleaseChildren()
 
@@ -397,7 +397,7 @@ function Search:PopulateSkills(shouldCascade)
 end
 
 function Search:PopulateReagents(shouldCascade)
-	GT.Log:Info('GT_Search_PopulateReagents', shouldCascade)
+	-- GT.Log:Info('GT_Search_PopulateReagents', shouldCascade)
 
 	if Search.lastReagentClicked == nil then
 		Search.reagentScrollFrame:ReleaseChildren()
@@ -507,7 +507,7 @@ function Search:PopulateReagents(shouldCascade)
 end
 
 function Search:PopulateCharacters(shouldCascade)
-	GT.Log:Info('GT_Search_PopulateCharacters', shouldCascade)
+	-- GT.Log:Info('GT_Search_PopulateCharacters', shouldCascade)
 
 	if Search.lastCharacterClicked == nil then
 		Search.characterScrollFrame:ReleaseChildren()
