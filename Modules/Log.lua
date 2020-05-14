@@ -150,9 +150,38 @@ function Log:_Log(logLevel, ...)
 	chatFrame:AddMessage(printMessage)
 end
 
+
+
 --@debug@
 function Log:LogDump()
 	Log:Info('Log_LogDump')
+	local editBox = Log:GetEditBox()
+	editBox:SetDisabled(true)
+
+	local text = nil
+	for _, logLine in pairs(GTDB.log) do
+		if text == nil then
+			text = logLine
+		else
+			text = GT.Text:Concat('\n', text, logLine)
+		end
+		editBox:SetText(text)
+	end
+	editBox:HighlightText(1, #text)
+	
+	editBox:SetDisabled(false)
+end
+
+function Log:DBDump()
+	Log:Info('Log_DBDump')
+
+	local editBox = Log:GetEditBox()
+	local characterDump = GT.Text:FormatTable(GT.DB:GetCharacters())
+	local professionDump = GT.Text:FormatTable(GT.DB:GetProfessions())
+	editBox:SetText(GT.Text:Concat('\n', L['CHARACTERS'], characterDump, L['PROFESSIONS'], professionDump))
+end
+
+function Log:GetEditBox()
 	local frame = AceGUI:Create("Frame")
 
 	frame:SetCallback('OnClose', function(widget)
@@ -174,23 +203,11 @@ function Log:LogDump()
 	local editBox = AceGUI:Create('MultiLineEditBox')
 	editBox:SetFullWidth(true)
 	editBox:SetFullHeight(true)
-	editBox:SetDisabled(true)
 	editBox:DisableButton(true)
-
 	frame:AddChild(editBox)
 
 	frame:Show()
-	local text = nil
-	for _, logLine in pairs(GTDB.log) do
-		if text == nil then
-			text = logLine
-		else
-			text = GT.Text:Concat(' \n', text, logLine)
-		end
-		editBox:SetText(text)
-	end
-	editBox:HighlightText(1, #text)
-	
-	editBox:SetDisabled(false)
+
+	return editBox
 end
 --@end-debug@

@@ -56,9 +56,9 @@ if L then
 					methodName = 'LogDump',
 					help = '/gt recap: Dumps the stored logs.'
 				},
-				versioncheck = {
-					methodName = 'VerionCheck',
-					help = '/gt versioncheck: Performs a version check.'
+				dbdump = {
+					methodName = 'DBDump',
+					help = '/gt dbdump: Dumps the database.'
 				}
 				--@end-debug@
 			}
@@ -97,6 +97,8 @@ if L then
 	L['RECAP_HEADER'] = '---------- RECAP START ----------'
 	L['RECAP_FOOTER'] = '---------- RECAP END ----------'
 	L['LOG_DUMP'] = 'Log Dump'
+	L['CHARACTERS'] = 'CHARACTERS'
+	L['PROFESSIONS'] = 'PROFESSIONS'
 	--@end-debug@
 
 	---------- LOG END ----------

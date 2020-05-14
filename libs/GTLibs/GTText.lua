@@ -4,6 +4,7 @@ local minorVersion = 1
 local lib, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
 
 local DEFAULT_DELIMITER = ' '
+local TABLE_INDENT = '  '
 
 function lib:Tokenize(text, delimiter)
     delimiter = delimiter or DEFAULT_DELIMITER
@@ -114,4 +115,28 @@ function lib:GetTextBetween(text, startCharacter, endCharacter)
     local startIndex = string.find(text, startCharacter)
     local endIndex = string.find(text, endCharacter)
     return string.sub(text, startIndex + 1, endIndex - 1)
+end
+
+function lib:FormatTable(tbl)
+    local txt = lib:_FormatTable(tbl, 1)
+    return txt
+end
+
+function lib:_FormatTable(tbl, depth)
+    txt = '{'
+    local count = 0
+    for k, v in pairs(tbl) do
+        formatting = string.rep('    ', depth) .. k .. ': '
+        if type(v) == 'table' then
+            txt = txt .. '\n' .. formatting .. lib:_FormatTable(v, depth + 1)
+        else
+            txt = txt .. '\n' .. formatting .. lib:ToString(v)
+        end
+        count = count + 1
+    end
+    if count > 0 then
+        txt = txt .. '\n' .. string.rep('    ', depth - 1)
+    end
+    txt = txt .. '}'
+    return txt
 end

@@ -99,6 +99,11 @@ function Command:LogDump()
 	GT.Log:LogDump()
 end
 
+function Command:DBDump()
+	GT.Log:Info('Command_DBDump')
+	GT.Log:DBDump()
+end
+
 function Command:VersionCheck()
 	GT.Comm:SendVersion()
 end

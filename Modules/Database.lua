@@ -110,6 +110,10 @@ function DB:GetProfession(characterName, professionName)
 	return professions[professionName]
 end
 
+function DB:GetProfessions()
+	return DB.db.global.professions
+end
+
 function DB:_GetProfession(professionName)
 	-- GT.Log:Info('DB__GetProfession', professionName)
 	if DB.db.global.professions[professionName] == nil then
