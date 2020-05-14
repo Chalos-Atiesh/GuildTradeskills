@@ -23,9 +23,7 @@
 </ul>
 <h2>Known Issues</h2>
 <ul>
-	<li>Reloading the UI sometimes causes the client to get disconnected from the server.</li>
-	<li>Timestamps are not being posted when a player logs in.</li>
-	<li>Reagents are sometimes not being created on the recipient when a player posts their skills.</li>
+	<li>None</li>
 </ul>
 <h2>Links</h2>
 <ul>

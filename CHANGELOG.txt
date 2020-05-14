@@ -1,3 +1,13 @@
+4.0.8
+	Added the ability to logdump to a copy/pastable window.
+	Added the ability to dbdump to a copy/pastable window.
+	Fixed an issue that was causing characters that haven't added any professions to get an error.
+	Now also resets the profession database when resetting.
+	Fixed log formatting.
+	Added a few poweruser commands. Not listed in standard help message.
+	Added a touch of highlighting to the actual commands in the help message.
+	Timestamps are now posted 15 seconds after the player logs in instead of immediately. This enables them to actually be sent.
+
 4.0.7
 	Fixed an issue where players were posting even when things were up to date.
 
