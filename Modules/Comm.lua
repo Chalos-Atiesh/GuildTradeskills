@@ -201,6 +201,10 @@ function Comm:SendPost(characterName, professionName, recipient)
 	end
 
 	local profession = GT.DB:GetProfession(characterName, professionName)
+	if profession == nil then
+		GT.Log:Error('Comm_SendPost_LocalNil', characterName, professionName)
+		return
+	end
 
 	local message = GT.Text:Concat(DELIMITER, characterName, professionName, profession.lastUpdate)
 	for _, skillName in pairs(profession.skills) do
