@@ -8,10 +8,28 @@ local Command = GT:NewModule('Command')
 GT.Command = Command
 GT.Command.tokens = nil
 
+local devCommands = {
+	logdump = {
+		methodName = 'LogDump',
+		help = '/gt recap: Dumps the stored logs to a copy/pastable window.'
+	},
+	dbdump = {
+		methodName = 'DBDump',
+		help = '/gt dbdump: Dumps the database to a copy/pastable window.'
+	},
+	delimit = {
+		methodName = 'Delimit',
+		help = '/gt delimit: Prints a delimit line.'
+	}
+}
+
 function Command:OnEnable()
 	GT.Log:Info('Command_OnEnable')
 	for command, info in pairs(L['SLASH_COMMANDS']) do
 		GT.RegisterChatCommand(self, command, info.methodName)
+	end
+	for devCommand, info in pairs(devCommands) do
+		GT.RegisterChatCommand(self, devCommand, info.methodName)
 	end
 end
 
@@ -23,22 +41,30 @@ function Command:OnCommand(input)
 		return
 	end
 
-	local commands = L['SLASH_COMMANDS']['gt'].subCommands
-
 	local userCommand, tokens = GT.Table:RemoveToken(tokens)
 	userCommand = string.lower(userCommand)
-	
-	for command, info in pairs(commands) do
-		if userCommand == command then
-			Command.tokens = tokens
-			local methodName = info.methodName
-			GT.Log:Info('Command_OnCommand', command, methodName, tokens)
-			Command[methodName]()
-			return
-		end
+	Command.tokens = tokens
+
+	local publicDidRun = Command:DoCommand(L['SLASH_COMMANDS']['gt'].subCommands, userCommand)
+	local devDidRun = Command:DoCommand(devCommands, userCommand)
+
+	if publicDidRun or devDidRun then
+		return
 	end
 
 	GT.Log:PlayerWarn(string.gsub(L['UNKNOWN_COMMAND'], '%{{command}}', userCommand))
+end
+
+function Command:DoCommand(commands, userCommand)
+	for command, info in pairs(commands) do
+		if userCommand == command then
+			local methodName = info.methodName
+			GT.Log:Info('Command_OnCommand', command, methodName, tokens)
+			Command[methodName]()
+			return true
+		end
+	end
+	return false
 end
 
 function Command:Help()
@@ -87,11 +113,6 @@ end
 --@debug@
 function Command:Delimit()
 	GT.Log:PlayerError('--------------------')
-end
-
-function Command:PrintDB()
-	GT.Log:Info(GT.DB:GetCharacters())
-	GT.Log:Info(GT.DB:GetProfessions())
 end
 
 function Command:LogDump()

@@ -44,26 +44,8 @@ if L then
 				},
 				reset = {
 					methodName = 'Reset',
-					help = '/gt reset: Resets all stored character info. |cffff0000This cannot be undone.|r'
+					help = '/gt reset: Resets all stored info. |cffff0000This cannot be undone.|r'
 				}
-				--@debug@
-				,delimit = {
-					methodName = 'Delimit',
-					help = '/gt delimit: Prints a delimit line.'
-				},
-				printdb = {
-					methodName = 'PrintDB',
-					help = '/gt printdb: Prints the database.'
-				},
-				logdump = {
-					methodName = 'LogDump',
-					help = '/gt recap: Dumps the stored logs.'
-				},
-				dbdump = {
-					methodName = 'DBDump',
-					help = '/gt dbdump: Dumps the database.'
-				}
-				--@end-debug@
 			}
 		}
 	}
