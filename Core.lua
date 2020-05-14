@@ -14,6 +14,8 @@ GT.Table = LibStub:GetLibrary('GTTable')
 GT.resetWarned = false
 GT.version = '@project-version@'
 
+local INITIAL_DELAY = 15
+
 function GT:OnInitialize()
 	GT.Log:Enable()
 
@@ -21,6 +23,16 @@ function GT:OnInitialize()
 
 	GT.Command:Enable()
 	GT.Event:Enable()
+
+	GT:Wait(INITIAL_DELAY, GT['InitMessages'], 'Hello')
+end
+
+local waitTable = {};
+local waitFrame = nil;
+
+function GT:InitMessages()
+	GT.Comm:SendTimestamps()
+	GT.Comm:SendVersion()
 end
 
 function GT:OnDisable()
@@ -109,4 +121,32 @@ function GT:GetCurrentVersion()
 	GT.DB:InitVersion(version)
 
 	return version
+end
+
+function GT:Wait(delay, func, ...)
+  if(type(delay)~="number" or type(func)~="function") then
+    return false;
+  end
+  if(waitFrame == nil) then
+    waitFrame = CreateFrame("Frame","WaitFrame", UIParent);
+    waitFrame:SetScript("onUpdate",function (self,elapse)
+      local count = #waitTable;
+      local i = 1;
+      while(i<=count) do
+        local waitRecord = tremove(waitTable,i);
+        local d = tremove(waitRecord,1);
+        local f = tremove(waitRecord,1);
+        local p = tremove(waitRecord,1);
+        if(d>elapse) then
+          tinsert(waitTable,i,{d-elapse,f,p});
+          i = i + 1;
+        else
+          count = count - 1;
+          f(unpack(p));
+        end
+      end
+    end);
+  end
+  tinsert(waitTable,{delay,func,{...}});
+  return true;
 end

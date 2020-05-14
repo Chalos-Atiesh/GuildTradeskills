@@ -39,9 +39,6 @@ function DB:OnEnable(force)
 		DB.db.global.professions = {}
 	end
 
-	GT.Comm:SendTimestamps()
-	GT.Comm:SendVersion()
-
 	GT.Log:PlayerInfo(L['WELCOME'])
 end
 
