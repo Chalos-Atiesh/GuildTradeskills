@@ -71,24 +71,29 @@ function lib:ToString(object)
     return type(object)
 end
 
-function lib:Strip(text, delimiter)
+function lib:Strip(text)
+    text = string.gsub(text, '|cff[%a%d][%a%d][%a%d][%a%d][%a%d][%a%d]', '')
+    text = string.gsub(text, '|r', '')
     local returnText = ''
     local adding = true
-    for i = 1, #text do
-        local c = text.sub(i, i)
-        if c == '%|' then
-            local nextC = text.sub(i + 1, i + 1)
-            if nextC == 'H' or nextC == 'c' then
+    local i = 1
+
+    while i <= #text do
+        local c = string.sub(text, i, i)
+        if c == '|' then
+            local nextC = string.sub(text, i + 1, i + 1)
+            if nextC == 'H' then
                 adding = false
-            elseif nextC == 'r' or nextC == 'h' then
+            elseif nextC == 'h' then
                 adding = true
                 i = i + 2
-                c = text.sub(i, i)
+                c = string.sub(text, i, i)
             end
         end
         if adding then
             returnText = returnText .. c
-        end 
+        end
+        i = i + 1
     end
     return returnText
 end
