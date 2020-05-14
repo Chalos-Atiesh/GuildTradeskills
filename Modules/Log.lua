@@ -4,6 +4,8 @@ local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
 
+local AceGUI = LibStub('AceGUI-3.0')
+
 local Log = GT:NewModule('Log')
 GT.Log = Log
 
@@ -53,6 +55,12 @@ function Log:OnEnable()
 	if GTDB.log == nil then
 		GTDB.log = {}
 	end
+	-- Log:BuildCopyLogFrame()
+end
+
+function Log:Reset()
+	Log:Info('Log_Reset')
+	GTDB.log = {}
 end
 
 function Log:Info(...)
@@ -94,43 +102,44 @@ function Log:SetChatFrame(frameName)
 		if name ~= '' and string.lower(name) == string.lower(frameName) then
 			GT.DB:SetChatFrameNumber(i)
 			local msg = string.gsub(L['CHAT_WINDOW_SUCCESS'], '%{{frame_name}}', name)
-			GT.Log:PlayerInfo(msg)
+			Log:PlayerInfo(msg)
 			return
 		end
 	end
 	local msg = string.gsub(L['CHAT_WINDOW_INVALID'], '%{{frame_name}}', frameName)
-	GT.Log:PlayerError(msg)
+	Log:PlayerError(msg)
 end
 
 function Log:_Log(logLevel, ...)
 	local color = LOG_COLOR_MAP[logLevel] or DEFAULT_LOG_COLOR
 
-	local message = GT.Text:Concat(DELIMITER, ...)
+	local original = GT.Text:Concat(DELIMITER, ...)
+	local stripped = GT.Text:Strip(original)
 	
-	message = string.gsub(LOG_FORMAT, '%{{message}}', message)
-	message = string.gsub(message, '%{{tag}}', L['LOG_TAG'])
-	message = string.gsub(message, '%{{start_color}}', color)
+	local printMessage = string.gsub(LOG_FORMAT, '%{{message}}', original)
+	printMessage = string.gsub(printMessage, '%{{tag}}', L['LOG_TAG'])
+	printMessage = string.gsub(printMessage, '%{{start_color}}', color)
 	if color == '' then
-		message = string.gsub(message, '%{{end_color}}', '')
+		printMessage = string.gsub(printMessage, '%{{end_color}}', '')
 	else
-		message = string.gsub(message, '%{{end_color}}', '|r')
+		printMessage = string.gsub(printMessage, '%{{end_color}}', '|r')
 	end
-
-	local stripped = GT.Text:Strip(message, GT.Comm:GetDelimiter())
-	local printMessage = message
 	if logLevel < PLAYER_INFO and #stripped >= LOG_LINE_LENGTH_LIMIT then
 		printMessage = string.sub(stripped, 1, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
 	end
 
 	if GTDB ~= nil and GTDB.log ~= nil then
-		local log = {}
-		log.timeStamp = time()
-		log.logLevel = logLevel
-		log.message = stripped
+		local levelWithColor = nil
+		if color == '' then
+			levelWithColor = tostring(logLevel)
+		else
+			levelWithColor = color .. tostring(logLevel) .. '|r'
+		end
 		while #GTDB.log > LOG_ARCHIVE_LIMIT do
 			table.remove(GTDB.log, 1)
 		end
-		table.insert(GTDB.log, log)
+		stripped = GT.Text:Concat(DELIMITER, levelWithColor, date('%y-%m-%d %H:%M:%S', time()), stripped)
+		table.insert(GTDB.log, stripped)
 	end
 
 	if logLevel < LOG_LEVEL_FILTER then
@@ -142,17 +151,46 @@ function Log:_Log(logLevel, ...)
 end
 
 --@debug@
-function Log:Recap()
-	local chatFrame = _G['ChatFrame' .. GT.DB:GetChatFrameNumber()]
-	local message = GT.Text:Concat('', L['LOG_TAG'],  COLOR_ERROR,  L['RECAP_HEADER'], '|r')
-	chatFrame:AddMessage(message)
-	for _, log in pairs(GTDB.log) do
-		local timeStamp = date(date('%y-%m-%d %H:%M:%S', log.timeStamp))
-		local logLevel = log.logLevel
-		message = GT.Text:Concat(DELIMITER, logLevel, timeStamp, log.message)
-		chatFrame:AddMessage(GT.Text:Concat('', L['LOG_TAG'], message))
+function Log:LogDump()
+	Log:Info('Log_LogDump')
+	local frame = AceGUI:Create("Frame")
+
+	frame:SetCallback('OnClose', function(widget)
+		widget:ReleaseChildren()
+		AceGUI:Release(widget)
+	end)
+	frame:SetTitle(L['LOG_DUMP'])
+	frame:SetLayout('Flow')
+
+	_G['GT_CopyLogFrame'] = frame.frame
+	tinsert(UISpecialFrames, "GT_CopyLogFrame")
+
+	-- local logScrollContainer = AceGUI:Create('SimpleGroup')
+	-- logScrollContainer:SetFullWidth(true)
+	-- logScrollContainer:SetFullHeight(true)
+	-- logScrollContainer:SetLayout('Fill')
+	-- frame:AddChild(logScrollContainer)
+
+	local editBox = AceGUI:Create('MultiLineEditBox')
+	editBox:SetFullWidth(true)
+	editBox:SetFullHeight(true)
+	editBox:SetDisabled(true)
+	editBox:DisableButton(true)
+
+	frame:AddChild(editBox)
+
+	frame:Show()
+	local text = nil
+	for _, logLine in pairs(GTDB.log) do
+		if text == nil then
+			text = logLine
+		else
+			text = GT.Text:Concat(' \n', text, logLine)
+		end
+		editBox:SetText(text)
 	end
-	message = GT.Text:Concat('', L['LOG_TAG'], COLOR_ERROR, L['RECAP_FOOTER'], '|r')
-	chatFrame:AddMessage(message)
+	editBox:HighlightText(1, #text)
+	
+	editBox:SetDisabled(false)
 end
 --@end-debug@
