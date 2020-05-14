@@ -31,7 +31,7 @@ function GT:InitReset(tokens)
 	local token = GT.Table:RemoveToken(tokens)
 	--@debug@
 	if string.lower(token) == L['FORCE'] then
-		GT.Reset()
+		GT:Reset(true)
 		return
 	end
 	--@end-debug@
@@ -59,11 +59,11 @@ function GT:InitReset(tokens)
 	GT.Log:PlayerWarn(message)
 end
 
-function GT:Reset()
-	GT.Log:PlayerWarn(L['RESET_FINAL'])
+function GT:Reset(force)
+	GT.Log:PlayerWarn(L['RESET_FINAL'], force)
 
-	GT.Log:Reset()
-	GT.DB:Reset()
+	GT.Log:Reset(force)
+	GT.DB:Reset(force)
 end
 
 function GT:ConvertVersion(releaseVersion, betaVersion, alphaVersion)
