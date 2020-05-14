@@ -5,6 +5,8 @@ local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
 
+local AceGUI = LibStub('AceGUI-3.0')
+
 local Search = GT:NewModule('Search')
 GT.Search = Search
 
@@ -32,8 +34,6 @@ Search.labelG = 209/255
 Search.labelB = 0
 
 Search.scrollLimit = 200
-
-local AceGUI = LibStub('AceGUI-3.0')
 
 local PROFESSIONS = {}
 
@@ -66,11 +66,11 @@ function Search:OpenSearch(tokens)
 	end
 
 	local mainFrame = AceGUI:Create('Frame')
-	mainFrame:SetCallback('OnClose',function(widget) AceGUI:Release(widget) end)
 	mainFrame:SetTitle(L['LONG_TAG'])
 	mainFrame:SetLayout('Flow')
 	mainFrame:ClearAllPoints()
-	mainFrame:SetCallback('OnClose', function()
+	mainFrame:SetCallback('OnClose', function(widget)
+
 		Search.lastSkillClicked = nil
 		Search.lastSkillLinkClicked = nil
 		Search.lastReagentClicked = nil
@@ -80,6 +80,9 @@ function Search:OpenSearch(tokens)
 		Search.skillScrollFrame = nil
 		Search.reagentScrollFrame = nil
 		Search.characterScrollFrame = nil
+		
+		widget:ReleaseChildren()
+		AceGUI:Release(widget)
 	end)
 	_G['GT_SearchMainFrame'] = mainFrame.frame
 	tinsert(UISpecialFrames, 'GT_SearchMainFrame')
