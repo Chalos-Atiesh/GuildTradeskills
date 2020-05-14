@@ -59,7 +59,7 @@ function Command:DoCommand(commands, userCommand)
 	for command, info in pairs(commands) do
 		if userCommand == command then
 			local methodName = info.methodName
-			GT.Log:Info('Command_OnCommand', command, methodName, tokens)
+			GT.Log:Info('Command_OnCommand_Found', command, methodName)
 			Command[methodName]()
 			return true
 		end
@@ -68,7 +68,7 @@ function Command:DoCommand(commands, userCommand)
 end
 
 function Command:Help()
-	GT.Log.Info('Command_Help')
+	GT.Log:Info('Command_Help')
 	Command:_Help(L['SLASH_COMMANDS'])
 end
 
