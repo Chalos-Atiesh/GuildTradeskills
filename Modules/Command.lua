@@ -110,11 +110,6 @@ function Command:Search()
 	GT.Search:OpenSearch(Command.tokens)
 end
 
---@debug@
-function Command:Delimit()
-	GT.Log:PlayerError('--------------------')
-end
-
 function Command:LogDump()
 	GT.Log:Info('Command_LogDump')
 	GT.Log:LogDump()
@@ -123,6 +118,11 @@ end
 function Command:DBDump()
 	GT.Log:Info('Command_DBDump')
 	GT.Log:DBDump()
+end
+
+--@debug@
+function Command:Delimit()
+	GT.Log:PlayerError('--------------------')
 end
 
 function Command:VersionCheck()

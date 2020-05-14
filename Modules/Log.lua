@@ -156,7 +156,6 @@ function Log:_FormatLogLine(message, color, tag)
 	return message
 end
 
---@debug@
 function Log:LogDump()
 	Log:Info('Log_LogDump')
 	local editBox = Log:GetEditBox()
@@ -200,12 +199,6 @@ function Log:GetEditBox()
 	_G['GT_CopyLogFrame'] = frame.frame
 	tinsert(UISpecialFrames, "GT_CopyLogFrame")
 
-	-- local logScrollContainer = AceGUI:Create('SimpleGroup')
-	-- logScrollContainer:SetFullWidth(true)
-	-- logScrollContainer:SetFullHeight(true)
-	-- logScrollContainer:SetLayout('Fill')
-	-- frame:AddChild(logScrollContainer)
-
 	local editBox = AceGUI:Create('MultiLineEditBox')
 	editBox:SetFullWidth(true)
 	editBox:SetFullHeight(true)
@@ -216,4 +209,3 @@ function Log:GetEditBox()
 
 	return editBox
 end
---@end-debug@
