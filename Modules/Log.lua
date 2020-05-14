@@ -58,8 +58,8 @@ function Log:OnEnable()
 	-- Log:BuildCopyLogFrame()
 end
 
-function Log:Reset()
-	Log:Info('Log_Reset')
+function Log:Reset(force)
+	Log:Info('Log_Reset', force)
 	GTDB.log = {}
 end
 
@@ -114,19 +114,14 @@ function Log:_Log(logLevel, ...)
 	local color = LOG_COLOR_MAP[logLevel] or DEFAULT_LOG_COLOR
 
 	local original = GT.Text:Concat(DELIMITER, ...)
-	local stripped = GT.Text:Strip(original)
 	
 	local printMessage = string.gsub(LOG_FORMAT, '%{{message}}', original)
-	printMessage = string.gsub(printMessage, '%{{tag}}', L['LOG_TAG'])
-	printMessage = string.gsub(printMessage, '%{{start_color}}', color)
-	if color == '' then
-		printMessage = string.gsub(printMessage, '%{{end_color}}', '')
-	else
-		printMessage = string.gsub(printMessage, '%{{end_color}}', '|r')
+	local logMessage = GT.Text:Strip(printMessage)
+	if logLevel < PLAYER_INFO and #logMessage >= LOG_LINE_LENGTH_LIMIT then
+		printMessage = string.sub(logMessage, 0, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
 	end
-	if logLevel < PLAYER_INFO and #stripped >= LOG_LINE_LENGTH_LIMIT then
-		printMessage = string.sub(stripped, 1, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
-	end
+	printMessage = Log:_FormatLogLine(printMessage, color, L['LOG_TAG'])
+	logMessage = Log:_FormatLogLine(logMessage, color, '')
 
 	if GTDB ~= nil and GTDB.log ~= nil then
 		local levelWithColor = nil
@@ -138,8 +133,8 @@ function Log:_Log(logLevel, ...)
 		while #GTDB.log > LOG_ARCHIVE_LIMIT do
 			table.remove(GTDB.log, 1)
 		end
-		stripped = GT.Text:Concat(DELIMITER, levelWithColor, date('%y-%m-%d %H:%M:%S', time()), stripped)
-		table.insert(GTDB.log, stripped)
+		logMessage = GT.Text:Concat(DELIMITER, levelWithColor, date('%y-%m-%d %H:%M:%S', time()), logMessage)
+		table.insert(GTDB.log, logMessage)
 	end
 
 	if logLevel < LOG_LEVEL_FILTER then
@@ -150,7 +145,16 @@ function Log:_Log(logLevel, ...)
 	chatFrame:AddMessage(printMessage)
 end
 
-
+function Log:_FormatLogLine(message, color, tag)
+	message = string.gsub(message, '%{{tag}}', tag)
+	message = string.gsub(message, '%{{start_color}}', color)
+	if color == '' then
+		message = string.gsub(message, '%{{end_color}}', '')
+	else
+		message = string.gsub(message, '%{{end_color}}', '|r')
+	end
+	return message
+end
 
 --@debug@
 function Log:LogDump()
