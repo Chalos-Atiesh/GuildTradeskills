@@ -21,10 +21,6 @@ function GT:OnInitialize()
 
 	GT.Command:Enable()
 	GT.Event:Enable()
-
-	--@debug@
-	GT.Log:SetChatFrame('GT')
-	--@end-debug@
 end
 
 function GT:OnDisable()
@@ -51,6 +47,7 @@ function GT:InitReset(tokens)
 	if string.lower(token) == string.lower(L['RESET_EXPECT_COMFIRM']) then
 		GT.Log:PlayerWarn(L['RESET_FINAL'])
 
+		GT.Log:Reset()
 		GT.DB:Reset()
 		return
 	end
