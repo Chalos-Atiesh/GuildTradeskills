@@ -53,7 +53,12 @@ function Comm:SendTimestamps()
 			table.insert(professionStrings, professionString)
 		end
 	end
-	Comm:_SendToOnline(TIMESTAMP, table.concat(professionStrings, DELIMITER))
+	if #professionStrings > 0 then
+		Comm:_SendToOnline(TIMESTAMP, table.concat(professionStrings, DELIMITER))
+	else
+		local characterName = UnitName('player')
+		Comm:_SendToOnline(TIMESTAMP, GT.Text:Concat(DELIMITER, characterName, 'None', 0))
+	end
 end
 
 function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
@@ -178,18 +183,12 @@ function Comm:OnGetReceived(prefix, message, distribution, sender)
 		local characterName, tokens = GT.Table:RemoveToken(tokens)
 		local professionName, tokens = GT.Table:RemoveToken(tokens)
 
-		if characterName == 'ALL' then
-			local characters = GT.DB:GetCharacters()
-			for tempCharacterName, _ in pairs(characters) do
-				local professions = characters[tempCharacterName].professions
-				for tempProfessionName, _ in pairs(professions) do
-					Comm:SendPost(tempCharacterName, tempProfessionName, sender)
-				end
-			end
-			return
+		if professionName ~= 'None' then
+			Comm:SendPost(characterName, professionName, sender)
+		else
+			GT.Log:Info('Comm_OnGetReceived_Ignore', prefix, distribution, sender, characterName, professionName)
 		end
 
-		Comm:SendPost(characterName, professionName, sender)
 	end
 end
 
