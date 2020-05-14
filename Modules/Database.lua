@@ -45,9 +45,12 @@ function DB:OnEnable(force)
 	GT.Log:PlayerInfo(L['WELCOME'])
 end
 
-function DB:Reset()
-	GT.Log:Info('DB_Reset')
+function DB:Reset(force)
+	GT.Log:Info('DB_Reset', force)
 	DB.db.char.characters = {}
+	if force then
+		DB.db.global.professions = {}
+	end
 end
 
 function DB:GetSearch(searchField)
