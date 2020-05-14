@@ -20,31 +20,31 @@ if L then
 	L['SLASH_COMMANDS'] = {
 		gt = {
 			methodName = 'OnCommand',
-			help = '/gt: Interact with this addon.',
+			help = YELLOW .. '/gt' .. COLOR_END .. ': Interact with this addon.',
 			subCommands = {
 				help = {
 					methodName = 'Help',
-					help = '/gt help: Print this mesage.'
+					help = YELLOW .. '/gt help' .. COLOR_END .. ': Print this mesage.'
 				},
 				search = {
 					methodName = 'Search',
-					help = '/gt search: Toggle the search pane.'
+					help = YELLOW .. '/gt search' .. COLOR_END .. ': Toggle the search pane.'
 				},
 				addprofession = {
 					methodName = 'InitAddProfession',
-					help = '/gt addprofession: Toggle adding a profession.'
+					help = YELLOW .. '/gt addprofession' .. COLOR_END .. ': Toggle adding a profession.'
 				},
 				removeprofession = {
 					methodName = 'RemoveProfession',
-					help = '/gt removeprofession {profession_name}: Removes a profession.'
+					help = YELLOW .. '/gt removeprofession {profession_name}' .. COLOR_END .. ': Removes a profession.'
 				},
 				window = {
 					methodName = 'SetChatFrame',
-					help = '/gt window {window_name}: Sets the output to a chat window.'
+					help = YELLOW .. '/gt window {window_name}' .. COLOR_END .. ': Sets the output to a chat window.'
 				},
 				reset = {
 					methodName = 'Reset',
-					help = '/gt reset: Resets all stored info. |cffff0000This cannot be undone.|r'
+					help = YELLOW .. '/gt reset' .. COLOR_END .. ': Resets all stored info. |cffff0000This cannot be undone.|r'
 				}
 			}
 		}
