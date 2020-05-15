@@ -231,12 +231,19 @@ end
 function Comm:OnPostReceived(prefix, message, distribution, sender)
 	GT.Log:Info('Comm_OnPostReceived', prefix, distribution, sender, message)
 
+	if not Comm:IsPostValidFormat(message) then
+		GT.Log:Error('Comm_OnPostReceived_RejectFormat', prefix, distribution, sender)
+		return
+	end
+
 	local tokens = GT.Text:Tokenize(message, DELIMITER)
 	
 	local characterName, tokens = GT.Table:RemoveToken(tokens)
 	local professionName, tokens = GT.Table:RemoveToken(tokens)
 	local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
 	lastUpdate = tonumber(lastUpdate)
+
+	GT.Log:Info('Comm_OnGetReceived_AcceptFormat', prefix, distribution, sender, characterName, professionName, lastUpdate)
 
 	local localCharacterName = UnitName('player')
 	if characterName == localCharacterName then
@@ -260,20 +267,89 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 		while #tokens > 0 do
 			local skillName, tokens = GT.Table:RemoveToken(tokens)
 			local skillLink, tokens = GT.Table:RemoveToken(tokens)
-			local reagentCount, tokens = GT.Table:RemoveToken(tokens)
-			reagentCount = tonumber(reagentCount)
+			local uniqueReagentCount, tokens = GT.Table:RemoveToken(tokens)
+			uniqueReagentCount = tonumber(uniqueReagentCount)
 
 			local skill = GT.DB:AddSkill(characterName, professionName, skillName, skillLink)
 
-			for i = 1, reagentCount do
+			for i = 1, uniqueReagentCount do
 				local reagentName, tokens = GT.Table:RemoveToken(tokens)
-				local reagentCount, tokens = GT.Table:RemoveToken(tokens)
+				local thisReagentCount, tokens = GT.Table:RemoveToken(tokens)
 
-				GT.DB:AddReagent(professionName, skillName, skillLink)
+				GT.DB:AddReagent(professionName, skillName, reagentName, thisReagentCount)
 			end
 		end
 	end
 	profession.lastUpdate = lastUpdate
+end
+
+function Comm:IsPostValidFormat(message)
+	GT.Log:Info('Comm_IsPostValidFormat')
+	local tokens = GT.Text:Tokenize(message, DELIMITER)
+	
+	local characterName, tokens = GT.Table:RemoveToken(tokens)
+	local professionName, tokens = GT.Table:RemoveToken(tokens)
+	local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
+
+	GT.Log:Info('Comm_IsPostValidFormat_IntroCheck', characterName, professionName, lastUpdate)
+
+	if characterName == nil then
+		GT.Log:Error('Comm_IsPostValidFormat_NilCharacterName')
+		return false
+	end
+
+	if professionName == nil then
+		GT.Log:Error('Comm_IsPostValidFormat_NilProfessionName')
+		return false
+	end
+
+	if lastUpdate == nil or tonumber(lastUpdate) == nil then
+		GT.Log:Error('Comm_IsPostValidFormat_InvalidLastUpdate', GT.Text:ToString(lastUpdate))
+		return false
+	end
+
+	GT.Log:Info('Comm_IsPostValidFormat_ValidIntro', characterName, professionName, lastUpdate)
+
+	while #tokens > 0 do
+		local skillName, tokens = GT.Table:RemoveToken(tokens)
+		local skillLink, tokens = GT.Table:RemoveToken(tokens)
+		local uniqueReagentCount, tokens = GT.Table:RemoveToken(tokens)
+
+		GT.Log:Info('Comm_IsPostValidFormat_SkillCheck', skillName, skillLink, GT.Text:ToString(uniqueReagentCount))
+
+		if skillName == nil then
+			GT.Log:Error('Comm_IsPostValidFormat_NilSkillName')
+			return false
+		end
+
+		if skillLink == nil then
+			GT.Log:Error('Comm_IsPostValidFormat_NilSkillLink')
+			return false
+		end
+
+		if uniqueReagentCount == nil or tonumber(uniqueReagentCount) == nil then
+			GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GT.Text:ToString(uniqueReagentCount))
+			return false
+		end
+
+		for i = 1, uniqueReagentCount do
+			local reagentName, tokens = GT.Table:RemoveToken(tokens)
+			local thisReagentCount, tokens = GT.Table:RemoveToken(tokens)
+
+			GT.Log:Info('Comm_IsPostValidFormat_ReagentCheck', reagentName, GT.Text:ToString(thisReagentCount))
+
+			if reagentName == nil or string.find(reagentName, ']') then
+				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentName', GT.Text:ToString(reagentName))
+				return false
+			end
+
+			if thisReagentCount == nil or tonumber(thisReagentCount) == nil then
+				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GT.Text:ToString(reagentCount))
+				return false
+			end
+		end
+	end
+	return true
 end
 
 function Comm:SendDeletions()
