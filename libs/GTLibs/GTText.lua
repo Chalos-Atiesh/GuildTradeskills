@@ -126,6 +126,9 @@ function lib:_FormatTable(tbl, depth)
     txt = '{'
     local count = 0
     for k, v in pairs(tbl) do
+        if type(k) == 'table' then
+            return 'TABLES SHOULD NEVER EVER HAVE TABLES AS KEYS! WTF WERE YOU THINKING?!'
+        end
         formatting = string.rep('    ', depth) .. k .. ': '
         if type(v) == 'table' then
             txt = txt .. '\n' .. formatting .. lib:_FormatTable(v, depth + 1)
