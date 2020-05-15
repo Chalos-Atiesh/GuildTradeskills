@@ -12,7 +12,7 @@ GT.Log = Log
 local DELIMITER = ': '
 local LOG_FORMAT = '{{tag}}{{start_color}}{{message}}{{end_color}}'
 local LOG_LINE_LENGTH_LIMIT = 200
-local LOG_ARCHIVE_LIMIT = 100
+local LOG_ARCHIVE_LIMIT = 500
 
 local INFO = 0
 local DEBUG = 1
