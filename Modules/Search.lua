@@ -51,7 +51,7 @@ function Search:OnEnable()
 end
 
 function Search:OpenSearch(tokens)
-	GT.Log:Info('GT_Search_OpenSearch', tokens)
+	GT.Log:Info('Search_OpenSearch', tokens)
 	if Search.state == nil then
 		Search.state = {}
 	end
@@ -288,7 +288,7 @@ function Search:OpenSearch(tokens)
 end
 
 function Search:PopulateSkills(shouldCascade)
-	-- GT.Log:Info('GT_Search_PopulateSkills', shouldCascade)
+	GT.Log:Info('Search_PopulateSkills', shouldCascade)
 
 	Search.skillScrollFrame:ReleaseChildren()
 
@@ -297,23 +297,30 @@ function Search:PopulateSkills(shouldCascade)
 	skillsToAdd = {}
 	local count = 0
 	if Search.lastReagentClicked ~= nil then
+		GT.Log:Info('Search_PopulateSkills_LastReagentClicked', Search.lastReagentClicked)
 		for characterName, _ in pairs(characters) do
+			GT.Log:Info('Search_PopulateSkills_Character', characterName)
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
+				GT.Log:Info('Search_PopulateSkills_Profession', professionName)
 				if GT.DB:GetSearch(professionName) then
 					local skills = professions[professionName].skills
 					for _, skillName in pairs(skills) do
+						GT.Log:Info('Search_PopulateSkills_Skill', skillName)
 						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
 						local reagents = skill.reagents
 						for reagentName, _ in pairs(reagents) do
 							if reagentName == Search.lastReagentClicked then
+								GT.Log:Info('Search_PopulateSkills_Reagent', reagentName)
 								local skill = GT.DB:GetSkill(characterName, professionName, skillName)
 								local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
 								local searchMatch = true
 								if Search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(Search.skillSearchText)) then
+									GT.Log:Info('Search_PopulateSkills_ReagentMatch', reagentName)
 									searchMatch = false
 								end
 								if not GT.Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
+									GT.Log:Info('Search_PopulateSkills_AddSkill', tempSkillName)
 									count = count + 1
 									skillsToAdd[tempSkillName] = skill.skillLink
 								end
@@ -324,8 +331,10 @@ function Search:PopulateSkills(shouldCascade)
 			end
 		end
 	elseif Search.lastCharacterClicked ~= nil then
+		GT.Log:Info('Search_PopulateSkills_LastCharacterClicked', Search.lastCharacterClicked)
 		for characterName, _ in pairs(characters) do
 			if characterName == Search.lastCharacterClicked then
+				GT.Log:Info('Search_PopulateSkills_Character', characterName)
 				local professions = characters[characterName].professions
 				for professionName, _ in pairs(professions) do
 					if GT.DB:GetSearch(professionName) then
@@ -397,7 +406,7 @@ function Search:PopulateSkills(shouldCascade)
 end
 
 function Search:PopulateReagents(shouldCascade)
-	-- GT.Log:Info('GT_Search_PopulateReagents', shouldCascade)
+	GT.Log:Info('Search_PopulateReagents', shouldCascade)
 
 	if Search.lastReagentClicked == nil then
 		Search.reagentScrollFrame:ReleaseChildren()
@@ -507,7 +516,7 @@ function Search:PopulateReagents(shouldCascade)
 end
 
 function Search:PopulateCharacters(shouldCascade)
-	-- GT.Log:Info('GT_Search_PopulateCharacters', shouldCascade)
+	GT.Log:Info('Search_PopulateCharacters', shouldCascade)
 
 	if Search.lastCharacterClicked == nil then
 		Search.characterScrollFrame:ReleaseChildren()
