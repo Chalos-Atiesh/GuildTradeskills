@@ -64,6 +64,16 @@ function DB:GetCharacters()
 	return DB.db.char.characters
 end
 
+function DB:ResetCharacter(characterName)
+	for tempCharacterName, _ in pairs(DB.db.char.characters) do
+		if string.lower(tempCharacterName) == string.lower(characterName) then
+			DB.db.char.characters[characterName] = {}
+			return true
+		end
+	end
+	return false
+end
+
 function DB:GetProfessions()
 	-- GT.Log:Info('DB_GetProfessions')
 	return DB.db.global.professions
@@ -153,6 +163,16 @@ function DB:DeleteProfession(characterName, professionName)
 		if dbProfessionName == professionName then
 			table.insert(character.deletedProfessions, professionName)
 			character.professions[professionName] = nil
+			return true
+		end
+	end
+	return false
+end
+
+function DB:ResetProfession(professionName)
+	for tempProfessionName, _ in pairs(DB.db.global.professions) do
+		if string.lower(tempProfessionName) == string.lower(professionName) then
+			DB.db.global.professions[tempProfessionName] = {}
 			return true
 		end
 	end

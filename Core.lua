@@ -40,42 +40,84 @@ function GT:OnDisable()
 end
 
 function GT:InitReset(tokens)
-	local token = GT.Table:RemoveToken(tokens)
+	tokens = GT.Table:Lower(tokens)
+	GT.Log:Info('GT_InitReset', tokens)
+	local force = false
 	--@debug@
-	if string.lower(token) == L['FORCE'] then
-		GT:Reset(true)
-		return
+	if GT.Table:Contains(tokens, L['FORCE']) then
+		GT.Log:PlayerWarn('Forcing reset.')
+		tokens = GT.Table:RemoveByValue(tokens, L['FORCE'])
+		force = true
 	end
 	--@end-debug@
-	if not GT.resetWarned then
+	if not GT.resetWarned and not force then
 		GT.Log:PlayerWarn(L['RESET_WARN'])
 		GT.resetWarned = true
 		return
 	end
 	GT.resetWarned = false
 
-	if token == nil then
-		GT.Log:PlayerWarn(L['RESET_NO_TOKEN'])
-		return
-	end
-	if string.lower(token) == string.lower(L['RESET_EXPECT_CANCEL']) then
+	if GT.Table:Contains(tokens, L['RESET_CANCEL']) then
 		GT.Log:PlayerInfo(L['RESET_CANCEL'])
 		return
 	end
-	if string.lower(token) == string.lower(L['RESET_EXPECT_COMFIRM']) then
-		GT:Reset()
+
+	if not GT.Table:Contains(tokens, L['RESET_EXPECT_COMFIRM']) and not force then
+		local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', GT.Text:Concat(' ', tokens))
+		GT.Log:PlayerWarn(message)
 		return
 	end
 
-	local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', token)
-	GT.Log:PlayerWarn(message)
+	if GT.Table:Contains(tokens, L['CHARACTER']) then
+		tokens = GT.Table:RemoveByValue(tokens, L['CHARACTER'])
+		local characterName = GT.Table:RemoveToken(tokens)
+		local message = string.gsub(L['RESET_CHARACTER'], '%{{character_name}}', characterName)
+		GT.Log:PlayerWarn(message)
+		GT:ResetCharacter(characterName)
+		return
+	end
+
+	if GT.Table:Contains(tokens, L['PROFESSION']) then
+		tokens = GT.Table:RemoveByValue(tokens, L['PROFESSION'])
+		local professionName = GT.Table:RemoveToken(tokens)
+		GT.Log:Info(tokens)
+		GT.Log:Info(professionName)
+		local message = string.gsub(L['RESET_PROFESSION'], '%{{profession_name}}', professionName)
+		GT.Log:PlayerWarn(message)
+		GT:ResetProfession(professionName)
+		return
+	end
+
+	GT:Reset(force)
 end
 
 function GT:Reset(force)
-	GT.Log:PlayerWarn(L['RESET_FINAL'], force)
+	GT.Log:PlayerWarn(L['RESET_FINAL'])
 
 	GT.Log:Reset(force)
 	GT.DB:Reset(force)
+end
+
+function GT:ResetProfession(professionName, force)
+	local reset = GT.DB:ResetProfession(professionName)
+	if not reset then
+		local message = string.gsub(L['PROFESSION_RESET_NOT_FOUND'], '%{{profession_name}}', professionName)
+		GT.Log:PlayerError(message)
+		return
+	end
+	local message = string.gsub(L['PROFESSION_RESET_FINAL'], '%{{profession_name}}', professionName)
+	GT.Log:PlayerInfo(message)
+end
+
+function GT:ResetCharacter(characterName, force)
+	local reset GT.DB:ResetCharacter(characterName)
+	if not reset then
+		local message = string.gsub(L['CHARACTER_RESET_NOT_FOUND'], '%{{character_name}}', characterName)
+		GT.Log:PlayerError(message)
+		return
+	end
+	local message = string.gsub(L['CHARACTER_RESET_FINAL'], '%{{character_name}}', characterName)
+	GT.Log:PlayerInfo(message)
 end
 
 function GT:ConvertVersion(releaseVersion, betaVersion, alphaVersion)

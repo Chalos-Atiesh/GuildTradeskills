@@ -10,6 +10,15 @@ local LONG_TAG = GREEN .. 'Guild' .. COLOR_END .. YELLOW .. 'Tradeskills' .. COL
 local WHISPER_TAG = 'GT: '
 
 if L then
+	---------- CHARACTER START ----------
+
+	L['CHARACTER'] = 'character'
+
+	L['CHARACTER_RESET_NOT_FOUND'] = 'Could not find character \'{{character_name}}\'.'
+	L['CHARACTER_RESET_FINAL'] = 'Successfully reset character \'{{character_name}}\'.'
+
+	---------- CHARACTER END ----------
+
 	---------- COMMAND START ----------
 
 	L['UNKNOWN_COMMAND'] = 'Sorry! Couldn\'t find the command \'{{command}}\'. Type \'/gt help\' to get a list of available commands.'
@@ -53,8 +62,10 @@ if L then
 	L['RESET_WARN'] = 'Are you sure? This will reset the entire addon. Type \'/gt reset confirm\' to continue or \'/gt reset cancel\'.'
 	L['RESET_EXPECT_COMFIRM'] = 'confirm'
 	L['RESET_EXPECT_CANCEL'] = 'cancel'
-	L['RESET_NO_TOKEN'] = 'Sorry! Please type either \'/gt reset confirm\' to confirm or \'/gt reset cancel\' to cancel.'
+	L['RESET_NO_CONFIRM'] = 'Sorry! Please type either \'/gt reset confirm\' to confirm or \'/gt reset cancel\' to cancel.'
 	L['RESET_CANCEL'] = 'Canceling addon reset.'
+	L['RESET_CHARACTER'] = 'Resetting character \'{{character_name}}\'. We warned you.'
+	L['RESET_PROFESSION'] = 'Resetting profession \'{{profession_name}}\'. We warned you.'
 	L['RESET_FINAL'] = 'Resetting entire addon. We warned you.'
 	L['RESET_UNKNOWN'] = 'Sorry! We dont\'t know what \'{{token}}\' is.'
 
@@ -89,6 +100,8 @@ if L then
 	---------- LOG END ----------
 	---------- PROFESSION START ----------
 
+	L['PROFESSION'] = 'profession'
+
     L['ALCHEMY'] = 'Alchemy'
     L['BLACKSMITHING'] = 'Blacksmithing'
     L['ENCHANTING'] = 'Enchanting'
@@ -103,6 +116,9 @@ if L then
 	L['PROFESSION_REMOVE_NIL_PROFESSION'] = 'Looks like you did not pass a profession name. You can remove a profession with \'/gt removeprofession {prfession_name}'
 	L['PROFESSION_REMOVE_NOT_FOUND'] = 'Could not find profession \'{{profession_name}}\' for character \'{{character_name}}\'.'
 	L['PROFESSION_REMOVE_SUCCESS'] = 'Successfully removed profession \'{{profession_name}}\' from character \'{{character_name}}\'.'
+
+	L['PROFESSION_RESET_NOT_FOUND'] = 'Could not find profession \'{{profession_name}}\'.'
+	L['PROFESSION_RESET_FINAL'] = 'Successfully reset profession \'{{profession_name}}\'.'
 
 	---------- PROFESSION END ----------
 	---------- GUI START ----------
