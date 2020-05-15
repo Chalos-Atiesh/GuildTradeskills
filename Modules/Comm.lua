@@ -319,7 +319,7 @@ function Comm:OnVersionReceived(prefix, message, distribution, sender)
 	local lVersion = GT:GetCurrentVersion()
 	local rVersion = tonumber(message)
 
-	if lVersion > rVersion then
+	if rVersion == nil or lVersion > rVersion then
 		GT.Log:Info('Comm_OnVersionReceived_RemoteUpdate', lVersion, rVersion)
 		--[===[@non-debug@
 		Comm:_SendToOnline(VERSION, tostring(version))
