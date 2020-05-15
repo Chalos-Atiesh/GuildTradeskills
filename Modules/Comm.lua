@@ -251,7 +251,6 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 		return
 	end
 
-	local update = false
 	local profession = GT.DB:GetProfession(characterName, professionName)
 	if profession ~= nil and profession.lastUpdate > lastUpdate then
 		GT.Log:Info('Comm_OnPostReceived_RemoteOutOfDate', sender, characterName, professionName)
@@ -260,24 +259,21 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 	elseif profession == nil or profession.lastUpdate < lastUpdate then
 		GT.Log:Info('Comm_OnPostReceived_LocalOutOfDate', characterName, professionName)
 		profession = GT.DB:AddProfession(characterName, professionName)
-		update = true
 	end
 
-	if update then
-		while #tokens > 0 do
-			local skillName, tokens = GT.Table:RemoveToken(tokens)
-			local skillLink, tokens = GT.Table:RemoveToken(tokens)
-			local uniqueReagentCount, tokens = GT.Table:RemoveToken(tokens)
-			uniqueReagentCount = tonumber(uniqueReagentCount)
+	while #tokens > 0 do
+		local skillName, tokens = GT.Table:RemoveToken(tokens)
+		local skillLink, tokens = GT.Table:RemoveToken(tokens)
+		local uniqueReagentCount, tokens = GT.Table:RemoveToken(tokens)
+		uniqueReagentCount = tonumber(uniqueReagentCount)
 
-			local skill = GT.DB:AddSkill(characterName, professionName, skillName, skillLink)
+		local skill = GT.DB:AddSkill(characterName, professionName, skillName, skillLink)
 
-			for i = 1, uniqueReagentCount do
-				local reagentName, tokens = GT.Table:RemoveToken(tokens)
-				local thisReagentCount, tokens = GT.Table:RemoveToken(tokens)
+		for i = 1, uniqueReagentCount do
+			local reagentName, tokens = GT.Table:RemoveToken(tokens)
+			local thisReagentCount, tokens = GT.Table:RemoveToken(tokens)
 
-				GT.DB:AddReagent(professionName, skillName, reagentName, thisReagentCount)
-			end
+			GT.DB:AddReagent(professionName, skillName, reagentName, thisReagentCount)
 		end
 	end
 	profession.lastUpdate = lastUpdate
