@@ -4,18 +4,30 @@ local minorVersion = 1
 local lib, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
 
 function lib:RemoveToken(tokens)
-	local token = tokens[1]
-	table.remove(tokens, 1)
-	return token, tokens
+	if tokens == nil then return nil, {} end
+	for i = 1, #tokens do
+		local token = tokens[1]
+		table.remove(tokens, 1)
+		return token, tokens
+	end
+	return nil, {}
 end
 
 function lib:RemoveByValue(tbl, value, valueIsKey)
 	local returnTable = {}
 	for k, v in pairs(tbl) do
 		if valueIsKey and k ~= value then
-			returnTable[k] = v
+			if tonumber(k) == nil then
+				returnTable[k] = v
+			else
+				table.insert(returnTable, v)
+			end
 		elseif not valueIsKey and v ~= value then
-			returnTable[k] = v
+			if tonumber(k) == nil then
+				returnTable[k] = v
+			else
+				table.insert(returnTable, v)
+			end
 		end
 	end
 	return returnTable
@@ -51,4 +63,18 @@ function lib:GetSortedKeys(tbl, sortFunction, sortByKey)
 	end
 
 	return keys
+end
+
+function lib:Lower(tbl)
+	local returnTable = {}
+	for k, v in pairs(tbl) do
+		if type(k) == 'table' then
+			k = lib:Lower(tbl)
+		end
+		if type(v) == 'table' then
+			v = lib:Lower(tbl)
+		end
+		returnTable[k] = v
+	end
+	return returnTable
 end
