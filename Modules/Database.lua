@@ -65,6 +65,9 @@ function DB:ResetCharacter(characterName)
 	for tempCharacterName, _ in pairs(DB.db.char.characters) do
 		if string.lower(tempCharacterName) == string.lower(characterName) then
 			DB.db.char.characters[characterName] = {}
+			local character = DB.db.char.characters[characterName]
+			character.professions = {}
+			character.deletedProfessions = {}
 			return true
 		end
 	end
@@ -176,6 +179,7 @@ function DB:ResetProfession(professionName)
 	for tempProfessionName, _ in pairs(DB.db.global.professions) do
 		if string.lower(tempProfessionName) == string.lower(professionName) then
 			DB.db.global.professions[tempProfessionName] = {}
+			local profession = DB.db.global.professions[tempProfessionName] = tempProfessionName
 			return true
 		end
 	end
