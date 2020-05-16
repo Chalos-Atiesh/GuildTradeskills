@@ -114,7 +114,7 @@ function GT:ResetProfession(professionName, force)
 end
 
 function GT:ResetCharacter(characterName, force)
-	local reset GT.DB:ResetCharacter(characterName)
+	local reset = GT.DB:ResetCharacter(characterName)
 	if not reset then
 		local message = string.gsub(L['CHARACTER_RESET_NOT_FOUND'], '%{{character_name}}', characterName)
 		GT.Log:PlayerError(message)
