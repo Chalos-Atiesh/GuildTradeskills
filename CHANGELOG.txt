@@ -1,3 +1,9 @@
+4.0.11
+	Added post message format checking. We now drop invalid posts insted of corrupting the database.
+	Added the ability to reset an individual profession or character.
+	We now always update the local DB on an accepted post. This should help fix broken databases.
+	Added a database integrity check and a message on failure.
+
 4.0.10
 	It packaged it but it included the entire effing Ace3 repo. Including bat files. Causing the file to be rejected.
 
