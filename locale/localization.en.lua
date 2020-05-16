@@ -147,4 +147,6 @@ if L then
 	L['CHAT_WINDOW_INVALID'] = 'Sorry! We couldn\'t find a chat window with name \'{{frame_name}}\'.'
 
 	L['UPDATE_AVAILABLE'] = LONG_TAG .. ' is out of date. Your version is {{local_version}} and {{remote_version}} is available.'
+
+	L['CORRUPTED_DATABASE'] = 'Unfortunately it seems your database has become corrupted. Please reset it with \'/gt reset\'.'
 end
