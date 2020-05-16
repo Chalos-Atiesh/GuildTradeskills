@@ -31,8 +31,12 @@ local waitTable = {};
 local waitFrame = nil;
 
 function GT:InitMessages()
+	GT.Log:PlayerInfo(L['WELCOME'])
 	GT.Comm:SendTimestamps()
 	GT.Comm:SendVersion()
+	if not GT.DB.valid then
+		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
+	end
 end
 
 function GT:OnDisable()
