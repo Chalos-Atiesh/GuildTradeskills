@@ -179,7 +179,8 @@ function DB:ResetProfession(professionName)
 	for tempProfessionName, _ in pairs(DB.db.global.professions) do
 		if string.lower(tempProfessionName) == string.lower(professionName) then
 			DB.db.global.professions[tempProfessionName] = {}
-			local profession = DB.db.global.professions[tempProfessionName] = tempProfessionName
+			local profession = DB.db.global.professions[tempProfessionName]
+			profession.professionName = tempProfessionName
 			return true
 		end
 	end
