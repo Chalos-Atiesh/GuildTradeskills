@@ -27,10 +27,6 @@ function DB:OnEnable(force)
 		DB.db.char.characters = {}
 	end
 
-	if DB.db.char.professions == nil or force then
-		DB.db.char.professions = {}
-	end
-
 	if DB.db.char.search == nil then
 		DB.db.char.search = {}
 	end
@@ -39,13 +35,14 @@ function DB:OnEnable(force)
 		DB.db.global.professions = {}
 	end
 
-	GT.Log:PlayerInfo(L['WELCOME'])
+	DB.valid = DB:Validate()
 end
 
 function DB:Reset(force)
 	GT.Log:Info('DB_Reset', force)
 	DB.db.char.characters = {}
 	DB.db.global.professions = {}
+	DB.valid = true
 end
 
 function DB:GetSearch(searchField)
@@ -110,12 +107,16 @@ function DB:GetProfession(characterName, professionName)
 
 	DB:_GetProfession(professionName)
 
-	local professions = DB:GetCharacter(characterName).professions
-	if professions[professionName] == nil then
-		-- GT.Log:Info('DB_GetProfession_Nil', characterName, professionName)
-		return nil
+	if characterName == nil then
+		return DB:_GetProfession(professionName)
+	else
+		local professions = DB:GetCharacter(characterName).professions
+		if professions[professionName] == nil then
+			-- GT.Log:Info('DB_GetProfession_Nil', characterName, professionName)
+			return nil
+		end
+		return professions[professionName]
 	end
-	return professions[professionName]
 end
 
 function DB:GetProfessions()
@@ -139,21 +140,23 @@ function DB:AddProfession(characterName, professionName)
 	-- GT.Log:Info('DB_AddProfession', characterName, professionName)
 
 	DB:_GetProfession(professionName)
-	-- GT.Log:Info(DB:GetProfessions())
 
-	local character = DB:GetCharacter(characterName)
-	character.deletedProfessions = GT.Table:RemoveByValue(character.deletedProfessions, professionName)
-	local professions = character.professions
-	if professions[professionName] == nil then
-		professions[professionName] = {}
-		professions[professionName].professionName = professionName
-		professions[professionName].lastUpdate = time()
+	if characterName ~= nil then
+		local character = DB:GetCharacter(characterName)
+		character.deletedProfessions = GT.Table:RemoveByValue(character.deletedProfessions, professionName)
+		local professions = character.professions
+		if professions[professionName] == nil then
+			professions[professionName] = {}
+			professions[professionName].professionName = professionName
+			professions[professionName].lastUpdate = time()
+		end
+		local profession = professions[professionName]
+		if profession.skills == nil then
+			profession.skills = {}
+		end
+		return profession
 	end
-	local profession = professions[professionName]
-	if profession.skills == nil then
-		profession.skills = {}
-	end
-	return profession
+	return DB:_GetProfession(professionName)
 end
 
 function DB:DeleteProfession(characterName, professionName)
@@ -218,13 +221,15 @@ function DB:AddSkill(characterName, professionName, skillName, skillLink)
 
 	profession = DB:GetProfession(characterName, professionName)
 	if profession == nil then
-		GT.Log:Error('DB_AddSkill_ProfessionNil' .. characterName, professionName, skillName, skillLink)
+		GT.Log:Error('DB_AddSkill_ProfessionNil', characterName, professionName, skillName, skillLink)
 		return nil
 	end
 	local skills = profession.skills
-	if not GT.Table:Contains(skills, skillName) then
-		table.insert(skills, skillName)
-		profession.lastUpdate = time()
+	if characterName ~= nil then
+		if not GT.Table:Contains(skills, skillName) then
+			table.insert(skills, skillName)
+			profession.lastUpdate = time()
+		end
 	end
 	return DB:_GetSkill(professionName, skillName, skillLink)
 end
@@ -257,6 +262,159 @@ function DB:AddReagent(professionName, skillName, reagentName, reagentCount)
 	-- GT.Log:Info('DB_AddReagent', professionName, skillName, reagentName, reagentCount)
 
 	return DB:_GetReagent(professionName, skillName, reagentName, reagentCount)
+end
+
+function DB:Validate()
+	local structureValid = DB:_ValidateStructure()
+	local dataValid = DB:_ValidateData()
+	return structureValid and dataValid
+end
+
+function DB:_ValidateStructure()
+	local valid = true
+	for characterName, _ in pairs(DB.db.char.characters) do
+		local character = DB.db.char.characters[characterName]
+		if character.professions == nil then
+			character.professions = {}
+			valid = false
+		end
+		if character.deletedProfessions == nil then
+			character.deletedProfessions = {}
+			valid = false
+		end
+		local professions = character.professions
+		for professionName, _ in pairs(professions) do
+			local profession = professions[professionName]
+			if profession.skills == nil then
+				profession.skills = {}
+				valid = false
+			end
+		end
+	end
+
+	for professionName, _ in pairs(DB.db.global.professions) do
+		local profession = DB.db.global.professions[professionName]
+		if profession.skills == nil then
+			profession.skills = {}
+			valid = false
+		end
+		local skills = profession.skills
+		for skillName, _ in pairs(skills) do
+			local skill = skills[skillName]
+			if skill.reagents == nil then
+				skill.reagents = {}
+				valid = false
+			end
+		end
+	end
+	return valid
+end
+
+function DB:_ValidateData()
+	local valid = true
+	for characterName, _ in pairs(DB.db.char.characters) do
+		if tonumber(characterName) ~= nil then
+			GT.Log:Error('Invalid character name', characterName)
+			valid = false
+		end
+		local professions = DB.db.char.characters[characterName].professions
+		for professionName, _ in pairs(professions) do
+			if tonumber(professionName) ~= nil then
+				GT.Log:Error('Invalid character profession name', characterName, professionName)
+				valid = false
+			end
+			local profession = professions[professionName]
+			if profession.lastUpdate ==  nil
+				or tonumber(profession.lastUpdate) == nil then
+				profession.lastUpdate = 0
+			end
+
+			if profession.professionName == nil
+				or tonumber(profession.professionName)
+				or string.find(profession.professionName, ']')
+			then
+				profession.professionName = professionName
+			end
+
+			local skills = profession.skills
+			for _, skillName in pairs(skills) do
+				if string.find(skillName, ']')
+					or tonumber(skillName) ~= nil
+				then
+					GT.Log:Error('Invalid character profession skill name', characterName, professionName, skillName)
+					valid = false
+				end
+			end
+		end
+	end
+
+	for professionName, _ in pairs(DB.db.global.professions) do
+		if tonumber(professionName) ~= nil
+			or string.find(professionName, ']') then
+			GT.Log:Error('Invalid profession name', professionName)
+			valid = false
+		end
+		local profession = DB.db.global.professions[professionName]
+
+		if profession.professionName == nil
+			or tonumber(profession.professionName) ~= nil
+			or string.find(profession.professionName, ']')
+		then
+			profession.professionName = professionName
+		end
+
+		local skills = profession.skills
+		for skillName, _ in pairs(skills) do
+			if string.find(skillName, ']')
+				or tonumber(skillName) ~= nil
+			then
+				GT.Log:Error('Invalid profession skill name', professionName, skillName)
+				valid = false
+			end
+
+			local skill = skills[skillName]
+			if skill.skillName == nil
+				or string.find(skill.skillName, ']')
+				or tonumber(skill.skillName) ~= nil
+			then
+				skill.skillName = skillName
+			end
+
+			if skill.skillLink == nil 
+				or tonumber(skill.skillLink) ~= nil 
+				or not string.find(skill.skillLink, ']')
+			then
+				GT.Log:Error('Invalid profession skill skillLink', professionName, skillName, skill.skillLink)
+				valid = false
+			end
+
+			local reagents = skill.reagents
+			for reagentName in pairs(reagents) do
+				if string.find(reagentName, ']')
+					or tonumber(reagentName) ~= nil
+				then
+					GT.Log:Error('Invalid profession skill reagentName', professionName, skillName, reagentName)
+				end
+
+				local reagent = reagents[reagentName]
+
+				if reagent.reagentName == nil
+					or tonumber(reagent.reagentName) ~= nil
+					or string.find(reagent.reagentName, ']')
+				then
+					reagent.reagentName = reagentName
+				end
+
+				if reagent.reagentCount == nil
+					or tonumber(reagent.reagentCount) == nil
+				then
+					GT.Log:Error('Invalid profession skill reagentCount', professionName, skillName, reagent.reagentCount)
+					valid = false
+				end
+			end
+		end
+	end
+	return valid
 end
 
 function DB:GetChatFrameNumber()
