@@ -35,7 +35,7 @@ function Profession:AddProfession()
 	local characterName = UnitName('player')
 	local profession = nil
 	if Profession.adding then
-		GT.Log:Info('Profession_AddProfession', professionName)
+		GT.Log:Info('Profession_AddProfession', characterName, professionName)
 		profession = GT.DB:AddProfession(characterName, professionName)
 
 		local msg = L['PROFESSION_ADD_SUCCESS']
@@ -43,11 +43,8 @@ function Profession:AddProfession()
 		msg = string.gsub(msg, '%{{profession_name}}', professionName)
 		GT.Log:PlayerInfo(msg)
 	else
-		profession = GT.DB:GetProfession(characterName, professionName)
-	end
-	if profession == nil then
-		GT.Log:Info('Profession_AddProfession_NilProfession', professionName)
-		return
+		GT.Log:Info('Profession_AddProfession_NotCharacter', nil, professionName)
+		profession = GT.DB:AddProfession(nil, professionName)
 	end
 
 	if Profession.adding then
@@ -56,8 +53,15 @@ function Profession:AddProfession()
 	end
 
 	local updated = Profession:UpdateProfession(profession)
+	
+	if GT.DB:GetProfession(characterName, professionName) == nil then
+		GT.Log:Info('Profession_AddProfession_NilProfession', professionName)
+		return
+	end
 
-	GT.Comm:SendTimestamps()
+	if updated then
+		GT.Comm:SendTimestamps()
+	end
 
 	Profession.adding = false
 end
@@ -92,10 +96,15 @@ function Profession:UpdateProfession(profession)
 
 		if kind and kind ~= 'header' and kind ~= 'subheader' then
 			local skillLink = GetTradeSkillItemLink(i)
-			if GT.DB:GetSkill(characterName, profession.professionName, skillName) == nil then
-				skill = GT.DB:AddSkill(characterName, profession.professionName, skillName, skillLink)
-				profession.lastUpdate = time()
-				updated = true
+
+			if Profession.adding then
+				if GT.DB:GetSkill(characterName, profession.professionName, skillName) == nil then
+					skill = GT.DB:AddSkill(characterName, profession.professionName, skillName, skillLink)
+					profession.lastUpdate = time()
+					updated = true
+				end
+			else
+				GT.DB:AddSkill(nil, profession.professionName, skillName, skillLink)
 			end
 
 			for j = 1, GetTradeSkillNumReagents(i) do
