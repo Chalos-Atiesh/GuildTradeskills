@@ -99,6 +99,7 @@ function Profession:UpdateProfession(profession)
 
 			if Profession.adding then
 				if GT.DB:GetSkill(characterName, profession.professionName, skillName) == nil then
+					GT.Log:Info('Profession_UpdateProfession_AddProfession', characterName, profession.professionName, skillName, skillLink)
 					skill = GT.DB:AddSkill(characterName, profession.professionName, skillName, skillLink)
 					profession.lastUpdate = time()
 					updated = true
@@ -110,6 +111,7 @@ function Profession:UpdateProfession(profession)
 			for j = 1, GetTradeSkillNumReagents(i) do
 				local reagentName, _, reagentCount = GetTradeSkillReagentInfo(i, j)
 				if reagentName then
+					GT.Log:Info('Profession_UpdateProfession_AddReagent', profession.professionName, skillName, reagentName, reagentCount)
 					GT.DB:AddReagent(profession.professionName, skillName, reagentName, reagentCount)
 				end
 			end

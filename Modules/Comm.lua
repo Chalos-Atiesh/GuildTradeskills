@@ -294,12 +294,17 @@ function Comm:IsPostValidFormat(message)
 		return false
 	end
 
-	if professionName == nil then
+	if professionName == nil
+		or tonumber(professionName) ~= nil
+		or string.find(professionName, ']')
+	then
 		GT.Log:Error('Comm_IsPostValidFormat_NilProfessionName')
 		return false
 	end
 
-	if lastUpdate == nil or tonumber(lastUpdate) == nil then
+	if lastUpdate == nil
+		or tonumber(lastUpdate) == nil
+	then
 		GT.Log:Error('Comm_IsPostValidFormat_InvalidLastUpdate', GT.Text:ToString(lastUpdate))
 		return false
 	end
@@ -313,36 +318,56 @@ function Comm:IsPostValidFormat(message)
 
 		GT.Log:Info('Comm_IsPostValidFormat_SkillCheck', skillName, skillLink, GT.Text:ToString(uniqueReagentCount))
 
-		if skillName == nil then
+		if skillName == nil
+			or string.find(skillName, ']')
+			or tonumber(skillName) ~= nil
+		then
 			GT.Log:Error('Comm_IsPostValidFormat_NilSkillName')
 			return false
 		end
 
-		if skillLink == nil then
+		if skillLink == nil
+			or not string.find(skillLink, ']')
+			or tonumber(skillLink) ~= nil
+		then
 			GT.Log:Error('Comm_IsPostValidFormat_NilSkillLink')
 			return false
 		end
 
-		if uniqueReagentCount == nil or tonumber(uniqueReagentCount) == nil then
+		if uniqueReagentCount == nil
+			or tonumber(uniqueReagentCount) == nil
+		then
 			GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GT.Text:ToString(uniqueReagentCount))
 			return false
 		end
+		uniqueReagentCount = tonumber(uniqueReagentCount)
 
+		local actualReagentCount = 0
 		for i = 1, uniqueReagentCount do
 			local reagentName, tokens = GT.Table:RemoveToken(tokens)
 			local thisReagentCount, tokens = GT.Table:RemoveToken(tokens)
 
 			GT.Log:Info('Comm_IsPostValidFormat_ReagentCheck', reagentName, GT.Text:ToString(thisReagentCount))
 
-			if reagentName == nil or string.find(reagentName, ']') then
+			if reagentName == nil
+				or string.find(reagentName, ']')
+				or tonumber(reagentName) ~= nil
+			then
 				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentName', GT.Text:ToString(reagentName))
 				return false
 			end
 
-			if thisReagentCount == nil or tonumber(thisReagentCount) == nil then
+			if thisReagentCount == nil
+				or string.find(reagentName, ']')
+				or tonumber(thisReagentCount) == nil then
 				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GT.Text:ToString(reagentCount))
 				return false
 			end
+			actualReagentCount = actualReagentCount + 1
+		end
+
+		if tonumber(uniqueReagentCount) ~= actualReagentCount then
+			GT.Log:Error('Comm_IsPostValidFormat_ReagentCountMismatch',uniqueReagentCount, actualReagentCount)
 		end
 	end
 	return true
@@ -430,8 +455,4 @@ function Comm:_SendToOnline(prefix, msg)
 			end
 		end
 	end
-end
-
-function Comm:GetDelimiter()
-	return DELIMITER
 end
