@@ -1,3 +1,11 @@
+4.1.0
+	Added advertising capabilities.
+	Added more protections for invalid posts.
+	Changed the trigger character from '!' to '?'. Too many addons use '!'. Localized the trigger character.
+
+4.0.12
+	Fixed syntax error in Modules/Database
+
 4.0.11
 	Added post message format checking. We now drop invalid posts insted of corrupting the database.
 	Added the ability to reset an individual profession or character.

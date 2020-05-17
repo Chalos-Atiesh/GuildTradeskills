@@ -4,6 +4,8 @@
 <h2>Commands</h2>
 <ul>
 	<li><strong>/gt help</strong>: Displays a list of available slash commands and descriptions.</li>
+	<li><strong>/gt advertise</strong>: Toggles advertising.</li>
+	<li><strong>/gt advertise {seconds}</strong>: Sets the number of seconds between advertisements.</li>
 	<li><strong>/gt addprofession</strong>: Add a profession to&nbsp;<strong><span style="color: #339966;">Guild</span></strong>&nbsp;<strong><span style="color: #ffcc00;">Tradeskills</span></strong></li>
 	<li><strong>/gt removeprofession {profession_name}</strong>: Remove a profession from&nbsp;<strong><span style="color: #339966;">Guild</span></strong>&nbsp;<strong><span style="color: #ffcc00;">Tradeskills</span></strong></li>
 	<li><strong>/gt search</strong>: Toggles the search panel.</li>
