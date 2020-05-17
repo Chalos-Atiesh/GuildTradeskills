@@ -120,6 +120,11 @@ function Command:DBDump()
 	GT.Log:DBDump()
 end
 
+function Command:ToggleAdvertising()
+	GT.Log:Info('Command_ToggleAdvertising')
+	GT.Advertise:ToggleAdvertising(Command.tokens)
+end
+
 --@debug@
 function Command:Delimit()
 	GT.Log:PlayerError('--------------------')

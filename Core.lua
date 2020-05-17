@@ -21,10 +21,11 @@ function GT:OnInitialize()
 
 	GT.Log:Info('GT_OnInitialize')
 
+	GT.Advertise:Enable()
 	GT.Command:Enable()
 	GT.Event:Enable()
 
-	GT:Wait(INITIAL_DELAY, GT['InitMessages'], 'Hello')
+	GT:Wait(INITIAL_DELAY, GT['InitMessages'])
 end
 
 local waitTable = {};
@@ -34,6 +35,8 @@ function GT:InitMessages()
 	GT.Log:PlayerInfo(L['WELCOME'])
 	GT.Comm:SendTimestamps()
 	GT.Comm:SendVersion()
+	GT.Whisper:Enable()
+	GT.Advertise:Advertise()
 	if not GT.DB.valid then
 		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
 	end
@@ -100,6 +103,7 @@ function GT:Reset(force)
 
 	GT.Log:Reset(force)
 	GT.DB:Reset(force)
+	GT.Advertise:Reset(force)
 end
 
 function GT:ResetProfession(professionName, force)

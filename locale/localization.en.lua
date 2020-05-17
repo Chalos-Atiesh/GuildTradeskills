@@ -8,6 +8,7 @@ local L = LibStub('AceLocale-3.0'):NewLocale(AddOnName, 'enUS', true, true)
 
 local LONG_TAG = GREEN .. 'Guild' .. COLOR_END .. YELLOW .. 'Tradeskills' .. COLOR_END
 local WHISPER_TAG = 'GT: '
+local TRIGGER_CHAR = '?'
 
 if L then
 	---------- CHARACTER START ----------
@@ -21,7 +22,7 @@ if L then
 
 	---------- COMMAND START ----------
 
-	L['UNKNOWN_COMMAND'] = 'Sorry! Couldn\'t find the command \'{{command}}\'. Type \'/gt help\' to get a list of available commands.'
+	L['UNKNOWN_COMMAND'] = 'Sorry! Couldn\'t find the command \'{{command}}\'. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to get a list of available commands.'
 	--@debug@
 	L['FORCE'] = 'force'
 	--@end-debug@
@@ -29,7 +30,7 @@ if L then
 	L['SLASH_COMMANDS'] = {
 		gt = {
 			methodName = 'OnCommand',
-			help = YELLOW .. '/gt' .. COLOR_END .. ': Interact with this addon.',
+			help = YELLOW .. '/gt' .. COLOR_END .. ': Toggle the search pane.',
 			subCommands = {
 				help = {
 					methodName = 'Help',
@@ -54,7 +55,11 @@ if L then
 				reset = {
 					methodName = 'Reset',
 					help = YELLOW .. '/gt reset' .. COLOR_END .. ': Resets all stored info. |cffff0000This cannot be undone.|r'
-				}
+				},
+				advertise = {
+					methodName = 'ToggleAdvertising',
+					help = YELLOW .. '/gt advertise' .. COLOR_END .. ': Toggles whether you are advertising.' .. YELLOW .. ' /gt advertise {seconds}' .. COLOR_END .. ': Sets the number of seconds between advertisements.'
+				},
 			}
 		}
 	}
@@ -72,13 +77,19 @@ if L then
 	---------- COMMAND END ----------
 	---------- WHISPER START ----------
 
+	L['TRIGGER_CHAR'] = TRIGGER_CHAR
+
 	L['WHISPER_TAG'] = WHISPER_TAG
-	L['WHISPER_PROFESSION_NOT_FOUND'] = WHISPER_TAG .. 'Whoops! Looks like I don\'t have \'{{profession_name}}\'. Available professions are {{profession_names}}.'
+	L['WHISPER_FIRST_PROFESSION'] = '{{profession_name}}'
+	L['WHISPER_SECOND_PROFESSION'] = ' and {{profession_name}}'
+	L['WHISPER_PROFESSION_NOT_FOUND'] = WHISPER_TAG .. 'Whoops! Looks like I don\'t have \'{{profession_search}}\'. Available professions are {{first_profession}}{{second_profession}}.'
+	L['WHISPER_NIL_PROFESSIONS'] = WHISPER_TAG .. 'Looks like I haven\'t added any professions. Please come back later!'
+
 	L['WHISPER_INVALID_PAGE'] = WHISPER_TAG .. 'Oops! Page {{page}} isn\'t a valid page. I only have {{max_pages}} pages.'
 	L['WHISPER_HEADER'] = WHISPER_TAG .. 'Page {{current_page}} of {{total_pages}}. I have {{total_skills}} skills.'
 	L['WHISPER_ITEM'] = WHISPER_TAG .. '{{number}}. {{skill_link}}'
-	L['WHISPER_FOOTER'] = WHISPER_TAG .. 'You can get the next page by replying \'!{{profession_name}} {{next_page}}\' or jump to a page by replying \'!{{profession_name}} {page_number}\'.'
-	L['WHISPER_FOOTER_LAST_PAGE'] = WHISPER_TAG .. 'You can jump to a page by replying \'!{{profession_name}} {page_number}\'.'
+	L['WHISPER_FOOTER'] = WHISPER_TAG .. 'You can get the next page by replying \'' .. TRIGGER_CHAR .. '{{profession_name}} {{next_page}}\' or jump to a page by replying \'' .. TRIGGER_CHAR .. '{{profession_name}} {page_number}\'.'
+	L['WHISPER_FOOTER_LAST_PAGE'] = WHISPER_TAG .. 'You can jump to a page by replying \'' .. TRIGGER_CHAR .. '{{profession_name}} {page_number}\'.'
 
     L['WHISPER_REQUEST'] = WHISPER_TAG .. 'Hey {{character_name}}! Could you craft {{item_link}} for me?'
     L['WHISPER_SELECT_REQUIRED'] = 'No selected skill found. You must select a skill first.'
@@ -137,6 +148,23 @@ if L then
 	L['GUILD_ONLINE'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00Online|r'
 
 	---------- GUI END ----------
+	---------- ADVERTISE START ----------
+
+	L['ADVERTISE_ON'] = 'Now advertising!'
+	L['ADVERTISE_OFF'] = 'Stopped advertising.'
+
+	L['ADVERTISING_INVALID_INTERVAL'] = '\'{{interval}}\' is an invalid time. It must be in seconds.'
+	L['ADVERTISE_MINIMUM_INTERVAL'] = '{{interval}} seconds is too short. Setting interval to {{minimum_interval}} seconds.'
+	L['ADVERTISE_SET_INTERVAL'] = 'Set advertising interval to {{interval}} seconds.'
+	L['ADVERTISE_NO_PROFESSIONS'] = 'Uh oh! Looks like you haven\'t added any professios to advertise. You can add one with \'/gt addprofession\'.' 
+
+	L['ADVERTISE_FIRST_PROFESSION'] = '{{skill_count}} {{profession_name}}'
+	L['ADVERTISE_SECOND_PROFESSION'] = ' and {{skill_count}} {{profession_name}}'
+	L['ADVERTISE_FIRST_WHISPER'] = '\'' .. TRIGGER_CHAR .. '{{profession_name}}\' or \'' .. TRIGGER_CHAR .. '{{profession_name}} {search}\''
+	L['ADVERTISE_SECOND_WHISPER'] = ' or \'' .. TRIGGER_CHAR .. '{{profession_name}}\' or \'' .. TRIGGER_CHAR .. '{{profession_name}} {search}\'' 
+	L['ADVERTISE_ADVERTISEMENT'] = WHISPER_TAG .. 'Offering my crafting services! I have {{first_profession}}{{second_profession}} recipies. Whisper {{first_whisper}}{{second_whisper}}.'
+
+	---------- ADVERTISE END ----------
 
 	L['LONG_TAG'] = LONG_TAG
 

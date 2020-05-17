@@ -9,15 +9,17 @@ GT.Whisper = Whisper
 
 Whisper.characters = {}
 
-local TRIGGER_CHAR = '!'
 local PREFIX = 'GT'
 local SKILLS_PER_PAGE = 5
+
+function Whisper:OnEnable()
+end
 
 function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	GT.Log:Info('Whisper_OnWhisperReceived', sender, message)
 
 	local firstChar = string.sub(message, 1, 1)
-	if firstChar ~= TRIGGER_CHAR then
+	if firstChar ~= L['TRIGGER_CHAR'] then
 		GT.Log:Info('Whisper_OnWhisperReceived_NoTrigger', sender, message)
 		return
 	end
@@ -51,11 +53,33 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	end
 
 	if finalProfession == nil then
-		local returnMessage = string.gsub(L['WHISPER_PROFESSION_NOT_FOUND'], '%{{profession_name}}', professionSearch)
-		if #professionNames <= 0 then
-			table.insert(professionNames, 'none')
+
+		local professions = character.professions
+		local firstProfessionName = nil
+		local secondProfessionName = nil
+		for professionName, _ in pairs(professions) do
+			if firstProfessionName == nil then
+				firstProfessionName = professionName
+			else
+				secondProfessionName = professionName
+			end
 		end
-		returnMessage = string.gsub(returnMessage, '%{{profession_names}}', table.concat(professionNames, ', '))
+
+		if firstProfessionName == nil then
+			Whisper:SendResponse(sender, L['WHISPER_NIL_PROFESSIONS'], searchTerm)
+			return
+		end
+
+		local firstWhisper = string.gsub(L['WHISPER_FIRST_PROFESSION'], '%{{profession_name}}', firstProfessionName)
+		local secondWhisper = ''
+		if secondProfessionName ~= nil then
+			secondWhisper = string.gsub(L['WHISPER_SECOND_PROFESSION'], '%{{profession_name}}', secondProfessionName)
+		end
+
+		local returnMessage = string.gsub(L['WHISPER_PROFESSION_NOT_FOUND'], '%{{profession_search}}', professionSearch)
+		returnMessage = string.gsub(returnMessage, '%{{first_profession}}', firstWhisper)
+		returnMessage = string.gsub(returnMessage, '%{{second_profession}}', secondWhisper)
+		
 		GT.Log:Info('Whisper_OnWhisperReceived_ProfNotFound', sender, message, returnMessage)
 		ChatThrottleLib:SendChatMessage('ALERT', PREFIX, returnMessage, 'WHISPER', 'Common', sender)
 		return

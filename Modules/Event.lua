@@ -18,7 +18,8 @@ function Event:OnEnable()
 		ADDON_LOADED = 'AddonLoaded',
 		TRADE_SKILL_UPDATE = 'TradeSkillUpdate',
 		CRAFT_UPDATE = 'TradeSkillUpdate',
-		CHAT_MSG_WHISPER = 'WhisperReceived'
+		CHAT_MSG_WHISPER = 'WhisperReceived',
+		CHAT_MSG_CHANNEL_NOTICE = 'ChannelNotice'
 	}
 
 	for event, methodName in pairs(EVENT_MAP) do
@@ -47,4 +48,17 @@ end
 function Event:WhisperReceived(...)
 	GT.Log:Info('Event_WhisperReceived')
 	GT.Whisper:OnWhisperReceived(...)
+end
+
+function Event:ChannelNotice(...)
+	local event = select(1, ...)
+	local subEvent = select(2, ...)
+	local channelType = select(8, ...)
+	local channelNumber = select(9, ...)
+
+	GT.Log:Info('Event_ChannelNotice', event, subEvent, channelType, channelNumber)
+
+	if GT.Table:Contains(GT.Advertise.events, subEvent) then
+		GT.Advertise:ChannelNotice(subEvent, channelType, channelNumber)
+	end
 end

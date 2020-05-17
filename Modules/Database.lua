@@ -324,21 +324,25 @@ function DB:_ValidateData()
 		end
 		local professions = DB.db.char.characters[characterName].professions
 		for professionName, _ in pairs(professions) do
-			if tonumber(professionName) ~= nil then
+			if tonumber(professionName) ~= nil 
+				or string.find(professionName, ']')
+			then
 				GT.Log:Error('Invalid character profession name', characterName, professionName)
 				valid = false
 			end
+
 			local profession = professions[professionName]
-			if profession.lastUpdate ==  nil
-				or tonumber(profession.lastUpdate) == nil then
-				profession.lastUpdate = 0
-			end
 
 			if profession.professionName == nil
 				or tonumber(profession.professionName)
 				or string.find(profession.professionName, ']')
 			then
 				profession.professionName = professionName
+			end
+
+			if profession.lastUpdate ==  nil
+				or tonumber(profession.lastUpdate) == nil then
+				profession.lastUpdate = 0
 			end
 
 			local skills = profession.skills
@@ -399,6 +403,7 @@ function DB:_ValidateData()
 					or tonumber(reagentName) ~= nil
 				then
 					GT.Log:Error('Invalid profession skill reagentName', professionName, skillName, reagentName)
+					valid = false
 				end
 
 				local reagent = reagents[reagentName]
@@ -457,4 +462,26 @@ end
 
 function DB:UpdateNotified(version)
 	DB.db.global.versionNotification = version
+end
+
+function DB:SetAdvertising(isAdvertising)
+	DB.db.char.isAdvertising = isAdvertising
+end
+
+function DB:IsAdvertising()
+	if DB.db.char.isAdvertising == nil then
+		DB.db.char.isAdvertising = GT.Advertise.DEFAULT_IS_ADVERTISING
+	end
+	return DB.db.char.isAdvertising
+end
+
+function DB:SetAdvertisingInterval(interval)
+	DB.db.char.advertisingInterval = interval
+end
+
+function DB:GetAdvertisingInterval()
+	if DB.db.char.advertisingInterval == nil then
+		DB.db.char.advertisingInterval = GT.Advertise.DEFAULT_INTERVAL
+	end
+	return DB.db.char.advertisingInterval
 end
