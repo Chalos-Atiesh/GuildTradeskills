@@ -36,6 +36,16 @@ function DB:OnEnable(force)
 	end
 
 	DB.valid = DB:Validate()
+
+	local frameNumber = DB:GetChatFrameNumber()
+	for i = 1, NUM_CHAT_WINDOWS do
+		local name = GetChatWindowInfo(i)
+		local shown = select(7, GetChatWindowInfo(i))
+		if i == frameNumber and not shown then
+			GT.Log:Warn('DB_OnEnable_ChatFrameNotShown', name)
+			GT.DB:SetChatFrameNumber(1)
+		end
+	end
 end
 
 function DB:Reset(force)
@@ -68,6 +78,7 @@ function DB:ResetCharacter(characterName)
 			local character = DB.db.char.characters[characterName]
 			character.professions = {}
 			character.deletedProfessions = {}
+			character.characterName = characterName
 			return true
 		end
 	end
@@ -133,6 +144,7 @@ function DB:_GetProfession(professionName)
 		DB.db.global.professions[professionName] = {}
 	end
 	local profession = DB.db.global.professions[professionName]
+	profession.professionName = professionName
 	if profession.skills == nil then
 		profession.skills = {}
 	end
@@ -316,11 +328,10 @@ function DB:_ValidateStructure()
 end
 
 function DB:_ValidateData()
-	local valid = true
 	for characterName, _ in pairs(DB.db.char.characters) do
 		if tonumber(characterName) ~= nil then
 			GT.Log:Error('Invalid character name', characterName)
-			valid = false
+			return false
 		end
 		local professions = DB.db.char.characters[characterName].professions
 		for professionName, _ in pairs(professions) do
@@ -328,7 +339,7 @@ function DB:_ValidateData()
 				or string.find(professionName, ']')
 			then
 				GT.Log:Error('Invalid character profession name', characterName, professionName)
-				valid = false
+				return false
 			end
 
 			local profession = professions[professionName]
@@ -351,7 +362,7 @@ function DB:_ValidateData()
 					or tonumber(skillName) ~= nil
 				then
 					GT.Log:Error('Invalid character profession skill name', characterName, professionName, skillName)
-					valid = false
+					return false
 				end
 			end
 		end
@@ -361,7 +372,7 @@ function DB:_ValidateData()
 		if tonumber(professionName) ~= nil
 			or string.find(professionName, ']') then
 			GT.Log:Error('Invalid profession name', professionName)
-			valid = false
+			return false
 		end
 		local profession = DB.db.global.professions[professionName]
 
@@ -378,7 +389,7 @@ function DB:_ValidateData()
 				or tonumber(skillName) ~= nil
 			then
 				GT.Log:Error('Invalid profession skill name', professionName, skillName)
-				valid = false
+				return false
 			end
 
 			local skill = skills[skillName]
@@ -394,7 +405,7 @@ function DB:_ValidateData()
 				or not string.find(skill.skillLink, ']')
 			then
 				GT.Log:Error('Invalid profession skill skillLink', professionName, skillName, skill.skillLink)
-				valid = false
+				return false
 			end
 
 			local reagents = skill.reagents
@@ -403,7 +414,7 @@ function DB:_ValidateData()
 					or tonumber(reagentName) ~= nil
 				then
 					GT.Log:Error('Invalid profession skill reagentName', professionName, skillName, reagentName)
-					valid = false
+					return false
 				end
 
 				local reagent = reagents[reagentName]
@@ -419,18 +430,18 @@ function DB:_ValidateData()
 					or tonumber(reagent.reagentCount) == nil
 				then
 					GT.Log:Error('Invalid profession skill reagentCount', professionName, skillName, reagent.reagentCount)
-					valid = false
+					return false
 				end
 			end
 		end
 	end
-	return valid
+	return true
 end
 
 function DB:GetChatFrameNumber()
-	if DB.db == nil then return 1 end
-	if DB.db.global == nil then return 1 end
-	if DB.db.global.chatFrameNumber == nil then return 1 end
+	if DB.db == nil then return GT.Log.DEFAULT_CHAT_FRAME end
+	if DB.db.global == nil then return GT.Log.DEFAULT_CHAT_FRAME end
+	if DB.db.global.chatFrameNumber == nil then return GT.Log.DEFAULT_CHAT_FRAME end
 	return DB.db.global.chatFrameNumber
 end
 

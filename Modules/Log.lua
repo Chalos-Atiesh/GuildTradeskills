@@ -9,6 +9,8 @@ local AceGUI = LibStub('AceGUI-3.0')
 local Log = GT:NewModule('Log')
 GT.Log = Log
 
+Log.DEFAULT_CHAT_FRAME = 1
+
 local DELIMITER = ': '
 local LOG_FORMAT = '{{tag}}{{start_color}}{{message}}{{end_color}}'
 local LOG_LINE_LENGTH_LIMIT = 200
@@ -21,6 +23,7 @@ local ERROR = 3
 local PLAYER_INFO = 4
 local PLAYER_WARN = 5
 local PLAYER_ERROR = 6
+
 local LOG_COLOR_MAP = {}
 
 local LOG_LEVEL_FILTER = PLAYER_INFO
@@ -37,6 +40,16 @@ local COLOR_PLAYER_INFO = ''
 local COLOR_PLAYER_WARN = '|cffff9900'
 local COLOR_PLAYER_ERROR = '|cffff0000'
 
+local STRING_INFO = 'INFO'
+local STRING_DEBUG = 'DEBUG'
+local STRING_WARN = 'WARN'
+local STRING_ERROR = 'ERROR'
+local STRING_PLAYER_INFO = 'PLAYER_INFO'
+local STRING_PLAYER_WARN = 'PLAYER_WARN'
+local STRING_PLAYER_ERROR = 'PLAYER_ERROR'
+
+local LOG_STRING_MAP = {}
+
 local DEFAULT_LOG_COLOR = COLOR_INFO
 
 function Log:OnEnable()
@@ -48,6 +61,14 @@ function Log:OnEnable()
 	LOG_COLOR_MAP[PLAYER_WARN] = COLOR_PLAYER_WARN
 	LOG_COLOR_MAP[PLAYER_ERROR] = COLOR_PLAYER_ERROR
 
+	LOG_STRING_MAP[INFO] = STRING_INFO
+	LOG_STRING_MAP[DEBUG] = STRING_DEBUG
+	LOG_STRING_MAP[WARN] = STRING_WARN
+	LOG_STRING_MAP[ERROR] = STRING_ERROR
+	LOG_STRING_MAP[PLAYER_INFO] = STRING_PLAYER_INFO
+	LOG_STRING_MAP[PLAYER_WARN] = STRING_PLAYER_WARN
+	LOG_STRING_MAP[PLAYER_ERROR] = STRING_PLAYER_ERROR
+
 	if GTDB == nil then
 		GTDB = {}
 	end
@@ -55,7 +76,6 @@ function Log:OnEnable()
 	if GTDB.log == nil then
 		GTDB.log = {}
 	end
-	-- Log:BuildCopyLogFrame()
 end
 
 function Log:Reset(force)
@@ -99,7 +119,8 @@ function Log:SetChatFrame(frameName)
 
 	for i = 1, NUM_CHAT_WINDOWS do
 		local name = GetChatWindowInfo(i) or ''
-		if name ~= '' and string.lower(name) == string.lower(frameName) then
+		local shown = select(7, GetChatWindowInfo(i))
+		if name ~= '' and string.lower(name) == string.lower(frameName) and shown then
 			GT.DB:SetChatFrameNumber(i)
 			local msg = string.gsub(L['CHAT_WINDOW_SUCCESS'], '%{{frame_name}}', name)
 			Log:PlayerInfo(msg)
@@ -126,9 +147,9 @@ function Log:_Log(logLevel, ...)
 	if GTDB ~= nil and GTDB.log ~= nil then
 		local levelWithColor = nil
 		if color == '' then
-			levelWithColor = tostring(logLevel)
+			levelWithColor = GT.Text:Concat(DELIMITER, tostring(logLevel),  LOG_STRING_MAP[logLevel])
 		else
-			levelWithColor = color .. tostring(logLevel) .. '|r'
+			levelWithColor = color .. GT.Text:Concat(tostring(logLevel), LOG_STRING_MAP[logLevel]) .. '|r'
 		end
 		while #GTDB.log > LOG_ARCHIVE_LIMIT do
 			table.remove(GTDB.log, 1)
