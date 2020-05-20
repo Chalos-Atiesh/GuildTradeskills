@@ -117,6 +117,14 @@ function lib:GetTextBetween(text, startCharacter, endCharacter)
     return string.sub(text, startIndex + 1, endIndex - 1)
 end
 
+function lib:UUID()
+    local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+    return string.gsub(template, '[xy]', function (c)
+        local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
+        return string.format('%x', v)
+    end)
+end
+
 function lib:FormatTable(tbl)
     local txt = lib:_FormatTable(tbl, 1)
     return txt
