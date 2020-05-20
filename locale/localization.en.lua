@@ -19,7 +19,6 @@ if L then
 	L['CHARACTER_RESET_FINAL'] = 'Successfully reset character \'{{character_name}}\'.'
 
 	---------- CHARACTER END ----------
-
 	---------- COMMAND START ----------
 
 	L['UNKNOWN_COMMAND'] = 'Sorry! Couldn\'t find the command \'{{command}}\'. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to get a list of available commands.'
@@ -59,7 +58,7 @@ if L then
 				advertise = {
 					methodName = 'ToggleAdvertising',
 					help = YELLOW .. '/gt advertise' .. COLOR_END .. ': Toggles whether you are advertising.' .. YELLOW .. ' /gt advertise {seconds}' .. COLOR_END .. ': Sets the number of seconds between advertisements.'
-				},
+				}
 			}
 		}
 	}
@@ -134,6 +133,10 @@ if L then
 	---------- PROFESSION END ----------
 	---------- GUI START ----------
 
+	L['LONG_TAG'] = LONG_TAG
+
+	L['WELCOME'] = 'Welcome to ' .. LONG_TAG .. '! For help getting started you can type \'/gt help\'.'
+
 	L['SEARCH_SKILLS'] = 'Search for skills:'
     L['SEARCH_REAGENTS'] = 'Search for reagents:'
     L['SEARCH_CHARACTERS'] = 'Search for characters:'
@@ -146,6 +149,14 @@ if L then
     
 	L['GUILD_OFFLINE'] = '|cff7f7f7f{{guild_member}}|r - |cff7f7f7fOffline|r'
 	L['GUILD_ONLINE'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00Online|r'
+
+	L['CHAT_FRAME_NIL'] = 'Looks like you didn\'t pass a chat window name. You can do so with \'/gt chatwindow {window_name}\'.'
+	L['CHAT_WINDOW_SUCCESS'] = 'Set ouput chat window to \'{{frame_name}}\'.'
+	L['CHAT_WINDOW_INVALID'] = 'Sorry! We couldn\'t find a chat window with name \'{{frame_name}}\'.'
+
+	L['UPDATE_AVAILABLE'] = LONG_TAG .. ' is out of date. Your version is {{local_version}} and {{remote_version}} is available.'
+
+	L['CORRUPTED_DATABASE'] = 'Unfortunately it seems your database has become corrupted. Please reset it with \'/gt reset\'.'
 
 	---------- GUI END ----------
 	---------- ADVERTISE START ----------
@@ -165,16 +176,10 @@ if L then
 	L['ADVERTISE_ADVERTISEMENT'] = WHISPER_TAG .. 'Offering my crafting services! I have {{first_profession}}{{second_profession}} recipies. Whisper {{first_whisper}}{{second_whisper}}.'
 
 	---------- ADVERTISE END ----------
+	---------- SYSTEM START ----------
 
-	L['LONG_TAG'] = LONG_TAG
+	L['GUILD_MEMBER_ONLINE'] = '^.*%[(.*)%].* has come online'
+	L['GUILD_MEMBER_OFFLINE'] = '(.*) has gone offline'
 
-	L['WELCOME'] = 'Welcome to ' .. LONG_TAG .. '! For help getting started you can type \'/gt help\'.'
-
-	L['CHAT_FRAME_NIL'] = 'Looks like you didn\'t pass a chat window name. You can do so with \'/gt chatwindow {window_name}\'.'
-	L['CHAT_WINDOW_SUCCESS'] = 'Set ouput chat window to \'{{frame_name}}\'.'
-	L['CHAT_WINDOW_INVALID'] = 'Sorry! We couldn\'t find a chat window with name \'{{frame_name}}\'.'
-
-	L['UPDATE_AVAILABLE'] = LONG_TAG .. ' is out of date. Your version is {{local_version}} and {{remote_version}} is available.'
-
-	L['CORRUPTED_DATABASE'] = 'Unfortunately it seems your database has become corrupted. Please reset it with \'/gt reset\'.'
+	---------- SYSTEM END ----------
 end

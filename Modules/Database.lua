@@ -36,16 +36,6 @@ function DB:OnEnable(force)
 	end
 
 	DB.valid = DB:Validate()
-
-	local frameNumber = DB:GetChatFrameNumber()
-	for i = 1, NUM_CHAT_WINDOWS do
-		local name = GetChatWindowInfo(i)
-		local shown = select(7, GetChatWindowInfo(i))
-		if i == frameNumber and not shown then
-			GT.Log:Warn('DB_OnEnable_ChatFrameNotShown', name)
-			GT.DB:SetChatFrameNumber(1)
-		end
-	end
 end
 
 function DB:Reset(force)
@@ -495,4 +485,15 @@ function DB:GetAdvertisingInterval()
 		DB.db.char.advertisingInterval = GT.Advertise.DEFAULT_INTERVAL
 	end
 	return DB.db.char.advertisingInterval
+end
+
+function DB:IsCommEnabled()
+	if DB.db.global.isCommEnabled == nil then
+		DB.db.global.isCommEnabled = true
+	end
+	return DB.db.global.isCommEnabled
+end
+
+function DB:SetCommEnabled(commEnabled)
+	DB.db.global.isCommEnabled = commEnabled
 end

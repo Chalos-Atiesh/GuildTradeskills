@@ -3,6 +3,7 @@ local AddOnName, GT = ...
 GT = LibStub('AceAddon-3.0'):NewAddon(AddOnName, 'AceComm-3.0', 'AceConsole-3.0', 'AceEvent-3.0')
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
+GT.L = L
 
 ---------- START LOAD LIBRARIES ----------
 
@@ -14,16 +15,20 @@ GT.Table = LibStub:GetLibrary('GTTable')
 GT.resetWarned = false
 GT.version = '@project-version@'
 
-local INITIAL_DELAY = 15
+local INITIAL_DELAY = 5
 
 function GT:OnInitialize()
 	GT.Log:Enable()
 
 	GT.Log:Info('GT_OnInitialize')
 
+	GT:RegisterEvent('CHAT_MSG_SYSTEM', 'OnChatMessageSystem')
+
 	GT.Advertise:Enable()
 	GT.Command:Enable()
 	GT.Event:Enable()
+	GT.Comm:Enable()
+	GT.Whisper:Enable()
 
 	GT:Wait(INITIAL_DELAY, GT['InitMessages'])
 end
@@ -32,11 +37,10 @@ local waitTable = {};
 local waitFrame = nil;
 
 function GT:InitMessages()
+	GT.Log:InitChatFrame()
 	GT.Log:PlayerInfo(L['WELCOME'])
-	GT.Comm:SendTimestamps()
-	GT.Comm:SendVersion()
-	GT.Whisper:Enable()
 	GT.Advertise:Advertise()
+	GT.CommGuild:RequestStartVote()
 	if not GT.DB.valid then
 		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
 	end
@@ -45,6 +49,14 @@ end
 function GT:OnDisable()
 	GT.Log:Info('GT_OnDisable')
 end
+
+---------- START EVENT HANDLING ----------
+
+function GT:OnChatMessageSystem(event, message)
+	GT.CommGuild:OnChatMessageSystem(message)
+end
+
+---------- END EVENT HANDLING ----------
 
 function GT:InitReset(tokens)
 	tokens = GT.Table:Lower(tokens)
@@ -72,26 +84,6 @@ function GT:InitReset(tokens)
 	if not GT.Table:Contains(tokens, L['RESET_EXPECT_COMFIRM']) and not force then
 		local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', GT.Text:Concat(' ', tokens))
 		GT.Log:PlayerWarn(message)
-		return
-	end
-
-	if GT.Table:Contains(tokens, L['CHARACTER']) then
-		tokens = GT.Table:RemoveByValue(tokens, L['CHARACTER'])
-		local characterName = GT.Table:RemoveToken(tokens)
-		local message = string.gsub(L['RESET_CHARACTER'], '%{{character_name}}', characterName)
-		GT.Log:PlayerWarn(message)
-		GT:ResetCharacter(characterName)
-		return
-	end
-
-	if GT.Table:Contains(tokens, L['PROFESSION']) then
-		tokens = GT.Table:RemoveByValue(tokens, L['PROFESSION'])
-		local professionName = GT.Table:RemoveToken(tokens)
-		GT.Log:Info(tokens)
-		GT.Log:Info(professionName)
-		local message = string.gsub(L['RESET_PROFESSION'], '%{{profession_name}}', professionName)
-		GT.Log:PlayerWarn(message)
-		GT:ResetProfession(professionName)
 		return
 	end
 
@@ -199,4 +191,16 @@ function GT:Wait(delay, func, ...)
   end
   tinsert(waitTable,{delay,func,{...}});
   return true;
+end
+
+function GT:IsCurrentCharacter(characterName)
+	if GT:GetCurrentCharacter() == characterName then
+		return true
+	end
+	return false
+end
+
+function GT:GetCurrentCharacter()
+	local characterName = UnitName('player')
+	return characterName
 end

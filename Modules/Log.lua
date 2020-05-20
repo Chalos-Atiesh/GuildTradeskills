@@ -110,6 +110,19 @@ end
 function Log:PlayerError(...)
 	Log:_Log(PLAYER_ERROR, ...)
 end
+	
+function Log:InitChatFrame()
+	GT.Log:Info('Log_InitChatFrame')
+	local frameNumber = GT.DB:GetChatFrameNumber()
+	for i = 1, NUM_CHAT_WINDOWS do
+		local name = GetChatWindowInfo(i)
+		local shown = select(7, GetChatWindowInfo(i))
+		if i == frameNumber and not shown then
+			GT.Log:Warn('Log_InitChatFrame_NotShown', name)
+			GT.DB:SetChatFrameNumber(1)
+		end
+	end
+end
 
 function Log:SetChatFrame(frameName)
 	Log:Info('Log_SetChatFrame', frameName)

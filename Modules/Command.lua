@@ -17,9 +17,9 @@ local devCommands = {
 		methodName = 'DBDump',
 		help = '/gt dbdump: Dumps the database to a copy/pastable window.'
 	},
-	delimit = {
-		methodName = 'Delimit',
-		help = '/gt delimit: Prints a delimit line.'
+	comm = {
+		methodName = 'ToggleComms',
+		help = '/gt comm: Toggles comms.'
 	}
 }
 
@@ -126,8 +126,8 @@ function Command:ToggleAdvertising()
 end
 
 --@debug@
-function Command:Delimit()
-	GT.Log:PlayerError('--------------------')
+function Command:ToggleComms()
+	GT.Comm:ToggleComms()
 end
 
 function Command:VersionCheck()

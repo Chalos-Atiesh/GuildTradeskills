@@ -42,8 +42,29 @@ function lib:Contains(tbl, value)
 			return true
 		end
 	end
-
 	return false
+end
+
+function lib:InsertField(tbl, fieldName)
+	if tbl == nil then
+		tbl = {}
+	end
+	if tbl[fieldName] == nil then
+		tbl[fieldName] = {}
+	end
+	return tbl
+end
+
+function lib:Insert(tbl, key, value)
+	if tbl == nil then
+		tbl = {}
+	end
+	if key == nil and not lib:Contains(tbl, value) then
+		table.insert(tbl, value)
+	elseif key ~= nil and not lib:Contains(tbl[key], value) then
+		tbl[key] = value
+	end
+	return tbl
 end
 
 function lib:GetSortedKeys(tbl, sortFunction, sortByKey)
@@ -51,6 +72,12 @@ function lib:GetSortedKeys(tbl, sortFunction, sortByKey)
 	for key in pairs(tbl) do
 		table.insert(keys, key)
 	end
+
+	if sortFunction == nil then
+		sortFunction = function(a, b) return a < b end
+	end
+
+	if sortByKey == nil then sortByKey = true end
 
 	if sortByKey then
 		table.sort(keys, function(a, b)
@@ -77,4 +104,12 @@ function lib:Lower(tbl)
 		returnTable[k] = v
 	end
 	return returnTable
+end
+
+function lib:Random(tbl)
+	local keys = {}
+	for k, _ in pairs(tbl) do
+		table.insert(keys, k)
+	end
+	return tbl[keys[math.random(#keys)]]
 end
