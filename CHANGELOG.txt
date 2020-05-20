@@ -1,3 +1,9 @@
+4.2.3
+	Adding UUID to text utils.
+
+4.2.2
+	Added guild database maintentance. We now remove characters that aren't in the guild any more.
+
 4.2.1
 	Moved to a guild based voting system to decide who sends a post instead of whispering everyone individually. This should massively reduce the number of messages sent and received at scale.
 	Still maintaining addon whisper functionality to have the ability to add non-guild members.
