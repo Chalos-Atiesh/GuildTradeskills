@@ -50,7 +50,7 @@ function CommWhisper:OnTimestampsReceived(sender, toGet, toPost)
 	end
 end
 
-function CommWhisper:OnGetReceived(sender, message)
+function CommWhisper:OnGetReceived(prefix, message, distribution, sender)
 	GT.Log:Info('CommWhisper_OnGetReceived', sender, message)
 
 	if not GT.DB:IsCommEnabled() then
