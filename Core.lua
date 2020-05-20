@@ -22,8 +22,6 @@ function GT:OnInitialize()
 
 	GT.Log:Info('GT_OnInitialize')
 
-	GT:RegisterEvent('CHAT_MSG_SYSTEM', 'OnChatMessageSystem')
-
 	GT.Advertise:Enable()
 	GT.Command:Enable()
 	GT.Event:Enable()
@@ -49,14 +47,6 @@ end
 function GT:OnDisable()
 	GT.Log:Info('GT_OnDisable')
 end
-
----------- START EVENT HANDLING ----------
-
-function GT:OnChatMessageSystem(event, message)
-	GT.CommGuild:OnChatMessageSystem(message)
-end
-
----------- END EVENT HANDLING ----------
 
 function GT:InitReset(tokens)
 	tokens = GT.Table:Lower(tokens)

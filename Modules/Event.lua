@@ -19,7 +19,8 @@ function Event:OnEnable()
 		TRADE_SKILL_UPDATE = 'TradeSkillUpdate',
 		CRAFT_UPDATE = 'TradeSkillUpdate',
 		CHAT_MSG_WHISPER = 'WhisperReceived',
-		CHAT_MSG_CHANNEL_NOTICE = 'ChannelNotice'
+		CHAT_MSG_CHANNEL_NOTICE = 'ChannelNotice',
+		CHAT_MSG_SYSTEM = 'ChatMessageSystem'
 	}
 
 	for event, methodName in pairs(EVENT_MAP) do
@@ -61,4 +62,8 @@ function Event:ChannelNotice(...)
 	if GT.Table:Contains(GT.Advertise.events, subEvent) then
 		GT.Advertise:ChannelNotice(subEvent, channelType, channelNumber)
 	end
+end
+
+function Event:ChatMessageSystem(event, message)
+	GT.CommGuild:ChatMessageSystem(message)
 end
