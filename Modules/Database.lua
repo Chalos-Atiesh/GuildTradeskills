@@ -33,6 +33,10 @@ function DB:OnEnable(force)
 		DB.db.global.professions = {}
 	end
 
+	if DB.db.global.uuid == nil then
+		DB.db.global.uuid = GT.Text:UUID()
+	end
+
 	DB.valid = DB:Validate()
 end
 
@@ -494,4 +498,24 @@ end
 
 function DB:SetCommEnabled(commEnabled)
 	DB.db.global.isCommEnabled = commEnabled
+end
+
+function DB:GetUUID()
+	return DB.db.global.uuid
+end
+
+function DB:PurgeGuild()
+	local guildCharacters = {}
+	for i = 1, GetNumGuildMembers() do
+		local guildName = GetGuildRosterInfo(i)
+		guildName = GT.Text:ConvertCharacterName(guildName)
+		table.insert(guildCharacters, guildName)
+	end
+
+	for characterName, _ in pairs(DB.db.char.characters) do
+		if not GT.Table:Contains(guildCharacters, characterName) then
+			GT.Log:Warn('DB_PurgeGuild_RemoveCharacter', characterName)
+			DB.db.char.characters[characterName] = nil
+		end
+	end
 end
