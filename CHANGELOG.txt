@@ -1,3 +1,7 @@
+4.2.1
+	Moved to a guild based voting system to decide who sends a post instead of whispering everyone individually. This should massively reduce the number of messages sent and received at scale.
+	Still maintaining addon whisper functionality to have the ability to add non-guild members.
+
 4.1.1
 	Fixed an issue where the profession name was not being set when created.
 
