@@ -2,6 +2,9 @@
 	<Script file='Command.lua'/>
 	<Script file='Log.lua'/>
 	<Script file='Comm.lua'/>
+	<Script file='CommWhisper.lua'/>
+	<Script file='CommGuild.lua'/>
+	<Script file='CommValidator.lua'/>
 	<Script file='Event.lua'/>
 	<Script file='Database.lua'/>
 	<Script file='Profession.lua'/>

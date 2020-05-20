@@ -2,8 +2,6 @@ local AddOnName = ...
 
 local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
-
 local Advertise = GT:NewModule('Advertise')
 GT.Advertise = Advertise
 
@@ -106,23 +104,23 @@ function Advertise:Advertise()
 	end
 
 	if firstProfession == nil then
-		GT.Log:PlayerWarn(L['ADVERTISE_NO_PROFESSIONS'])
+		GT.Log:PlayerWarn(GT.L['ADVERTISE_NO_PROFESSIONS'])
 		return
 	end
 
-	local firstMessage = string.gsub(L['ADVERTISE_FIRST_PROFESSION'], '%{{skill_count}}', firstSkillCount)
+	local firstMessage = string.gsub(GT.L['ADVERTISE_FIRST_PROFESSION'], '%{{skill_count}}', firstSkillCount)
 	firstMessage = string.gsub(firstMessage, '%{{profession_name}}', firstProfession.professionName)
-	local firstWhisper = string.gsub(L['ADVERTISE_FIRST_WHISPER'], '%{{profession_name}}', firstProfession.professionName)
+	local firstWhisper = string.gsub(GT.L['ADVERTISE_FIRST_WHISPER'], '%{{profession_name}}', firstProfession.professionName)
 
 	local secondMessage = ''
 	local secondWhisper = ''
 	if secondProfession ~= nil then
-		secondMessage = string.gsub(L['ADVERTISE_SECOND_PROFESSION'], '%{{skill_count}}', secondSkillCount)
+		secondMessage = string.gsub(GT.L['ADVERTISE_SECOND_PROFESSION'], '%{{skill_count}}', secondSkillCount)
 		secondMessage = string.gsub(secondMessage, '%{{profession_name}}', secondProfession.professionName)
-		secondWhisper = string.gsub(L['ADVERTISE_SECOND_WHISPER'], '%{{profession_name}}', secondProfession.professionName)
+		secondWhisper = string.gsub(GT.L['ADVERTISE_SECOND_WHISPER'], '%{{profession_name}}', secondProfession.professionName)
 	end
 
-	local message = string.gsub(L['ADVERTISE_ADVERTISEMENT'], '%{{first_profession}}', firstMessage)
+	local message = string.gsub(GT.L['ADVERTISE_ADVERTISEMENT'], '%{{first_profession}}', firstMessage)
 	message = string.gsub(message, '%{{second_profession}}', secondMessage)
 	message = string.gsub(message, '%{{first_whisper}}', firstWhisper)
 	message = string.gsub(message, '%{{second_whisper}}', secondWhisper)
@@ -145,10 +143,10 @@ function Advertise:ToggleAdvertising(tokens)
 		local message = nil
 		if GT.DB:IsAdvertising() then
 			GT.DB:SetAdvertising(false)
-			message = L['ADVERTISE_OFF']
+			message = GT.L['ADVERTISE_OFF']
 		else
 			GT.DB:SetAdvertising(true)
-			message = L['ADVERTISE_ON']
+			message = GT.L['ADVERTISE_ON']
 			Advertise:Advertise()
 		end
 		GT.Log:PlayerInfo(message)
@@ -156,20 +154,20 @@ function Advertise:ToggleAdvertising(tokens)
 	end
 
 	if tonumber(interval) == nil then
-		local message = string.gsub(L['ADVERTISING_INVALID_INTERVAL'], '%{{interval}}', interval)
+		local message = string.gsub(GT.L['ADVERTISING_INVALID_INTERVAL'], '%{{interval}}', interval)
 		GT.Log:PlayerError(message)
 		return
 	end
 
 	interval = tonumber(interval)
 	if interval < MINIMUM_INTERVAL then
-		local message = string.gsub(L['ADVERTISE_MINIMUM_INTERVAL'], '%{{interval}}', interval)
+		local message = string.gsub(GT.L['ADVERTISE_MINIMUM_INTERVAL'], '%{{interval}}', interval)
 		message = string.gsub(message, '%{{minimum_interval}}', MINIMUM_INTERVAL)
 		GT.Log:PlayerWarn(message)
 		interval = MINIMUM_INTERVAL
 	end
 
-	local message = string.gsub(L['ADVERTISE_SET_INTERVAL'], '%{{interval}}', interval)
+	local message = string.gsub(GT.L['ADVERTISE_SET_INTERVAL'], '%{{interval}}', interval)
 	GT.Log:PlayerInfo(message)
 	GT.DB:SetAdvertisingInterval(interval)
 end

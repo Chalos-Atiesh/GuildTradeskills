@@ -3,8 +3,6 @@ RCC = RAID_CLASS_COLORS
 
 local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
-
 local AceGUI = LibStub('AceGUI-3.0')
 
 local Search = GT:NewModule('Search')
@@ -40,13 +38,13 @@ local PROFESSIONS = {}
 function Search:OnEnable()
 	GT.Log:Info('Search_OnEnable')
 	PROFESSIONS = {
-		L['ALCHEMY'],
-		L['BLACKSMITHING'],
-		L['ENCHANTING'],
-		L['ENGINEERING'],
-		L['LEATHERWORKING'],
-		L['TAILORING'],
-		L['COOKING']
+		GT.L['ALCHEMY'],
+		GT.L['BLACKSMITHING'],
+		GT.L['ENCHANTING'],
+		GT.L['ENGINEERING'],
+		GT.L['LEATHERWORKING'],
+		GT.L['TAILORING'],
+		GT.L['COOKING']
 	}
 end
 
@@ -66,7 +64,7 @@ function Search:OpenSearch(tokens)
 	end
 
 	local mainFrame = AceGUI:Create('Frame')
-	mainFrame:SetTitle(L['LONG_TAG'])
+	mainFrame:SetTitle(GT.L['LONG_TAG'])
 	mainFrame:SetLayout('Flow')
 	mainFrame:ClearAllPoints()
 	mainFrame:SetCallback('OnClose', function(widget)
@@ -94,7 +92,7 @@ function Search:OpenSearch(tokens)
 
 	local resetFiltersButton = AceGUI:Create('Button')
 	resetFiltersButton:SetRelativeWidth(1/4)
-	resetFiltersButton:SetText(L['BUTTON_FILTERS_RESET'])
+	resetFiltersButton:SetText(GT.L['BUTTON_FILTERS_RESET'])
 	resetFiltersButton:SetCallback('OnClick', function()
 		Search.lastSkillClicked = nil
 		Search.lastSkillLinkClicked = nil
@@ -117,7 +115,7 @@ function Search:OpenSearch(tokens)
 	skillSearchContainer:ClearAllPoints()
 
 	local skillSearchBox = AceGUI:Create('EditBox')
-	skillSearchBox:SetLabel(L['SEARCH_SKILLS'])
+	skillSearchBox:SetLabel(GT.L['SEARCH_SKILLS'])
 	skillSearchBox:DisableButton(true)
 	if Search.skillSearchText ~= nil then
 		skillSearchBox:SetText(Search.skillSearchText)
@@ -138,7 +136,7 @@ function Search:OpenSearch(tokens)
 	reagentSearchContainer:ClearAllPoints()
 
 	local reagentSearchBox = AceGUI:Create('EditBox')
-	reagentSearchBox:SetLabel(L['SEARCH_REAGENTS'])
+	reagentSearchBox:SetLabel(GT.L['SEARCH_REAGENTS'])
 	reagentSearchBox:DisableButton(true)
 	if Search.reagentSearchText ~= nil then
 		reagentSearchBox:SetText(Search.reagentSearchText, true)
@@ -159,7 +157,7 @@ function Search:OpenSearch(tokens)
 	characterSearchContainer:ClearAllPoints()
 
 	local characterSearchBox = AceGUI:Create('EditBox')
-	characterSearchBox:SetLabel(L['SEARCH_CHARACTERS'])
+	characterSearchBox:SetLabel(GT.L['SEARCH_CHARACTERS'])
 	characterSearchBox:DisableButton(true)
 	if Search.characterSearchText ~= nil then
 		characterSearchBox:SetText(Search.characterSearchText)
@@ -182,28 +180,28 @@ function Search:OpenSearch(tokens)
 	mainFrame:AddChild(labelLine)
 
 	local profLabel = AceGUI:Create('Label')
-	profLabel:SetText(L['LABEL_PROFESSIONS'])
+	profLabel:SetText(GT.L['LABEL_PROFESSIONS'])
 	profLabel:SetRelativeWidth(1/4)
 	profLabel:SetColor(Search.labelR, Search.labelG, Search.labelB)
 	labelLine:AddChild(profLabel)
 	profLabel:ClearAllPoints()
 
 	local skillLabel = AceGUI:Create('Label')
-	skillLabel:SetText(L['LABEL_SKILLS'])
+	skillLabel:SetText(GT.L['LABEL_SKILLS'])
 	skillLabel:SetRelativeWidth(1/4)
 	skillLabel:SetColor(1, 0.82, 0)
 	labelLine:AddChild(skillLabel)
 	skillLabel:ClearAllPoints()
 
 	local reagentLabel = AceGUI:Create('Label')
-	reagentLabel:SetText(L['LABEL_REAGENTS'])
+	reagentLabel:SetText(GT.L['LABEL_REAGENTS'])
 	reagentLabel:SetRelativeWidth(1/4)
 	reagentLabel:SetColor(Search.labelR, Search.labelG, Search.labelB)
 	labelLine:AddChild(reagentLabel)
 	reagentLabel:ClearAllPoints()
 
 	local characterLabel = AceGUI:Create('Label')
-	characterLabel:SetText(L['LABEL_CHARACTERS'])
+	characterLabel:SetText(GT.L['LABEL_CHARACTERS'])
 	characterLabel:SetRelativeWidth(1/4)
 	characterLabel:SetColor(Search.labelR, Search.labelG, Search.labelB)
 	labelLine:AddChild(characterLabel)
@@ -577,9 +575,9 @@ function Search:PopulateCharacters(shouldCascade)
 	for _, key in ipairs(sortedKeys) do
 		local characterName = charactersToAdd[key]
 		local characterLabel = AceGUI:Create('InteractiveLabel')
-		local labelText = string.gsub(L['GUILD_OFFLINE'], '%{{guild_member}}', characterName)
+		local labelText = string.gsub(GT.L['GUILD_OFFLINE'], '%{{guild_member}}', characterName)
 		if GT.Table:Contains(onlineGuildMembers, characterName) then
-			labelText = string.gsub(L['GUILD_ONLINE'], '%{{guild_member}}', characterName)
+			labelText = string.gsub(GT.L['GUILD_ONLINE'], '%{{guild_member}}', characterName)
 			labelText = string.gsub(labelText, '%{{class_color}}', classColors[characterName])
 		end
 		characterLabel:SetText(labelText)
@@ -601,7 +599,7 @@ function Search:PopulateCharacters(shouldCascade)
 						local guildCharacterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
 						local tempCharacterName = GT.Text:ConvertCharacterName(guildCharacterName)
 						if online and tempCharacterName == characterName then
-							local msg = L['WHISPER_REQUEST']
+							local msg = GT.L['WHISPER_REQUEST']
 							msg = string.gsub(msg, '%{{character_name}}', characterName)
 							msg = string.gsub(msg, '%{{item_link}}', Search.lastSkillLinkClicked)
 							ChatThrottleLib:SendChatMessage('ALERT', 'GT', msg, 'WHISPER', 'Common', guildCharacterName)
@@ -609,11 +607,11 @@ function Search:PopulateCharacters(shouldCascade)
 						end
 					end
 					if not whisperSent then
-						GT.Log:PlayerWarn(string.gsub(L['WHISPER_NO_CHARACTER_FOUND'], '%{{character_name}}', characterName))
+						GT.Log:PlayerWarn(string.gsub(GT.L['WHISPER_NO_CHARACTER_FOUND'], '%{{character_name}}', characterName))
 					end
 
 				elseif Search.lastSkillLinkClicked == nil then
-					GT.Log:PlayerWarn(L['WHISPER_SELECT_REQUIRED'])
+					GT.Log:PlayerWarn(GT.L['WHISPER_SELECT_REQUIRED'])
 				end
 			else
 				Search.lastSkillClicked = nil

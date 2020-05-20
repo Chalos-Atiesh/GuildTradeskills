@@ -2,8 +2,6 @@ local AddOnName = ...
 
 local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
-
 local Command = GT:NewModule('Command')
 GT.Command = Command
 GT.Command.tokens = nil
@@ -25,7 +23,7 @@ local devCommands = {
 
 function Command:OnEnable()
 	GT.Log:Info('Command_OnEnable')
-	for command, info in pairs(L['SLASH_COMMANDS']) do
+	for command, info in pairs(GT.L['SLASH_COMMANDS']) do
 		GT.RegisterChatCommand(self, command, info.methodName)
 	end
 	for devCommand, info in pairs(devCommands) do
@@ -45,14 +43,14 @@ function Command:OnCommand(input)
 	userCommand = string.lower(userCommand)
 	Command.tokens = tokens
 
-	local publicDidRun = Command:DoCommand(L['SLASH_COMMANDS']['gt'].subCommands, userCommand)
+	local publicDidRun = Command:DoCommand(GT.L['SLASH_COMMANDS']['gt'].subCommands, userCommand)
 	local devDidRun = Command:DoCommand(devCommands, userCommand)
 
 	if publicDidRun or devDidRun then
 		return
 	end
 
-	GT.Log:PlayerWarn(string.gsub(L['UNKNOWN_COMMAND'], '%{{command}}', userCommand))
+	GT.Log:PlayerWarn(string.gsub(GT.L['UNKNOWN_COMMAND'], '%{{command}}', userCommand))
 end
 
 function Command:DoCommand(commands, userCommand)
@@ -69,7 +67,7 @@ end
 
 function Command:Help()
 	GT.Log:Info('Command_Help')
-	Command:_Help(L['SLASH_COMMANDS'])
+	Command:_Help(GT.L['SLASH_COMMANDS'])
 end
 
 function GT.Command:_Help(commands)

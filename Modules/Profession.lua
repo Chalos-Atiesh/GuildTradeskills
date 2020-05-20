@@ -1,9 +1,6 @@
 local AddOnName = ...
 
 local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
-
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
-
 local Profession = GT:NewModule('Profession')
 GT.Profession = Profession
 
@@ -12,10 +9,10 @@ Profession.adding = false
 function Profession:InitAddProfession()
 	GT.Log:Info('Profession_AddProfession')
 	if not Profession.adding then
-		GT.Log:PlayerInfo(L['PROFESSION_ADD_INIT'])
+		GT.Log:PlayerInfo(GT.L['PROFESSION_ADD_INIT'])
 		Profession.adding = true
 	else
-		GT.Log:PlayerInfo(L['PROFESSION_ADD_CANCEL'])
+		GT.Log:PlayerInfo(GT.L['PROFESSION_ADD_CANCEL'])
 		Profession.adding = false
 	end
 end
@@ -38,7 +35,7 @@ function Profession:AddProfession()
 		GT.Log:Info('Profession_AddProfession', characterName, professionName)
 		profession = GT.DB:AddProfession(characterName, professionName)
 
-		local msg = L['PROFESSION_ADD_SUCCESS']
+		local msg = GT.L['PROFESSION_ADD_SUCCESS']
 		msg = string.gsub(msg, '%{{character_name}}', characterName)
 		msg = string.gsub(msg, '%{{profession_name}}', professionName)
 		GT.Log:PlayerInfo(msg)
@@ -58,10 +55,13 @@ function Profession:AddProfession()
 		GT.Log:Info('Profession_AddProfession_NilProfession', professionName)
 		return
 	end
-
+	--[===[@non-debug@
 	if updated then
-		GT.Comm:SendTimestamps()
+	--@end-non-debug@]===]
+		GT.CommGuild:RequestStartVote()
+	--[===[@non-debug@
 	end
+	--@end-non-debug@]===]
 
 	Profession.adding = false
 end
@@ -111,7 +111,7 @@ function Profession:UpdateProfession(profession)
 			for j = 1, GetTradeSkillNumReagents(i) do
 				local reagentName, _, reagentCount = GetTradeSkillReagentInfo(i, j)
 				if reagentName then
-					GT.Log:Info('Profession_UpdateProfession_AddReagent', profession.professionName, skillName, reagentName, reagentCount)
+					-- GT.Log:Info('Profession_UpdateProfession_AddReagent', profession.professionName, skillName, reagentName, reagentCount)
 					GT.DB:AddReagent(profession.professionName, skillName, reagentName, reagentCount)
 				end
 			end
@@ -124,7 +124,7 @@ end
 function Profession:DeleteProfession(characterName, professionName)
 	GT.Log:Info('Profession_RemoveProfession', characterName, professionName)
 	if professionName == nil then
-		GT.Log:PlayerError(L['PROFESSION_REMOVE_NIL_PROFESSION'])
+		GT.Log:PlayerError(GT.L['PROFESSION_REMOVE_NIL_PROFESSION'])
 		return
 	end
 
@@ -140,12 +140,12 @@ function Profession:DeleteProfession(characterName, professionName)
 	end
 
 	if removed then
-		local message = string.gsub(L['PROFESSION_REMOVE_SUCCESS'], '%{{character_name}}', characterName)
+		local message = string.gsub(GT.L['PROFESSION_REMOVE_SUCCESS'], '%{{character_name}}', characterName)
 		message = string.gsub(message, '%{{profession_name}}', professionName)
 		GT.Log:PlayerInfo(message)
 		GT.Comm:SendDeletions()
 	else
-		local message = string.gsub(L['PROFESSION_REMOVE_NOT_FOUND'], '%{{character_name}}', characterName)
+		local message = string.gsub(GT.L['PROFESSION_REMOVE_NOT_FOUND'], '%{{character_name}}', characterName)
 		message = string.gsub(message, '%{{profession_name}}', professionName)
 		GT.Log:PlayerError(message)
 	end

@@ -2,8 +2,6 @@ local AddOnName = ...
 
 local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
-
 local Whisper = GT:NewModule('Whisper')
 GT.Whisper = Whisper
 
@@ -19,7 +17,7 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	GT.Log:Info('Whisper_OnWhisperReceived', sender, message)
 
 	local firstChar = string.sub(message, 1, 1)
-	if firstChar ~= L['TRIGGER_CHAR'] then
+	if firstChar ~= GT.GT.L['TRIGGER_CHAR'] then
 		GT.Log:Info('Whisper_OnWhisperReceived_NoTrigger', sender, message)
 		return
 	end
@@ -32,7 +30,7 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		searchTerm = nil
 	end
 
-	if string.lower(professionSearch) == L['WHISPER_HELP_ME'] then
+	if string.lower(professionSearch) == GT.GT.L['WHISPER_HELP_ME'] then
 		Whisper:Help(sender)
 		return
 	end
@@ -66,17 +64,17 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		end
 
 		if firstProfessionName == nil then
-			Whisper:SendResponse(sender, L['WHISPER_NIL_PROFESSIONS'], searchTerm)
+			Whisper:SendResponse(sender, GT.L['WHISPER_NIL_PROFESSIONS'], searchTerm)
 			return
 		end
 
-		local firstWhisper = string.gsub(L['WHISPER_FIRST_PROFESSION'], '%{{profession_name}}', firstProfessionName)
+		local firstWhisper = string.gsub(GT.L['WHISPER_FIRST_PROFESSION'], '%{{profession_name}}', firstProfessionName)
 		local secondWhisper = ''
 		if secondProfessionName ~= nil then
-			secondWhisper = string.gsub(L['WHISPER_SECOND_PROFESSION'], '%{{profession_name}}', secondProfessionName)
+			secondWhisper = string.gsub(GT.L['WHISPER_SECOND_PROFESSION'], '%{{profession_name}}', secondProfessionName)
 		end
 
-		local returnMessage = string.gsub(L['WHISPER_PROFESSION_NOT_FOUND'], '%{{profession_search}}', professionSearch)
+		local returnMessage = string.gsub(GT.L['WHISPER_PROFESSION_NOT_FOUND'], '%{{profession_search}}', professionSearch)
 		returnMessage = string.gsub(returnMessage, '%{{first_profession}}', firstWhisper)
 		returnMessage = string.gsub(returnMessage, '%{{second_profession}}', secondWhisper)
 		
@@ -148,7 +146,7 @@ function Whisper:_SendResponse(recipient, professionName, skills, page)
 	end
 
 	if firstIndex > skillCount then
-		local msg = string.gsub(L['WHISPER_INVALID_PAGE'], '%{{page}}', tostring(page))
+		local msg = string.gsub(GT.L['WHISPER_INVALID_PAGE'], '%{{page}}', tostring(page))
 		msg = string.gsub(msg, '%{{max_pages}}', totalPages)
 		GT.Log:Info('Whisper_SendResponse_InvalidPage', recipient, professionName, msg)
 		ChatThrottleLib:SendChatMessage('ALERT', PREFIX, msg, 'WHISPER', 'Common', recipient)
@@ -156,7 +154,7 @@ function Whisper:_SendResponse(recipient, professionName, skills, page)
 	end
 
 	if totalPages > 1 then
-		local msg = string.gsub(L['WHISPER_HEADER'], '%{{current_page}}', page)
+		local msg = string.gsub(GT.L['WHISPER_HEADER'], '%{{current_page}}', page)
 		msg = string.gsub(msg, '%{{total_pages}}', tostring(totalPages))
 		msg = string.gsub(msg, '%{{total_skills}}', tostring(skillCount))
 		GT.Log:Info('Whisper_SendResponse_Header', recipient, professionName, searchTerm, msg)
@@ -169,7 +167,7 @@ function Whisper:_SendResponse(recipient, professionName, skills, page)
 	for _, key in ipairs(sortedKeys) do
 		if i + 1 > firstIndex and i < lastIndex then
 			local skillLink = skills[key]
-			msg = string.gsub(L['WHISPER_ITEM'], '%{{number}}', tostring(count + 1))
+			msg = string.gsub(GT.L['WHISPER_ITEM'], '%{{number}}', tostring(count + 1))
 			msg = string.gsub(msg, '%{{skill_link}}', skillLink)
 			GT.Log:Info('Whisper_SendResponse_Item', recipient, professionName, searchTerm, msg)
 			ChatThrottleLib:SendChatMessage('ALERT', PREFIX, msg, 'WHISPER', 'Common', recipient)
@@ -180,12 +178,12 @@ function Whisper:_SendResponse(recipient, professionName, skills, page)
 
 	if totalPages > 1 then
 		if page < totalPages then
-			msg = string.gsub(L['WHISPER_FOOTER'], '%{{profession_name}}', professionName)
+			msg = string.gsub(GT.L['WHISPER_FOOTER'], '%{{profession_name}}', professionName)
 			msg = string.gsub(msg, '%{{next_page}}', tostring(page + 1))
 			GT.Log:Info('Whisper_SendResponse_Footer', recipient, professionName, searchTerm, msg)
 			ChatThrottleLib:SendChatMessage('ALERT', PREFIX, msg, 'WHISPER', 'Common', recipient)
 		else
-			msg = string.gsub(L['WHISPER_FOOTER_LAST_PAGE'], '%{{profession_name}}', professionName)
+			msg = string.gsub(GT.L['WHISPER_FOOTER_LAST_PAGE'], '%{{profession_name}}', professionName)
 			GT.Log:Info('Whisper_SendResponse_FooterLastPage', recipient, professionName, searchTerm, msg)
 			ChatThrottleLib:SendChatMessage('ALERT', PREFIX, msg, 'WHISPER', 'Common', recipient)
 		end

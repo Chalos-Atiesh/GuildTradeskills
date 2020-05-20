@@ -2,8 +2,6 @@ local AddOnName = ...
 
 local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
-
 local AceGUI = LibStub('AceGUI-3.0')
 
 local Log = GT:NewModule('Log')
@@ -127,7 +125,7 @@ end
 function Log:SetChatFrame(frameName)
 	Log:Info('Log_SetChatFrame', frameName)
 	if frameName == nil then
-		Log:PlayerWarn(L['CHAT_FRAME_NIL'])
+		Log:PlayerWarn(GT.L['CHAT_FRAME_NIL'])
 	end
 
 	for i = 1, NUM_CHAT_WINDOWS do
@@ -135,12 +133,12 @@ function Log:SetChatFrame(frameName)
 		local shown = select(7, GetChatWindowInfo(i))
 		if name ~= '' and string.lower(name) == string.lower(frameName) and shown then
 			GT.DB:SetChatFrameNumber(i)
-			local msg = string.gsub(L['CHAT_WINDOW_SUCCESS'], '%{{frame_name}}', name)
+			local msg = string.gsub(GT.L['CHAT_WINDOW_SUCCESS'], '%{{frame_name}}', name)
 			Log:PlayerInfo(msg)
 			return
 		end
 	end
-	local msg = string.gsub(L['CHAT_WINDOW_INVALID'], '%{{frame_name}}', frameName)
+	local msg = string.gsub(GT.L['CHAT_WINDOW_INVALID'], '%{{frame_name}}', frameName)
 	Log:PlayerError(msg)
 end
 
@@ -154,7 +152,7 @@ function Log:_Log(logLevel, ...)
 	if logLevel < PLAYER_INFO and #logMessage >= LOG_LINE_LENGTH_LIMIT then
 		printMessage = string.sub(logMessage, 0, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
 	end
-	printMessage = Log:_FormatLogLine(printMessage, color, L['LOG_TAG'])
+	printMessage = Log:_FormatLogLine(printMessage, color, GT.L['LOG_TAG'])
 	logMessage = Log:_FormatLogLine(logMessage, color, '')
 
 	if GTDB ~= nil and GTDB.log ~= nil then
@@ -215,7 +213,7 @@ function Log:DBDump()
 	local editBox = Log:GetEditBox()
 	local characterDump = GT.Text:FormatTable(GT.DB:GetCharacters())
 	local professionDump = GT.Text:FormatTable(GT.DB:GetProfessions())
-	local text = GT.Text:Concat('\n', L['CHARACTERS'], characterDump, L['PROFESSIONS'], professionDump)
+	local text = GT.Text:Concat('\n', GT.L['CHARACTERS'], characterDump, GT.L['PROFESSIONS'], professionDump)
 	editBox:SetText(text)
 	editBox:HighlightText(0, #text)
 end
@@ -227,7 +225,7 @@ function Log:GetEditBox()
 		widget:ReleaseChildren()
 		AceGUI:Release(widget)
 	end)
-	frame:SetTitle(L['LOG_DUMP'])
+	frame:SetTitle(GT.L['LOG_DUMP'])
 	frame:SetLayout('Flow')
 
 	_G['GT_CopyLogFrame'] = frame.frame
