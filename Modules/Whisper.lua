@@ -17,7 +17,7 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	GT.Log:Info('Whisper_OnWhisperReceived', sender, message)
 
 	local firstChar = string.sub(message, 1, 1)
-	if firstChar ~= GT.GT.L['TRIGGER_CHAR'] then
+	if firstChar ~= GT.L['TRIGGER_CHAR'] then
 		GT.Log:Info('Whisper_OnWhisperReceived_NoTrigger', sender, message)
 		return
 	end
@@ -30,7 +30,7 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		searchTerm = nil
 	end
 
-	if string.lower(professionSearch) == GT.GT.L['WHISPER_HELP_ME'] then
+	if string.lower(professionSearch) == GT.L['WHISPER_HELP_ME'] then
 		Whisper:Help(sender)
 		return
 	end
