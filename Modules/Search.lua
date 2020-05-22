@@ -565,7 +565,7 @@ function Search:PopulateCharacters(shouldCascade)
 	for i=1,countTotalMembers do
 		local characterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
 		if online then
-			characterName = GT.Text:ConvertCharacterName(characterName)
+			characterName = Ambiguate(characterName)
 			table.insert(onlineGuildMembers, characterName)
 			classColors[characterName] = RCC[string.upper(class)]['colorStr']
 		end
@@ -584,7 +584,7 @@ function Search:PopulateCharacters(shouldCascade)
 		characterLabel:SetHighlight("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 		characterLabel:SetCallback('OnClick', function(widget, event, button)
 			local labelText = widget.label:GetText()
-			local characterName = GT.Text:ConvertCharacterName(labelText)
+			local characterName = Ambiguate(labelText)
 			characterName = string.sub(characterName, 11)
 			characterName = string.sub(characterName, 0, #characterName - 3)
 			if button == 'RightButton' then
@@ -597,7 +597,7 @@ function Search:PopulateCharacters(shouldCascade)
 					local totalGuildMembers = GetNumGuildMembers()
 					for i = 1, totalGuildMembers do
 						local guildCharacterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
-						local tempCharacterName = GT.Text:ConvertCharacterName(guildCharacterName)
+						local tempCharacterName = Ambiguate(guildCharacterName)
 						if online and tempCharacterName == characterName then
 							local msg = GT.L['WHISPER_REQUEST']
 							msg = string.gsub(msg, '%{{character_name}}', characterName)

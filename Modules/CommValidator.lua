@@ -206,3 +206,16 @@ function CommValidator:IsPostValid(message)
 	end
 	return true
 end
+
+function CommValidator:IsRequestValid(message)
+	local _, countDash = string.gsub(message, '-', '-')
+	if #message ~= 36 then
+		GT.Log:Error('CommValidator_IsRequestValid_IvalidLength', 36, #message, message)
+		return false
+	end
+	if countDash ~= 4 then
+		GT.Log:Error('CommValidator_IsRequestValid_InvalidDashCount', 4, countDash, message)
+		return false
+	end
+	return true
+end

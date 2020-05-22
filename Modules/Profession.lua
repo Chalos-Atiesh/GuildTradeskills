@@ -121,8 +121,12 @@ function Profession:UpdateProfession(profession)
 	return updated
 end
 
-function Profession:DeleteProfession(characterName, professionName)
-	GT.Log:Info('Profession_RemoveProfession', characterName, professionName)
+function Profession:DeleteProfession(tokens)
+	GT.Log:Info('Profession_RemoveProfession', tokens)
+
+	local characterName = UnitName('player')
+	local professionName = GT.Table:RemoveToken(Command.tokens)
+	
 	if professionName == nil then
 		GT.Log:PlayerError(GT.L['PROFESSION_REMOVE_NIL_PROFESSION'])
 		return

@@ -58,6 +58,18 @@ if L then
 				advertise = {
 					methodName = 'ToggleAdvertising',
 					help = YELLOW .. '/gt advertise' .. COLOR_END .. ': Toggles whether you are advertising.' .. YELLOW .. ' /gt advertise {seconds}' .. COLOR_END .. ': Sets the number of seconds between advertisements.'
+				},
+				add = {
+					methodName = 'SendRequest',
+					help = YELLOW .. '/gt add {character_name}' .. COLOR_END .. ': Requests to add a specific character.'
+				},
+				reject = {
+					methodName = 'RejectRequest',
+					help = YELLOW .. '/gt reject {character_name}' .. COLOR_END .. ': Rejects someone\'s request to add you. They can request again.'
+				},
+				ignore = {
+					methodName = 'IgnoreRequest',
+					help = YELLOW .. '/gt ignore {character_name}' .. COLOR_END .. ': Ignores that person. No requests from that account should get through.'
 				}
 			}
 		}
@@ -180,6 +192,57 @@ if L then
 
 	L['GUILD_MEMBER_ONLINE'] = '^.*%[(.*)%].* has come online'
 	L['GUILD_MEMBER_OFFLINE'] = '(.*) has gone offline'
+	L['PLAYER_NOT_FOUND'] = 'Player not found'
 
 	---------- SYSTEM END ----------
+	---------- NON-GUILD REQUEST START ----------
+	L['PLAYER_REQUEST_NIL'] = 'You must pass a character name. \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['PLAYER_REQUEST_NOT_FOUND'] = 'Whoops! Looks like the character \'{{character_name}}\' does not exist.'
+	L['PLAYER_REQUEST_REPEAT'] = 'You already have an outstanding request to {{character_name}}. You cannot send another.'
+	L['PLAYER_REQUEST_OFFLINE'] = '{{character_name}} is offline. The request will be sent when you both are online at the same time.'
+	L['PLAYER_REQUEST_SENT'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
+	L['PLAYER_REQUEST_SENT_TIMEOUT'] = 
+	L['PLAYER_REQUEST_MAX'] = 'You cannot have more than {{max_requests}} pending requests.'
+
+	L['PLAYER_REQUEST_RECEIVED'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
+	L['PLAYER_REQUEST_CONFIRM_OFFLINE'] = '{{character_name}} is offline. We will confirm wwith them when you are both online at the same time.'
+	L['PLAYER_REQUEST_CONFIRM_OUTGOING'] = 'Confirmation was sent to {{character_name}}! You should see their items shortly.'
+	L['PLAYER_REQUEST_CONFIRM_INCOMING'] = 'Got confirmation from {{character_name}}! You should see their items shortly.'
+
+
+
+
+	L['REQUEST_CHARACTER_NIL'] = 'You must pass a character name. \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['REQUEST_CHARACTER_NOT_FOUND'] = 'Whoops! Looks like the character \'{{character_name}}\' does not exist.'
+	L['REQUEST_MAX_COUNT'] = 'You cannot have more than {{max_requests}} pending requests.'
+	L['REQUEST_OUTGOING_REPEAT'] = 'You already have an outstanding request to {{character_name}}. You cannot send another.'
+
+	L['COMM_QUEUE_INCOMING_REQUEST'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
+	L['COMM_QUEUE_OUTGOING_REQUEST'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
+	L['COMM_QUEUE_INCOMING_CONFIRM'] = '{{character_name}} has accepted your request! You should see their items shortly.'
+	L['COMM_QUEUE_OUTGOING_CONFIRM'] = 'Accepted request from {{character_name}}! You should see their items shortly.'
+	L['COMM_QUEUE_INCOMING_REJECT'] = '{{character_name}} has rejected your invitation.'
+	L['COMM_QUEUE_OUTGOING_REJECT'] = 'Your rejection has been sent to {{character_name}}.'
+	L['COMM_QUEUE_INCOMING_IGNORE'] = 'You have been ignored by {{character_name}}. You can no longer send requests to them.'
+	L['COMM_QUEUE_OUTGOING_IGNORE'] = '{{character_name}} has been notified that they have been ignored.'
+
+	L['COMM_QUEUE_INCOMING_REQUEST_TIMEOUT'] = 'Your message to {{character_name}} has timed out and has been canceled. You can re-request with \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['COMM_QUEUE_OUTGOING_REQUEST_TIMEOUT'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
+	L['COMM_QUEUE_INCOMING_CONFIRM_TIMEOUT'] = 'Got confirmation from {{character_name}}! You should see their items shortly.'
+	L['COMM_QUEUE_OUTGOING_CONFIRM_TIMEOUT'] = 'Your confirmation to {{character_name}} has timed out. You can refresh it with \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['COMM_QUEUE_INCOMING_REJECT_TIMEOUT'] = 'This shouldn\'t ever happen. The incoming rejection from {{character_name}} has timed out.'
+	L['COMM_QUEUE_OUTGOING_REJECT_TIMEOUT'] = 'Your rejection to {{character_name}} has timed out. You can refresh it with \'' .. YELLOW .. '/gt reject {character_name}' .. COLOR_END .. '\'.'
+	L['COMM_QUEUE_INCOMING_IGNORE_TIMEOUT'] = 'This shouldn\'t ever happen. The incoming ignore from {{character_name}} has timed out.'
+	L['COMM_QUEUE_OUTGOING_IGNORE_TIMEOUT'] = 'Your ignore of {{character_name}} has timed out. However you will still not receive requests from them.'
+
+	L['COMM_QUEUE_INCOMING_REQUEST_OFFLINE'] = 'This shouldn\'t ever happen. An incoming request from {{character_name}} came in when you were offline.'
+	L['COMM_QUEUE_OUTGOING_REQUEST_OFFLINE'] = '{{character_name}} is offline. The request will be sent when you both are online at the same time.'
+	L['COMM_QUEUE_INCOMING_CONFIRM_OFFLINE'] = 'This shouldn\'t ever happen. An incoming confirm from {{character_name}} came in when you were offline.'
+	L['COMM_QUEUE_OUTGOING_CONFIRM_OFFLINE'] = '{{character_name}} is offline. We will confirm wwith them when you both are online at the same time.'
+	L['COMM_QUEUE_INCOMING_REJECT_OFFLINE'] = 'This shouldn\'t ever happen. An incoming rejection from {{character_name}} came in when you were offline.'
+	L['COMM_QUEUE_OUTGOING_REJECT_OFFLINE'] = '{{character_name}} is offline. The rejection will be sent when you both are online at the same time.'
+	L['COMM_QUEUE_INCOMING_IGNORE_OFFLINE'] = 'This shouldn\'t ever happen. An incoming ignore from {{character_name}} came in when you were offline.'
+	L['COMM_QUEUE_OUTGOING_IGNORE_OFFLINE'] = '{{character_name}} is offline so the ignore cannot be sent but you will stop receiving requests from them.'
+
+	---------- NON-GUILD REQUEST END ----------
 end

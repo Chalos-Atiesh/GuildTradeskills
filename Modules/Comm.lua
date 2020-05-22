@@ -51,6 +51,35 @@ function Comm:OnEnable()
 	end
 end
 
+function Comm:SendTimestamps(distribution, recipient)
+	GT.Log:Info('Comm_SendTimestamps', distribution, recipient)
+	if not GT.DB:IsCommEnabled() then
+		GT.Log:Warn('Comm_SendTimestamps_CommDisabled')
+		return
+	end
+
+	local characters = GT.DB:GetCharacters()
+	local professionStrings = {}
+	for characterName, _ in pairs(characters) do
+		local professions = characters[characterName].professions
+		for professionName, _ in pairs(professions) do
+			local profession = professions[professionName]
+			local professionString = GT.Text:Concat(Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
+			table.insert(professionStrings, professionString)
+		end
+	end
+
+	local message = nil
+	if #professionStrings > 0 then
+		message = table.concat(professionStrings, Comm.DELIMITER)
+	else
+		message = GT.Text:Concat(Comm.DELIMITER, characterName, 'None', 0)
+	end
+
+	GT.Log:Info('Comm_SendTimestamps_Exit', message)
+	Comm:SendCommMessage(Comm.TIMESTAMP, message, distribution, recipient, 'NORMAL')
+end
+
 function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 	local characterName = UnitName('player')
 	if sender == characterName and distribution ~= Comm.GUILD then
@@ -151,7 +180,7 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 	local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
 	lastUpdate = tonumber(lastUpdate)
 
-	GT.Log:Info('Comm_OnGetReceived_AcceptFormat', prefix, distribution, sender, characterName, professionName, lastUpdate)
+	GT.Log:Info('Comm_OnPostReceived_AcceptFormat', prefix, distribution, sender, characterName, professionName, lastUpdate)
 
 	local localCharacterName = UnitName('player')
 	if characterName == localCharacterName then

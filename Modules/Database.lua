@@ -21,6 +21,10 @@ function DB:OnEnable(force)
 		DB.db.global = {}
 	end
 
+	if DB.db.global.uuid == nil then
+		DB.db.global.uuid = GT.Text:UUID()
+	end
+
 	if DB.db.char.characters == nil or force then
 		DB.db.char.characters = {}
 	end
@@ -29,15 +33,176 @@ function DB:OnEnable(force)
 		DB.db.char.search = {}
 	end
 
-	if DB.db.global.professions == nil or force then
-		DB.db.global.professions = {}
+	if DB.db.global.incomingCommQueues == nil then
+		DB.db.global.incomingCommQueues = {}
 	end
 
-	if DB.db.global.uuid == nil then
-		DB.db.global.uuid = GT.Text:UUID()
+	if DB.db.global.outgoingCommQueues == nil then
+		DB.db.global.outgoingCommQueues = {}
+	end
+
+	if DB.db.global.rejections == nil then
+		DB.db.global.rejections = {}
+	end
+
+	if DB.db.global.ignored == nil then
+		DB.db.global.ignored = {}
 	end
 
 	DB.valid = DB:Validate()
+end
+
+function DB:InitIncomingCommQueue(queueName, command)
+	if DB.db.global.incomingCommQueues[queueName] == nil then
+		DB.db.global.incomingCommQueues[queueName] = {}
+	end
+	local queue = DB.db.global.incomingCommQueues[queueName]
+	DB:InitCommQueue(queue, queueName, command)
+end
+
+function DB:InitOutgoingCommQueue(queueName, command)
+	if DB.db.global.outgoingCommQueues[queueName] == nil then
+		DB.db.global.outgoingCommQueues[queueName] = {}
+	end
+	local queue = DB.db.global.outgoingCommQueues[queueName]
+	DB:InitCommQueue(queue, queueName, command)
+end
+
+function DB:InitCommQueue(queue, queueName, command)
+	if queue.queue == nil then
+		queue.queue = {}
+	end
+	queue.queueName = queueName
+	queue.command = command
+end
+
+function DB:GetIncomingCommQueues()
+	return DB.db.global.incomingCommQueues
+end
+
+function DB:GetOutgoingCommQueues()
+	return DB.db.global.incomingCommQueues
+end
+
+function DB:GetCommQueue(queueName)
+	if DB.db.global.commQueues[queueName] == nil then
+		return {}
+	end
+	return DB.db.global.commQueues[queueName]
+end
+
+function DB:GetCommQueueForCharacter(characterName)
+	if characterName == nil then
+		GT.Log:Error('DB_GetCommQueueName_NilCharacterName')
+		return nil
+	end
+	characterName = string.lower(characterName)
+
+	local queues = DB:GetCommQueues()
+	for queueName, _ in pairs(queues) do
+		local queue = queues[queueName]
+		local command = queue.command
+		for uuid, _ in pairs(queue.queue) do
+			local uuidQueue = queue[uuid]
+			for tempCharacterName, timestamp in pairs(uuidQueue) do
+				if tempCharacterName == characterName then
+					return queue, uuid
+				end
+			end
+		end
+	end
+	return nil, nil
+end
+
+function DB:GetPendingComm(queueName, uuid, characterName)
+	if queueName == nil
+		or characterName == nil
+	then
+		GT.Log:Warn('DB_GetPendingComm_NilCommField', queueName, uuid, GT.Text:ToString(characterName))
+		return nil, nil
+	end
+
+	if uuid ~= nil then
+		uuid = string.lower(uuid)
+	end
+	characterName = string.lower(characterName)
+
+	if DB.db.global.commQueues[queueName] == nil then
+		GT.Log:Warn('DB_GetPendingComm_NilQueue', queueName, uuid, GT.Text:ToString(characterName))
+		return nil, nil
+	end
+
+	local commQueue = DB.db.global.commQueues[queueName].queue
+
+	if uuid ~= nil and characterName ~= nil then
+		if commQueue[uuid] == nil then
+			return nil, nil
+		end
+		local timestamp = commQueue[characterName]
+		return characterName, timestamp
+	end
+
+	if uuid == nil then
+		for tempUUID, _ in pairs(commQueue) do
+			local tempCharacterName, timestamp = commQueue[tempUUID]
+			if characterName == tempCharacterName then
+				return tempCharacterName, timestamp
+			end
+		end
+		return nil, nil
+	end
+	return nil, nil
+end
+
+function DB:AddPendingComm(queueName, uuid, characterName)
+	if queueName == nil
+		or uuid == nil
+		or characterName == nil
+	then
+		GT.Log:Warn('DB_AddPendingComm_NilArg', queueName, uuid, GT.Text:ToString(characterName))
+		return false
+	end
+
+	uuid = string.lower(uuid)
+	characterName = string.lower(characterName)
+
+	if DB.db.global.commQueues[queueName] == nil then
+		GT.Log:Warn('DB_AddPendingComm_NilQueue', queueName, uuid, GT.Text.ToString(characterName))
+		return false
+	end
+
+	local commQueue = DB.db.global.commQueues[queueName].queue
+
+	commQueue = GT.Table:InsertField(commQueue, uuid)
+	local pendingUUID = commQueue[uuid]
+	if GT.Table:Contains(pendingUUID, characterName) then
+		GT.Log:Warn('DB_AddPendingComm_Exists', queueName, uuid, characterName)
+		return false
+	end
+
+	pendingUUID = GT.Table:Insert(pendingUUID, characterName, time())
+	return true
+end
+
+function DB:RemovePendingComm(queueName, uuid, characterName)
+	if queueName == nil
+		or characterName == nil
+	then
+		GT.Log:Warn('DB_RemovePendingComm_NilValue', queueName, uuid, GT.Text:ToString(characterName))
+		return nil, nil
+	end
+
+	uuid = string.lower(uuid)
+	characterName = string.lower(characterName)
+
+	local pendingCharacterName, timestamp = DB:GetPendingComm(queueName, uuid, characterName)
+	if pendingCharacterName == nil then
+		GT.Log:Warn('DB_RemovePendingComm_NilSearch', queueName, uuid, characterName)
+		return nil, nil
+	end
+
+	DB.db.global.commQueues[uuid].queue[characterName] = nil
+	return pendingCharacterName, timestamp
 end
 
 function DB:Reset(force)
@@ -105,6 +270,7 @@ function DB:AddCharacter(characterName)
 	if character.deletedProfessions == nil then
 		character.deletedProfessions = {}
 	end
+	character.isRando = false
 	return character
 end
 
@@ -325,7 +491,11 @@ function DB:_ValidateData()
 			GT.Log:Error('Invalid character name', characterName)
 			return false
 		end
-		local professions = DB.db.char.characters[characterName].professions
+		local character = DB.db.char.characters[characterName]
+		if character.isRando == nil then
+			character.isRando = false
+		end
+		local professions = character.professions
 		for professionName, _ in pairs(professions) do
 			if tonumber(professionName) ~= nil 
 				or string.find(professionName, ']')
@@ -508,8 +678,7 @@ function DB:PurgeGuild()
 	local guildCharacters = {}
 	for i = 1, GetNumGuildMembers() do
 		local guildName = GetGuildRosterInfo(i)
-		guildName = GT.Text:ConvertCharacterName(guildName)
-		table.insert(guildCharacters, guildName)
+		table.insert(guildCharacters, Ambiguate(guildName, 'none'))
 	end
 
 	for characterName, _ in pairs(DB.db.char.characters) do

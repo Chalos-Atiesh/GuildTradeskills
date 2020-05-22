@@ -66,7 +66,7 @@ function Command:DoCommand(commands, userCommand)
 end
 
 function Command:Help()
-	GT.Log:Info('Command_Help')
+	GT.Log:Info('Command_Help', Command.tokens)
 	Command:_Help(GT.L['SLASH_COMMANDS'])
 end
 
@@ -80,15 +80,13 @@ function GT.Command:_Help(commands)
 end
 
 function Command:InitAddProfession()
-	GT.Log:Info('Command_InitAddProfession')
-	GT.Profession:InitAddProfession()
+	GT.Log:Info('Command_InitAddProfession', Command.tokens)
+	GT.Profession:InitAddProfession(Command.tokens)
 end
 
 function Command:RemoveProfession()
 	GT.Log:Info('Command_RemoveProfession', Command.tokens)
-	local professionName = GT.Table:RemoveToken(Command.tokens)
-	local characterName = UnitName('player')
-	GT.Profession:DeleteProfession(characterName, professionName)
+	GT.Profession:DeleteProfession(Command.tokens)
 end
 
 function Command:SetChatFrame()
@@ -109,18 +107,23 @@ function Command:Search()
 end
 
 function Command:LogDump()
-	GT.Log:Info('Command_LogDump')
-	GT.Log:LogDump()
+	GT.Log:Info('Command_LogDump', Command.tokens)
+	GT.Log:LogDump(Command.tokens)
 end
 
 function Command:DBDump()
-	GT.Log:Info('Command_DBDump')
-	GT.Log:DBDump()
+	GT.Log:Info('Command_DBDump', Command.tokens)
+	GT.Log:DBDump(Command.tokens)
 end
 
 function Command:ToggleAdvertising()
-	GT.Log:Info('Command_ToggleAdvertising')
+	GT.Log:Info('Command_ToggleAdvertising', Command.tokens)
 	GT.Advertise:ToggleAdvertising(Command.tokens)
+end
+
+function Command:SendRequest()
+	GT.Log:Info('Command_SendRequest', Command.tokens)
+	GT.CommWhisper:InitSendRequest(Command.tokens)
 end
 
 --@debug@

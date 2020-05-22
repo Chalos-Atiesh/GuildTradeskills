@@ -201,38 +201,12 @@ end
 ---------- START VOTING PROCESS ----------
 
 function CommGuild:SendTimestamps()
-	GT.Log:Info('CommGuild_SendTimestamps_Enter')
-
-	if not GT.DB:IsCommEnabled() then
-		GT.Log:Warn('CommGuild_SendTimestamps_CommDisabled')
-		return
-	end
-
+	GT.Log:Info('CommGuild_SendTimestamps')
 	if voteState <= VOTE_STATE_START_REQUESTED then
-		GT.Log:Info('CommGuild_SendTimestamps_NoResponses')
+		GT.Log:Info('Comm_SendTimestamps_NoResponses')
 		return
 	end
-
-	local characters = GT.DB:GetCharacters()
-	local professionStrings = {}
-	for characterName, _ in pairs(characters) do
-		local professions = characters[characterName].professions
-		for professionName, _ in pairs(professions) do
-			local profession = professions[professionName]
-			local professionString = GT.Text:Concat(GT.Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
-			table.insert(professionStrings, professionString)
-		end
-	end
-
-	local message = nil
-	if #professionStrings > 0 then
-		message = table.concat(professionStrings, GT.Comm.DELIMITER)
-	else
-		message = GT.Text:Concat(GT.Comm.DELIMITER, characterName, 'None', 0)
-	end
-
-	GT.Log:Info('CommGuild_SendTimestamps_Exit', message)
-	GT.Comm:SendCommMessage(GT.Comm.TIMESTAMP, message, GUILD, nil, 'NORMAL')
+	GT.Comm:SendTimestamps(GT.Comm.GUILD, nil)
 end
 
 function CommGuild:OnTimestampsReceived(sender, toGet, toPost)

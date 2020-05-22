@@ -27,6 +27,7 @@ function GT:OnInitialize()
 	GT.Event:Enable()
 	GT.Comm:Enable()
 	GT.Whisper:Enable()
+	GT.Friends:Enable()
 
 	GT:Wait(INITIAL_DELAY, GT['InitMessages'])
 end
@@ -38,7 +39,9 @@ function GT:InitMessages()
 	GT.Log:InitChatFrame()
 	GT.Log:PlayerInfo(L['WELCOME'])
 	GT.Advertise:Advertise()
+	GT.DB:PurgeGuild()
 	GT.CommGuild:RequestStartVote()
+	GT.CommWhisper:ProcessPendingRequests()
 	if not GT.DB.valid then
 		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
 	end

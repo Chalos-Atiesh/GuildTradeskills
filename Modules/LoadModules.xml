@@ -11,4 +11,5 @@
 	<Script file='Whisper.lua'/>
 	<Script file='Search.lua'/>
 	<Script file='Advertise.lua'/>
+	<Script file='Friends.lua'/>
 </Ui>
