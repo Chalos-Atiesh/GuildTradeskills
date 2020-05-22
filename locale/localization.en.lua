@@ -10,6 +10,8 @@ local LONG_TAG = GREEN .. 'Guild' .. COLOR_END .. YELLOW .. 'Tradeskills' .. COL
 local WHISPER_TAG = 'GT: '
 local TRIGGER_CHAR = '?'
 
+local CHARACTER_NIL = 'You must pass a character name. \''
+
 if L then
 	---------- CHARACTER START ----------
 
@@ -212,10 +214,16 @@ if L then
 
 
 
-	L['REQUEST_CHARACTER_NIL'] = 'You must pass a character name. \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['REQUEST_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['REJECT_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt reject {character_name}' .. COLOR_END .. '\'.'
+	L['REJECT_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt ignore {character_name}' .. COLOR_END .. '\'.'
+	L['REJECT_CHARACTER_NOT_FOUND'] = '{{character_name}} has not sent you a request to reject. You can ignore them with \'' .. YELLOW .. '/gt ignore {{character_name}}' .. COLOR_END .. '\'.'
+	L['REJECT_COUNT_WARN'] = 'You have rejected this person {{ignore_count}} times. If you reject them {{ignore_threshold}} times they will automatically be ignored.'
+	L['REJECT_AUTO_IGNORE'] = 'You have rejected this person {{ignore_threshold}} times. Automatically ignoring them.'
+	L['REJECT_THRESHOLD_EXCEEDED'] = 'This person has already automatically been placed on your ignore list. You cannot reject them again.'
 	L['REQUEST_CHARACTER_NOT_FOUND'] = 'Whoops! Looks like the character \'{{character_name}}\' does not exist.'
 	L['REQUEST_MAX_COUNT'] = 'You cannot have more than {{max_requests}} pending requests.'
-	L['REQUEST_OUTGOING_REPEAT'] = 'You already have an outstanding request to {{character_name}}. You cannot send another.'
+	L['REQUEST_OUTGOING_REPEAT'] = 'You already have an outgoing message to {{character_name}}. You cannot send another.'
 
 	L['COMM_QUEUE_INCOMING_REQUEST'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
 	L['COMM_QUEUE_OUTGOING_REQUEST'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
