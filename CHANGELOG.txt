@@ -1,3 +1,9 @@
+4.2.5
+	Fixed an error when receiving whispers.
+
+4.2.4
+	Fixed an issue when players were still using the old whisper comm method.
+
 4.2.3
 	Adding UUID to text utils.
 
