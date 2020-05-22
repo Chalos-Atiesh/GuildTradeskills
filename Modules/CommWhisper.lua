@@ -39,12 +39,12 @@ function CommWhisper:OnTimestampsReceived(sender, toGet, toPost)
 
 	local message = table.concat(sendLines, GT.Comm.DELIMITER)
 	GT.Log:Info('CommWhisper_OnTimestampsReceived_SendGet', sender, message)
-	Comm:SendCommMessage(GET, message, GT.Comm.WHISPER, sender, 'NORMAL')
+	GT.Comm:SendCommMessage(GET, message, GT.Comm.WHISPER, sender, 'NORMAL')
 
 	for characterName, _ in pairs(toPost) do
 		if characterName ~= sender then
 			for _, professionName in pairs(toPost[characterName]) do
-				Comm:SendPost(GT.Comm.WHISPER, characterName, professionName, sender)
+				GT.Comm:SendPost(GT.Comm.WHISPER, characterName, professionName, sender)
 			end
 		end
 	end
