@@ -1,3 +1,6 @@
+5.0.2
+	Apparently load order is important when loading libraries.
+
 5.0.1
 	Forgot to add the AceConfig dependency.
 
