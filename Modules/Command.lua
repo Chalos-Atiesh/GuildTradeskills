@@ -171,12 +171,17 @@ end
 
 function Command:ToggleBroadcast()
 	GT.Log:Info('Command_ToggleBroadcast', Command.tokens)
-	GT.CommYell:ToggleBroadcast(Command.tokens)
-end
-
-function Command:ToggleForwards()
-	GT.Log:Info('Command_ToggleForwards', Command.tokens)
-	GT.CommYell:ToggleForwards(Command.tokens)
+	local token = GT.Table:RemoveToken(Command.tokens)
+	if token == nil or token == GT.L['SEND'] or token == GT.L['RECEIVE'] then
+		GT.CommYell:ToggleBroadcast({token})
+		return
+	end
+	if token ~= nil and (token == GT.L['SEND_FORWARDS'] or token == GT.L['RECEIVE_FORWARDS']) then
+		GT.CommYell:ToggleForwards({token})
+		return
+	end
+	local message = string.gsub(GT.L['BROADCAST_UNKNOWN'], '%{{broadcast_type}}', token)
+	GT.Log:PlayerWarn(message)
 end
 
 --@debug@
