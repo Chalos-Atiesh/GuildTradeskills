@@ -1,3 +1,6 @@
+5.0.1
+	Forgot to add the AceConfig dependency.
+
 5.0.0
 	Added the ability to add non-guild members.
 	Added the ability to broadcast and receive broadcasts.
