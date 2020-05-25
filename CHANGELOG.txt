@@ -1,3 +1,11 @@
+5.0.0
+	Added the ability to add non-guild members.
+	Added the ability to broadcast and receive broadcasts.
+	Added non-guild member management.
+	Added an options panel for UI inclined users.
+	Fixed the ordering of commands on /gt help.
+	Moved the profession add notification from the chat pane to a popup.
+
 4.2.5
 	Fixed an error when receiving whispers.
 
