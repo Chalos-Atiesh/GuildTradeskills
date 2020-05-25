@@ -6,7 +6,6 @@ local Comm = GT:NewModule('Comm')
 GT.Comm = Comm
 
 LibStub('AceComm-3.0'):Embed(Comm)
--- GT.Comm.AceComm = LibStub('AceComm-3.0')
 
 Comm.COMM_VARIANCE = 0.3
 
@@ -127,10 +126,10 @@ end
 function Comm:SendPost(distribution, characterName, professionName, recipient)
 	GT.Log:Info('Comm_SendPost', distribution, characterName, professionName, recipient)
 
-	-- if not GT.DB:IsCommEnabled() then
-	-- 	GT.Log:Warn('Comm_SendPost_CommDisabled')
-	-- 	return
-	-- end
+	if not GT.DB:IsCommEnabled() then
+		GT.Log:Warn('Comm_SendPost_CommDisabled')
+		return
+	end
 
 	if characterName == recipient then
 		GT.Log:Warn('Comm_SendPost_AboutThemselves', characterName, professionName, recipient)

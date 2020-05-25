@@ -110,6 +110,7 @@ if L then
 				broadcast = {
 					order = 9,
 					methodName = 'ToggleBroadcast',
+					help = YELLOW .. '/gt broadcast' .. COLOR_END .. ': Toggles all broadcasting capabilities.',
 					subCommands = {
 						send = {
 							order = 0,

@@ -12,11 +12,10 @@ CommYell.MAX_BROADCAST_INTERVAL = 300
 CommYell.DEFAULT_BROADCAST_INTERVAL = 120
 
 function CommYell:Broadcast()
-	GT.DB:SetBroadcastInterval(15)
-	-- if not GT.DB:IsCommEnabled() then
-	-- 	GT.Log:Warn('CommYell_Broadcast_CommDisabled')
-	-- 	return
-	-- end
+	if not GT.DB:IsCommEnabled() then
+		GT.Log:Warn('CommYell_Broadcast_CommDisabled')
+		return
+	end
 
 	local characters = GT.DB:GetCharacters()
 	for characterName, _ in pairs(characters) do
@@ -38,6 +37,7 @@ function CommYell:ToggleBroadcast(tokens)
 
 	if broadcastType == nil then
 		CommYell:_ToggleBroadcast()
+		return
 	end
 	broadcastType = string.lower(broadcastType)
 	if broadcastType == GT.L['SEND'] and GT.DB:IsBroadcasting() then
@@ -69,12 +69,14 @@ function CommYell:_ToggleBroadcast()
 	if GT.DB:IsBroadcasting() or GT.DB:IsReceivingBroadcasts() then
 		GT.DB:SetBroadcasting(false)
 		GT.DB:SetReceivingBroadcasts(false)
+		GT.DB:SetForwarding(false)
 		GT.DB:SetReceivingForwards(false)
 		GT.Log:PlayerInfo(GT.L['BROADCAST_ALL_OFF'])
 		return
 	end
 	GT.DB:SetBroadcasting(true)
 	GT.DB:SetReceivingBroadcasts(true)
+	GT.DB:SetForwarding(true)
 	GT.DB:SetReceivingForwards(true)
 	GT.Log:PlayerInfo(GT.L['BROADCAST_ALL_ON'])
 end
@@ -138,10 +140,10 @@ function CommYell:_ShouldSendPost(characterName)
 end
 
 function CommYell:SendPost(characterName, professionName)
-	-- if not GT.DB:IsCommEnabled() then
-	-- 	GT.Log:Warn('CommYell_SendPost_CommDisabled')
-	-- 	return
-	-- end
+	if not GT.DB:IsCommEnabled() then
+		GT.Log:Warn('CommYell_SendPost_CommDisabled')
+		return
+	end
 	if not CommYell:_ShouldSendPost(characterName) then
 		return
 	end
@@ -151,9 +153,7 @@ function CommYell:SendPost(characterName, professionName)
 	for professionName, _ in pairs(character.professions) do
 		local message = GT.Comm:GetPostMessage(characterName, professionName)
 		if message ~= nil then
-			-- ChatThrottleLib:SendAddonMessage('BULK', GT.Comm.POST, message, GT.Comm.YELL)
-			-- ChatThrottleLib:SendChatMessage('BULK', GT.Comm.POST, returnMessage, GT.Comm.YELL, 'Common')
-			GT.Comm:SendPost(GT.Comm.SAY, characterName, professionName, nil)
+			GT.Comm:SendPost(GT.Comm.YELL, characterName, professionName, nil)
 		end
 	end
 end
