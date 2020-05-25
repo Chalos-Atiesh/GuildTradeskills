@@ -1,3 +1,6 @@
+5.0.3
+	Sanity check passed. Marking as release.
+
 5.0.2
 	Apparently load order is important when loading libraries.
 
