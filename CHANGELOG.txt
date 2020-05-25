@@ -1,3 +1,6 @@
+5.0.4
+	Fixed an issue where the player would get disconnected if they were registered to vote but could not.
+
 5.0.3
 	Sanity check passed. Marking as release.
 

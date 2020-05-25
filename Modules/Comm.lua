@@ -87,7 +87,7 @@ function Comm:SendTimestamps(distribution, recipient)
 	end
 
 	GT.Log:Info('Comm_SendTimestamps', recipient, message)
-	Comm:SendCommMessage(Comm.TIMESTAMP, message, distribution, recipient, 'NORMAL')
+	Comm:SendCommMessage(Comm.TIMESTAMP, message, distribution, recipient, Comm.NORMAL)
 end
 
 function Comm:OnTimestampsReceived(prefix, message, distribution, sender)

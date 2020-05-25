@@ -97,7 +97,7 @@ function CommGuild:RequestStartVote()
 	timestampCollection = {}
 	voteCollection = {}
 	voteState = VOTE_STATE_START_REQUESTED
-	CommGuild:SendCommMessage(START_VOTE, tostring(voteStart), GT.Comm.GUILD, nil, GT.Comm.ALERT)
+	CommGuild:SendCommMessage(START_VOTE, tostring(voteStart), GT.Comm.GUILD, nil, GT.Comm.NORMAL)
 end
 
 function CommGuild:OnRequestStartVoteReceived(prefix, message, distribution, sender)
@@ -123,7 +123,7 @@ function CommGuild:OnRequestStartVoteReceived(prefix, message, distribution, sen
 	if voteState == VOTE_STATE_REGISTERING then
 		GT.Log:Info('CommGuild_OnRequestStartVoteReceived_Registering', sender, voteStart)
 		registeredVoters = GT.Table:Insert(registeredVoters, nil, sender)
-		CommGuild:SendCommMessage(START_VOTE_ACK, tostring(voteStart), GT.Comm.GUILD, nil, GT.Comm.ALERT)
+		CommGuild:SendCommMessage(START_VOTE_ACK, tostring(voteStart), GT.Comm.GUILD, nil, GT.Comm.NORMAL)
 		return
 	end
 
@@ -141,7 +141,7 @@ function CommGuild:OnRequestStartVoteReceived(prefix, message, distribution, sen
 	registeredVoters = GT.Table:Insert(registeredVoters, nil, GT:GetCurrentCharacter())
 	registeredVoters = GT.Table:Insert(registeredVoters, nil, sender)
 	GT:Wait(START_WINDOW, CommGuild['SendTimestamps'])
-	CommGuild:SendCommMessage(START_VOTE_ACK, tostring(voteStart), GT.Comm.GUILD,  nil, GT.Comm.ALERT)
+	CommGuild:SendCommMessage(START_VOTE_ACK, tostring(voteStart), GT.Comm.GUILD,  nil, GT.Comm.NORMAL)
 end
 
 function CommGuild:OnVoteStartAckReceived(prefix, message, distribution, sender)
@@ -275,9 +275,11 @@ function CommGuild:DoVote()
 		end
 	end
 
-	local message = table.concat(votes, GT.Comm.DELIMITER)
-	GT.Log:Info('CommGuild_DoVote_Exit', message)
-	GT.Comm:SendCommMessage(VOTE, message, GT.Comm.GUILD, nil, 'NORMAL')
+	if #votes > 0 then
+		local message = table.concat(votes, GT.Comm.DELIMITER)
+		GT.Log:Info('CommGuild_DoVote_Exit', message)
+		GT.Comm:SendCommMessage(VOTE, message, GT.Comm.GUILD, nil, GT.Comm.NORMAL)
+	end
 
 	timestampCollection = {}
 
