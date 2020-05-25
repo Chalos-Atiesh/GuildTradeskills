@@ -113,3 +113,11 @@ function lib:Random(tbl)
 	end
 	return tbl[keys[math.random(#keys)]]
 end
+
+function lib:Count(tbl)
+	local count = 0
+	for k, v in pairs(tbl) do
+		count = count + 1
+	end
+	return count
+end

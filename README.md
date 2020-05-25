@@ -3,12 +3,23 @@
 <p><span style="font-size: 14px;">You can then easily search through their skills for something that might interest you and ask them the next time they're on if they'll craft it for you! Don't forget to tip your guildies!</span></p>
 <h2>Commands</h2>
 <ul>
+	<li><strong>/gt</strong>: Toggles the search pane.</li>
 	<li><strong>/gt help</strong>: Displays a list of available slash commands and descriptions.</li>
+	<li><strong>/gt opt</strong>: Toggles the options pane.</li>
 	<li><strong>/gt advertise</strong>: Toggles advertising.</li>
 	<li><strong>/gt advertise {seconds}</strong>: Sets the number of seconds between advertisements.</li>
-	<li><strong>/gt addprofession</strong>: Add a profession to&nbsp;<strong><span style="color: #339966;">Guild</span></strong>&nbsp;<strong><span style="color: #ffcc00;">Tradeskills</span></strong></li>
+	<li><strong>/gt addprofession</strong>: Toggles adding a profession. Open the profession you want to add after.</li>
 	<li><strong>/gt removeprofession {profession_name}</strong>: Remove a profession from&nbsp;<strong><span style="color: #339966;">Guild</span></strong>&nbsp;<strong><span style="color: #ffcc00;">Tradeskills</span></strong></li>
-	<li><strong>/gt search</strong>: Toggles the search panel.</li>
+	<li><strong>/gt add {character_name}</strong>: Requests to add a specific character.</li>
+	<li><strong>/gt reject {character_name}</strong>: Rejects someone's request to add you. They can request again.</li>
+	<li><strong>/gt ignore {character_name}</strong>: Ignores that person. No requests from that account should get through.</li>
+	<li><strong>/gt requests</strong>: Lists the characters that have requested to add you.</li>
+	<li><strong>/gt broadcast</strong>: Toggles all broadcasting capabilities.</li>
+	<li><strong>/gt broadcast send</strong>: Toggles whether you are sending broadcasts to everyone. <strong>Yes, everyone everyone.</strong></li>
+	<li><strong>/gt broadcast receive</strong>: Toggles whether you are receiving broadcasts from everyone. <strong>Yes, everyone everyone.</strong></li>
+	<li><strong>/gt broadcast sendforwards</strong>: Toggles whether you are frowarding broadcasts that you have received. <strong>Use with caution. This may impact performance.</strong></li>
+	<li><strong>/gt broadcase receiveforwards</strong>:Toggles whether you are accepting forwarded broadcasts that you ahve received. <strong>Use with caution. This may impact performance.</strong>
+	<li><strong>/gt window {window_name}</strong>: Sets the output window.</li>
 	<li><strong>/gt reset</strong>: Resets all stored data. Yes... all of it.&nbsp;<strong>This cannot be undone</strong>.&nbsp;We warned you.</li>
 </ul>
 <h2>FAQ</h2>

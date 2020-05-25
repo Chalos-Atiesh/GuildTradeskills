@@ -148,6 +148,7 @@ function Log:_Log(logLevel, ...)
 	local original = GT.Text:Concat(DELIMITER, ...)
 	
 	local printMessage = string.gsub(LOG_FORMAT, '%{{message}}', original)
+	printMessage = string.gsub(printMessage, '|r', '|r' .. color)
 	local logMessage = GT.Text:Strip(printMessage)
 	if logLevel < PLAYER_INFO and #logMessage >= LOG_LINE_LENGTH_LIMIT then
 		printMessage = string.sub(logMessage, 0, LOG_LINE_LENGTH_LIMIT - 3) .. '...'

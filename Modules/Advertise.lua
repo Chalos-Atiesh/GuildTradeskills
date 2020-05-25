@@ -7,16 +7,16 @@ GT.Advertise = Advertise
 
 Advertise.events = {}
 Advertise.DEFAULT_INTERVAL = 60
+Advertise.MINIMUM_INTERVAL = 60
+Advertise.MAXIMUM_INTERVAL = 300
 Advertise.DEFAULT_IS_ADVERTISING = false
 
 local CHANNEL_TYPE = 2
 local CHANNEL_NUMBER = 2
 local DEFAULT_INTERVAL = 120
-local MINIMUM_INTERVAL = 60
 local PREFIX = 'ADVERTISE'
 
 local isInTrade = false
-local lastAdvertise = nil
 
 function Advertise:OnEnable()
 	GT.Log:Info('Advertise_OnEnable')
@@ -33,51 +33,45 @@ function Advertise:Reset()
 end
 
 function Advertise:ChannelNotice(subEvent, channelType, channelNumber)
+	if channelType ~= CHANNEL_TYPE or channelNumber ~= CHANNEL_NUMBER then
+		return
+	end
 	GT.Log:Info('Advertise_ChannelNotice', subEvent, channelType, channelNumber)
 
-	if channelType ~= CHANNEL_TYPE or channelNumber ~= CHANNEL_NUMBER then
-		GT.Log:Info('Advertise_ChannelNotice_IgnoreChannelTypeNumber', channelType, channelNumber)
-		return
-	end
-
-	Advertise:SetChannelState(subEvent)
-
-	if not isInTrade then
-		GT.Log:Info('Advertise_ChannelNotice_NotInChannel')
-		return
-	end
-
-	if not GT.DB:IsAdvertising() then
-		GT.Log:Info('Advertise_ChannelNotice_NotAdvertising')
-		return
-	end
-
-	Advertise:Advertise()
+	Advertise:SetChannelState()
 end
 
 
 function Advertise:Advertise()
+	Advertise:SetChannelState()
+
+	local shouldAdvertise = true
 	if not isInTrade then
-		GT.Log:Info('Advertise_Advertise_NotInTrade')
-		return
+		-- GT.Log:Info('Advertise_Advertise_NotInTrade')
+		shouldAdvertise = false
 	end
 
 	if not GT.DB:IsAdvertising() then
-		GT.Log:Info('Advertise_Advertise_NotAdvertising')
-		return
+		-- GT.Log:Info('Advertise_Advertise_NotAdvertising')
+		shouldAdvertise = false
 	end
 
 	local interval = GT.DB:GetAdvertisingInterval()
 	if lastAdvertise ~= nil and lastAdvertise + interval < time() then
 		GT.Log:Warn('Advertise_Advertise_ShortenedInterval', lastAdvertise, interval, time())
-		GT:Wait(interval, Advertise['Advertise'])
 		lastAdvertise = time()
-		return
+		shouldAdvertise = false
 	end
 
-	lastAdvertise = time()
-	GT.Log:Info('Advertise_Advertise')
+	if shouldAdvertise then
+		GT.Log:Info('Advertise_Advertise')
+		Advertise:_Advertise()
+	end
 
+	GT:Wait(GT.DB:GetAdvertisingInterval(), Advertise['Advertise'])
+end
+
+function Advertise:_Advertise()
 	local characterName = UnitName('player')
 	local professions = GT.DB:GetCharacter(characterName).professions
 
@@ -130,8 +124,6 @@ function Advertise:Advertise()
 	--[===[@non-debug@
 	ChatThrottleLib:SendChatMessage('ALERT', PREFIX, message, 'CHANNEL', 'Common', CHANNEL_NUMBER)
 	--@end-non-debug@]===]
-
-	GT:Wait(GT.DB:GetAdvertisingInterval(), Advertise['Advertise'])
 end
 
 
@@ -160,11 +152,11 @@ function Advertise:ToggleAdvertising(tokens)
 	end
 
 	interval = tonumber(interval)
-	if interval < MINIMUM_INTERVAL then
+	if interval < Advertise.MINIMUM_INTERVAL then
 		local message = string.gsub(GT.L['ADVERTISE_MINIMUM_INTERVAL'], '%{{interval}}', interval)
-		message = string.gsub(message, '%{{minimum_interval}}', MINIMUM_INTERVAL)
+		message = string.gsub(message, '%{{minimum_interval}}', Advertise.MINIMUM_INTERVAL)
 		GT.Log:PlayerWarn(message)
-		interval = MINIMUM_INTERVAL
+		interval = Advertise.MINIMUM_INTERVAL
 	end
 
 	local message = string.gsub(GT.L['ADVERTISE_SET_INTERVAL'], '%{{interval}}', interval)
@@ -172,13 +164,12 @@ function Advertise:ToggleAdvertising(tokens)
 	GT.DB:SetAdvertisingInterval(interval)
 end
 
-function Advertise:SetChannelState(subEvent)
+function Advertise:SetChannelState()
 	local id, name = GetChannelName(CHANNEL_NUMBER)
-	if subEvent == 'YOU_CHANGED'
-		or name ~= nil then
+	if name ~= nil then
 		isInTrade = true
 	else
 		isInTrade = false
 	end
-	GT.Log:Info('Advertise_SetChannelState', isInTrade)
+	-- GT.Log:Info('Advertise_SetChannelState', isInTrade)
 end

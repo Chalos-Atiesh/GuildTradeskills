@@ -6,7 +6,8 @@ local Comm = GT:NewModule('Comm')
 GT.Comm = Comm
 
 LibStub('AceComm-3.0'):Embed(Comm)
--- GT.Comm.AceComm = LibStub('AceComm-3.0')
+
+Comm.COMM_VARIANCE = 0.3
 
 Comm.DELIMITER = '?'
 
@@ -16,6 +17,8 @@ Comm.UPDATED = 1
 
 Comm.WHISPER = 'WHISPER'
 Comm.GUILD = 'GUILD'
+Comm.YELL = 'YELL'
+Comm.SAY = 'SAY'
 
 Comm.ALERT = 'ALERT'
 Comm.NORMAL = 'NORMAL'
@@ -42,6 +45,8 @@ function Comm:OnEnable()
 
 	table.insert(DISTRIBUTIONS, Comm.WHISPER)
 	table.insert(DISTRIBUTIONS, Comm.GUILD)
+	table.insert(DISTRIBUTIONS, Comm.YELL)
+	table.insert(DISTRIBUTIONS, Comm.SAY)
 
 	GT.CommGuild:Enable()
 	GT.CommWhisper:Enable()
@@ -49,6 +54,40 @@ function Comm:OnEnable()
 	for command, functionName in pairs(COMMAND_MAP) do
 		Comm:RegisterComm(command, functionName)
 	end
+end
+
+function Comm:SendTimestamps(distribution, recipient)
+	-- GT.Log:Info('Comm_SendTimestamps', distribution, recipient)
+	if not GT.DB:IsCommEnabled() then
+		GT.Log:Warn('Comm_SendTimestamps_CommDisabled')
+		return
+	end
+
+	local characters = GT.DB:GetCharacters()
+	local professionStrings = {}
+	for characterName, _ in pairs(characters) do
+		local character = characters[characterName]
+		if (distribution == Comm.GUILD and character.isGuildMember)
+			or (distribution == Comm.WHISPER and GT:IsCurrentCharacter(characterName))
+		then
+			local professions = character.professions
+			for professionName, _ in pairs(professions) do
+				local profession = professions[professionName]
+				local professionString = GT.Text:Concat(Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
+				table.insert(professionStrings, professionString)
+			end
+		end
+	end
+
+	local message = nil
+	if #professionStrings > 0 then
+		message = table.concat(professionStrings, Comm.DELIMITER)
+	else
+		message = GT.Text:Concat(Comm.DELIMITER, GT:GetCurrentCharacter(), 'None', 0)
+	end
+
+	GT.Log:Info('Comm_SendTimestamps', recipient, message)
+	Comm:SendCommMessage(Comm.TIMESTAMP, message, distribution, recipient, 'NORMAL')
 end
 
 function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
@@ -64,7 +103,7 @@ function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 	end
 
 	if not GT.Table:Contains(DISTRIBUTIONS, distribution) then
-		GT.Log:Error('Comm_OnTimestampsReceived_UnknownDistribution', distribution, sender, message)
+		GT.Log:Error('Comm_OnTimestampsReceived_UnknownDistribution', prefix, distribution, sender, message)
 		return
 	end
 
@@ -73,14 +112,14 @@ function Comm:OnTimestampsReceived(prefix, message, distribution, sender)
 		return
 	end
 
-	-- GT.Log:Info('Comm_OnTimestampsReceived_AcceptFormat', sender, message)
-
 	local toGet, toPost = Comm:_ProcessTimestamps(message)
 
 	if distribution == Comm.WHISPER then
 		GT.CommWhisper:OnTimestampsReceived(sender, toGet, toPost)
 	elseif distribution == Comm.GUILD then
 		GT.CommGuild:OnTimestampsReceived(sender, toGet, toPost)
+	else
+		GT.Log:Error('Comm_OnTimestampsReceived_DistributionRejected', distribution, sender, message)
 	end
 end
 
@@ -88,7 +127,7 @@ function Comm:SendPost(distribution, characterName, professionName, recipient)
 	GT.Log:Info('Comm_SendPost', distribution, characterName, professionName, recipient)
 
 	if not GT.DB:IsCommEnabled() then
-		GT.Log:Warn('Comm_OnTimestampsReceived_CommDisabled')
+		GT.Log:Warn('Comm_SendPost_CommDisabled')
 		return
 	end
 
@@ -97,10 +136,20 @@ function Comm:SendPost(distribution, characterName, professionName, recipient)
 		return
 	end
 
-	local profession = GT.DB:GetProfession(characterName, professionName)
-	if profession == nil then
+	local message = Comm:GetPostMessage(characterName, professionName)
+	if message == nil then
 		GT.Log:Error('Comm_SendPost_LocalNil', characterName, professionName)
 		return
+	end
+
+	GT.Log:Info('Comm_SendPost_Send', recipient, message)
+	Comm:SendCommMessage(Comm.POST, message, distribution, recipient, Comm.BULK)
+end
+
+function Comm:GetPostMessage(characterName, professionName)
+	local profession = GT.DB:GetProfession(characterName, professionName)
+	if profession == nil then
+		return nil
 	end
 
 	local message = GT.Text:Concat(Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
@@ -121,37 +170,39 @@ function Comm:SendPost(distribution, characterName, professionName, recipient)
 			message = GT.Text:Concat(Comm.DELIMITER, message, reagentName, reagentCount)
 		end
 	end
-	GT.Log:Info('Comm_SendPost_Send', recipient, message)
-	Comm:SendCommMessage(Comm.POST, message, distribution, recipient, Comm.BULK)
+	return message
 end
 
 function Comm:OnPostReceived(prefix, message, distribution, sender)
 	if GT:IsCurrentCharacter(sender) then return end
-	GT.Log:Info('Comm_OnPostReceived', prefix, distribution, sender, message)
+	GT.Log:Info('Comm_OnPostReceived', prefix, distribution, sender)
 
 	if not GT.DB:IsCommEnabled() then
-		GT.Log:Warn('Comm_OnTimestampsReceived_CommDisabled')
+		GT.Log:Warn('Comm_OnPostReceived_CommDisabled')
 		return
 	end
 
-	if not GT.CommValidator:IsPostValid(message) then
-		--[===[@non-debug@
-		GT.Log:Error('Comm_OnPostReceived_RejectFormat', prefix, distribution, sender, message)
-		--@end-non-debug@]===]
-		--@debug@
-		GT.Log:PlayerError('Comm_OnPostReceived_RejectFormat', prefix, distribution, sender, message)
-		--@end-debug@
+	if not GT.Table:Contains(DISTRIBUTIONS, distribution) then
+		GT.Log:Error('Comm_OnPostReceived_UnknownDistribution', prefix, distribution, sender)
 		return
 	end
 
 	local tokens = GT.Text:Tokenize(message, Comm.DELIMITER)
-	
 	local characterName, tokens = GT.Table:RemoveToken(tokens)
-	local professionName, tokens = GT.Table:RemoveToken(tokens)
-	local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
-	lastUpdate = tonumber(lastUpdate)
 
-	GT.Log:Info('Comm_OnGetReceived_AcceptFormat', prefix, distribution, sender, characterName, professionName, lastUpdate)
+	if characterName ~= nil
+		and(distribution == Comm.YELL
+			or distribution == Comm.SAY)
+	then
+		if not GT.DB:IsReceivingBroadcasts() and string.lower(characterName) == string.lower(sender) then
+			GT.Log:Info('Comm_OnPostReceived_NotReceivingBroadcasts', prefix, distribution, sender)
+			return
+		end
+		if not GT.DB:IsReceivingForwards() and string.lower(characterName) ~= string.lower(sender) then
+			GT.Log:Info('Comm_OnPostReceived_NotReceivingFowards', prefix, distribution, sender)
+			return
+		end
+	end
 
 	local localCharacterName = UnitName('player')
 	if characterName == localCharacterName then
@@ -159,14 +210,38 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 		return
 	end
 
+	if distribution == Comm.WHISPER and string.lower(characterName) ~= string.lower(sender) then
+		GT.Log:Error('Comm_OnPostReceived_WhisperAboutOther', distribution, sender, characterName)
+		return
+	end
+
+	if not GT.CommValidator:IsPostValid(message) then
+		GT.Log:Error('Comm_OnPostReceived_RejectFormat', prefix, distribution, sender, message)
+		return
+	end
+	local professionName, tokens = GT.Table:RemoveToken(tokens)
+	local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
+	lastUpdate = tonumber(lastUpdate)
+
+	GT.Log:Info('Comm_OnPostReceived_AcceptFormat', prefix, distribution, sender, characterName, professionName, lastUpdate)
+
 	local profession = GT.DB:GetProfession(characterName, professionName)
 	if profession ~= nil and profession.lastUpdate > lastUpdate then
 		GT.Log:Info('Comm_OnPostReceived_RemoteOutOfDate', sender, characterName, professionName)
-		Comm:SendPost(characterName, professionName, sender)
+		if distribution == Comm.YELL or distribution == Comm.SAY then
+			GT.CommYell:SendPost(characterName, professionName)
+		else
+			Comm:SendPost(distribution, characterName, professionName, sender)
+		end
 		return
 	elseif profession == nil or profession.lastUpdate < lastUpdate then
 		GT.Log:Info('Comm_OnPostReceived_LocalOutOfDate', characterName, professionName)
 		profession = GT.DB:AddProfession(characterName, professionName)
+		if distribution == Comm.YELL or distribution == Comm.SAY then
+			local character = GT.DB:GetCharacter(characterName)
+			character.isBroadcasted = true
+			character.isGuildMember = false
+		end
 	end
 
 	while #tokens > 0 do
@@ -191,7 +266,7 @@ function Comm:SendDeletions()
 	GT.Log:Info('Comm_SendDeletions')
 
 	if not GT.DB:IsCommEnabled() then
-		GT.Log:Warn('Comm_OnTimestampsReceived_CommDisabled')
+		GT.Log:Warn('Comm_SendDeletions_CommDisabled')
 		return
 	end
 
@@ -225,7 +300,7 @@ function Comm:SendVersion()
 	GT.Log:Info('Comm_SendVersion', version)
 
 	if not GT.DB:IsCommEnabled() then
-		GT.Log:Warn('Comm_OnTimestampsReceived_CommDisabled')
+		GT.Log:Warn('Comm_SendVersion_CommDisabled')
 		return
 	end
 
@@ -238,7 +313,7 @@ function Comm:OnVersionReceived(prefix, message, distribution, sender)
 	GT.Log:Info('Comm_OnVersionReceived', prefix, distribution, sender, message)
 
 	if not GT.DB:IsCommEnabled() then
-		GT.Log:Warn('Comm_OnTimestampsReceived_CommDisabled')
+		GT.Log:Warn('Comm_OnVersionReceived_CommDisabled')
 		return
 	end
 
@@ -295,23 +370,24 @@ function Comm:_ProcessTimestamps(message)
 		local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
 		lastUpdate = tonumber(lastUpdate)
 
-		all = Comm:_Update(all, characterName, professionName, lastUpdate)
+		if professionName ~= 'None' then
+			all = Comm:_Update(all, characterName, professionName, lastUpdate)
+			local profession = GT.DB:GetProfession(characterName, professionName, false)
 
-		local profession = GT.DB:GetProfession(characterName, professionName)
+			if profession == nil or profession.lastUpdate < lastUpdate then
+				if profession == nil then
+					-- GT.Log:Info('Comm_OnTimestampsReceived_LocalNil', characterName, professionName, lastUpdate)
+				else
+					-- GT.Log:Info('Comm_OnTimestampsReceived_LocalOutOfDate', characterName, professionName, profession.lastUpdate, lastUpdate)
+				end
 
-		if profession == nil or profession.lastUpdate < lastUpdate then
-			if profession == nil then
-				-- GT.Log:Info('Comm_OnTimestampsReceived_LocalNil', characterName, professionName, lastUpdate)
+				toGet = Comm:_Update(toGet, characterName, professionName, lastUpdate)
+			elseif profession.lastUpdate > lastUpdate then
+				-- GT.Log:Info('Comm_OnTimestampsReceived_RemoteOutOfDate', characterName, professionName, profession.lastUpdate, lastUpdate)
+				toPost = Comm:_Update(toPost, characterName, professionName, profession.lastUpdate)
 			else
-				-- GT.Log:Info('Comm_OnTimestampsReceived_LocalOutOfDate', characterName, professionName, profession.lastUpdate, lastUpdate)
+				-- GT.Log:Info('Comm_OnTimestampsReceived_UpToDate', characterName, professionName, profession.lastUpdate, lastUpdate)
 			end
-
-			toGet = Comm:_Update(toGet, characterName, professionName, lastUpdate)
-		elseif profession.lastUpdate > lastUpdate then
-			-- GT.Log:Info('Comm_OnTimestampsReceived_RemoteOutOfDate', characterName, professionName, profession.lastUpdate, lastUpdate)
-			toPost = Comm:_Update(toPost, characterName, professionName, profession.lastUpdate)
-		else
-			-- GT.Log:Info('Comm_OnTimestampsReceived_UpToDate', characterName, professionName, profession.lastUpdate, lastUpdate)
 		end
 	end
 

@@ -21,6 +21,30 @@ function DB:OnEnable(force)
 		DB.db.global = {}
 	end
 
+	if DB.db.global.uuid == nil then
+		DB.db.global.uuid = GT.Text:UUID()
+	end
+
+	if DB.db.char.isBroadcasting == nil then
+		DB.db.char.isBroadcasting = false
+	end
+
+	if DB.db.char.broadcastInterval == nil then
+		DB.db.char.broadcastInterval = GT.CommYell.DEFAULT_BROADCAST_INTERVAL
+	end
+
+	if DB.db.char.isReceivingBroadcasts == nil then
+		DB.db.char.isReceivingBroadcasts = false
+	end
+
+	if DB.db.char.isForwarding == nil then
+		DB.db.char.isForwarding = false
+	end
+
+	if DB.db.char.isReceivingForwards == nil then
+		DB.db.char.isReceivingForwards = false
+	end
+
 	if DB.db.char.characters == nil or force then
 		DB.db.char.characters = {}
 	end
@@ -29,15 +53,289 @@ function DB:OnEnable(force)
 		DB.db.char.search = {}
 	end
 
-	if DB.db.global.professions == nil or force then
-		DB.db.global.professions = {}
+	if DB.db.global.handshakes == nil then
+		DB.db.global.handshakes = {}
 	end
 
-	if DB.db.global.uuid == nil then
-		DB.db.global.uuid = GT.Text:UUID()
+	if DB.db.char.incomingCommQueue == nil then
+		DB.db.char.incomingCommQueue = {}
 	end
+
+	if DB.db.char.outgoingCommQueue == nil then
+		DB.db.char.outgoingCommQueue = {}
+	end
+
+	if DB.db.global.incomingIgnores == nil then
+		DB.db.global.incomingIgnores = {}
+	end
+
+	if DB.db.global.outgoingIgnores == nil then
+		DB.db.global.outgoingIgnores = {}
+	end
+
+	if DB.db.global.incomingUnassignedIgnores == nil then
+		DB.db.global.incomingUnassignedIgnores = {}
+	end
+
+	if DB.db.global.outgoingUnassignedIgnores == nil then
+		DB.db.global.outgoingUnassignedIgnores = {}
+	end
+
+	--@debug@
+	-- DB.db.char.incomingCommQueue = {}
+	-- DB.db.char.outgoingCommQueue = {}
+
+	-- DB.db.global.incomingIgnores = {}
+	-- DB.db.global.outgoingIgnores = {}
+
+	-- DB.db.global.handshakes = {}
+	--@end-debug@
 
 	DB.valid = DB:Validate()
+end
+
+function DB:GetRequestFilterState()
+	if DB.db.char.requestFilterState == nil then
+		return nil
+	end
+	return DB.db.char.requestFilterState
+end
+
+function DB:SetRequestFilterState(filterState)
+	DB.db.char.requestFilterState = filterState
+end
+
+function DB:GetBroadcastInterval()
+	return DB.db.char.broadcastInterval
+end
+
+function DB:SetBroadcastInterval(interval)
+	DB.db.char.broadcastInterval = interval
+end
+
+function DB:IsBroadcasting()
+	return DB.db.char.isBroadcasting
+end
+
+function DB:SetBroadcasting(isBroadcasting)
+	DB.db.char.isBroadcasting = isBroadcasting
+end
+
+function DB:IsReceivingBroadcasts()
+	return DB.db.char.isReceivingBroadcasts
+end
+
+function DB:SetReceivingBroadcasts(isReceiving)
+	DB.db.char.isReceivingBroadcasts = isReceiving
+end
+
+function DB:IsForwarding()
+	return DB.db.char.isForwarding
+end
+
+function DB:SetForwarding(isForwarding)
+	DB.db.char.isForwarding = isForwarding
+end
+
+function DB:IsReceivingForwards()
+	return DB.db.char.isReceivingForwards
+end
+
+function DB:SetReceivingForwards(isAccepting)
+	DB.db.char.isReceivingForwards = isAccepting
+end
+
+function DB:GetCommQueues()
+	return DB.db.char.incomingCommQueue, DB.db.char.outgoingCommQueue
+end
+
+function DB:GetCommQueue(isIncoming)
+	if isIncoming then
+		return DB.db.char.incomingCommQueue
+	end
+	return DB.db.char.outgoingCommQueue
+end
+
+function DB:RecordHandshake(uuid, characterName)
+	characterName = string.lower(characterName)
+
+	local handshakes = DB.db.global.handshakes
+	handshakes = GT.Table:InsertField(handshakes, uuid)
+	local handshakeUUID = handshakes[uuid]
+	handshakeUUID = GT.Table:Insert(handshakeUUID, nil, characterName)
+end
+
+function DB:GetHandshakeRecord(characterName)
+	characterName = string.lower(characterName)
+
+	local handshakes = DB.db.global.handshakes
+	for uuid, _ in pairs(handshakes) do
+		local characters = handshakes[uuid]
+		for _, tempCharacterName in pairs(characters) do
+			if tempCharacterName == characterName then
+				return uuid
+			end
+		end
+	end
+	return nil
+end
+
+function DB:GetCommForCharacter(isIncoming, characterName)
+	characterName = string.lower(characterName)
+
+	local queue = DB:GetCommQueue(isIncoming)
+	for _, comm in pairs(queue) do
+		if comm.characterName == characterName then
+			return comm
+		end
+	end
+	return nil
+end
+
+function DB:GetCommsWithCommand(isIncoming, command)
+	local returnComms = {}
+	local queue = DB:GetCommQueue(isIncoming)
+	for uuid, comm in pairs(queue) do
+		if comm.command == command then
+			returnComms[uuid] = comm
+		end
+	end
+	return returnComms
+end
+
+function DB:GetCommWithCommand(isIncoming, command, characterName)
+	characterName = string.lower(characterName)
+
+	local queue = DB:GetCommQueue(isIncoming)
+	for _, comm in pairs(queue) do
+		if comm.command == command and comm.characterName == characterName then
+			return comm
+		end
+	end
+	return nil
+end
+
+function DB:EnqueueComm(isIncoming, command, characterName, message)
+	characterName = string.lower(characterName)
+
+	queue = DB:GetCommQueue(isIncoming)
+	comm = {}
+	comm.isIncoming = isIncoming
+	comm.command = command
+	comm.characterName = characterName
+	comm.timestamp = time()
+	comm.message = message
+	queue[GT.Text:UUID()] = comm
+	return true
+end
+
+function DB:DequeueComm(isIncoming, command, characterName)
+	characterName = string.lower(characterName)
+
+	local queue = DB:GetCommQueue(isIncoming)
+	for uuid, comm in pairs(queue) do
+		if comm.command == command and comm.characterName == characterName then
+			queue[uuid] = nil
+			return comm
+		end
+	end
+	return nil
+end
+
+function DB:DequeueComms(isIncoming, characterName)
+	characterName = string.lower(characterName)
+
+	local queue = DB:GetCommQueue(isIncoming)
+	for uuid, comm in pairs(queue) do
+		if comm.characterName == characterName then
+			queue[uuid] = nil
+		end
+	end
+end
+
+function DB:_GetIgnoreList(isIncoming)
+	if isIncoming then
+		return DB.db.global.incomingIgnores, DB.db.global.incomingUnassignedIgnores
+	end
+	return DB.db.global.outgoingIgnores, DB.db.global.outgoingUnassignedIgnores
+end
+
+function DB:_AssignIgnore(isIncoming, uuid, characterName)
+	uuid = string.lower(uuid)
+	characterName = string.lower(characterName)
+
+	local assignedList, unassignedList = DB:_GetIgnoreList(isIncoming)
+	assignedList = GT.Table:InsertField(assignedList, uuid)
+	local account = assignedList[uuid]
+	if GT.Table:Contains(account, characterName) then return false end
+
+	account = GT.Table:Insert(account, nil, characterName)
+	unassignedList = GT.Table:RemoveByValue(unassignedList, characterName)
+	return true
+end
+
+function DB:AddIgnore(isIncoming, uuid, characterName)
+	characterName = string.lower(characterName)
+
+	local assignedList, unassignedList = DB:_GetIgnoreList(isIncoming)
+	if uuid ~= nil then
+		uuid = string.lower(uuid)
+		return GT.DB:_AssignIgnore(isIncoming, uuid, characterName)
+	end
+	if GT.Table:Contains(unassignedList, characterName) then return false end
+
+	unassignedList = GT.Table:Insert(unassignedList, characterName)
+	return true
+end
+
+function DB:RemoveIgnore(isIncoming, uuid, characterName)
+	characterName = string.lower(characterName)
+
+	local assignedList, unassignedList = DB:_GetIgnoreList(isIncoming)
+
+	local removed = false
+	if uuid ~= nil then
+		uuid = string.lower(uuid)
+		for tempUUID, _ in pairs(assignedList) do
+			if tempUUID == uuid then
+				assignedList[uuid] = nil
+				removed = true
+			end
+		end
+	end
+
+	if GT.Table:Contains(unassignedList, characterName) then
+		unassignedList = GT.Table:RemoveByValue(unassignedList, characterName)
+		removed = true
+	end
+	return removed
+end
+
+function DB:IsIgnored(isIncoming, uuid, characterName)
+	characterName = string.lower(characterName)
+
+	local assignedList, unassignedList = DB:_GetIgnoreList(isIncoming)
+
+	if uuid ~= nil then
+		uuid = string.lower(uuid)
+
+		for tempUUID, _ in pairs(assignedList) do
+			if tempUUID == uuid then
+				GT.DB:_AssignIgnore(isIncoming, uuid, characterName)
+				return true
+			end
+		end
+	end
+
+	for _, tempCharacterName in pairs(unassignedList) do
+		if tempCharacterName == characterName then
+			if uuid ~= nil then
+				GT.DB:_AssignIgnore(isIncoming, uuid, characterName)
+			end
+			return true
+		end
+	end
+	return false
 end
 
 function DB:Reset(force)
@@ -77,11 +375,6 @@ function DB:ResetCharacter(characterName)
 	return false
 end
 
-function DB:GetProfessions()
-	-- GT.Log:Info('DB_GetProfessions')
-	return DB.db.global.professions
-end
-
 function DB:GetCharacter(characterName)
 	-- GT.Log:Info('DB_GetCharacter', characterName)
 	if DB.db.char.characters[characterName] == nil then
@@ -105,23 +398,68 @@ function DB:AddCharacter(characterName)
 	if character.deletedProfessions == nil then
 		character.deletedProfessions = {}
 	end
+	character.isGuildMember = true
+	character.isBroadcasted = false
 	return character
 end
 
-function DB:GetProfession(characterName, professionName)
+function DB:CharacterExists(characterName)
+	characterName = string.lower(characterName)
+	for tempCharacterName, _ in pairs(DB.db.char.characters) do
+		if string.lower(tempCharacterName) == characterName then
+			return true
+		end
+	end
+	return false
+end
+
+function DB:DeleteCharacter(characterName)
+	GT.Log:Info('DB_DeleteCharacter', characterName)
+	characterName = string.lower(characterName)
+	local nameToRemove = nil
+	for tempCharacterName, _ in pairs(DB.db.char.characters) do
+		if string.lower(tempCharacterName) == characterName then
+			GT.Log:Info('DB_DeleteCharacter_Found', tempCharacterName, characterName)
+			nameToRemove = tempCharacterName
+			break
+		end
+	end
+	if nameToRemove ~= nil then
+		DB.db.char.characters[nameToRemove] = nil
+		return true
+	end
+	return false
+end
+
+function DB:GetProfessions()
+	-- GT.Log:Info('DB_GetProfessions')
+	return DB.db.global.professions
+end
+
+function DB:GetProfession(characterName, professionName, create)
+	if create == nil then create = true end
 	-- GT.Log:Info('DB_GetProfession', characterName, professionName)
 
 	DB:_GetProfession(professionName)
 
 	if characterName == nil then
 		return DB:_GetProfession(professionName)
-	else
+	elseif create then
 		local professions = DB:GetCharacter(characterName).professions
 		if professions[professionName] == nil then
 			-- GT.Log:Info('DB_GetProfession_Nil', characterName, professionName)
 			return nil
 		end
 		return professions[professionName]
+	elseif not create then
+		if not DB:CharacterExists(characterName) then
+			return nil
+		end
+		local professions = DB:GetCharacter(characterName).professions
+		if professions[professionName] == nil then
+			-- GT.Log:Info('DB_GetProfession_Nil', characterName, professionName)
+			return nil
+		end
 	end
 end
 
@@ -169,12 +507,16 @@ end
 function DB:DeleteProfession(characterName, professionName)
 	-- GT.Log:Info('DB_DeleteProfession', characterName, professionName)
 	local character = DB:GetCharacter(characterName)
+	local professionNameToRemove = nil
 	for dbProfessionName, _ in pairs(character.professions) do
 		if dbProfessionName == professionName then
 			table.insert(character.deletedProfessions, professionName)
-			character.professions[professionName] = nil
-			return true
+			professionNameToRemove = dbProfessionName
 		end
+	end
+	if professionNameToRemove ~= nil then
+		character.professions[professionName] = nil
+		return true
 	end
 	return false
 end
@@ -325,7 +667,14 @@ function DB:_ValidateData()
 			GT.Log:Error('Invalid character name', characterName)
 			return false
 		end
-		local professions = DB.db.char.characters[characterName].professions
+		local character = DB.db.char.characters[characterName]
+		if character.isGuildMember == nil then
+			character.isGuildMember = true
+		end
+		if character.isBroadcasted == nil then
+			character.isBroadcasted = false
+		end
+		local professions = character.professions
 		for professionName, _ in pairs(professions) do
 			if tonumber(professionName) ~= nil 
 				or string.find(professionName, ']')
@@ -508,12 +857,20 @@ function DB:PurgeGuild()
 	local guildCharacters = {}
 	for i = 1, GetNumGuildMembers() do
 		local guildName = GetGuildRosterInfo(i)
-		guildName = GT.Text:ConvertCharacterName(guildName)
-		table.insert(guildCharacters, guildName)
+		table.insert(guildCharacters, Ambiguate(guildName, 'none'))
 	end
+	guildCharacters = GT.Table:Insert(guildCharacters, nil, GT.GetCurrentCharacter())
 
 	for characterName, _ in pairs(DB.db.char.characters) do
-		if not GT.Table:Contains(guildCharacters, characterName) then
+		local character = DB.db.char.characters[characterName]
+		if not GT.Table:Contains(guildCharacters, characterName)
+			--@debug@
+			and character.isGuildMember
+			--@end-debug@
+			--[===[@non-debug@
+			and character.isGuildMember
+			--@end-non-debug@]===]
+		then
 			GT.Log:Warn('DB_PurgeGuild_RemoveCharacter', characterName)
 			DB.db.char.characters[characterName] = nil
 		end

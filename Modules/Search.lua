@@ -559,57 +559,89 @@ function Search:PopulateCharacters(shouldCascade)
 		end
 	end
 
-	local onlineGuildMembers = {}
+	local onlineCharacters = {}
 	local classColors = {}
 	local countTotalMembers, countOnlineMembers = GetNumGuildMembers()
 	for i=1,countTotalMembers do
-		local characterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
-		if online then
-			characterName = GT.Text:ConvertCharacterName(characterName)
-			table.insert(onlineGuildMembers, characterName)
-			classColors[characterName] = RCC[string.upper(class)]['colorStr']
+		local characterName, _, _, _, class, _, _, _, online = GetGuildRosterInfo(i)
+		characterName = Ambiguate(characterName, 'none')
+		if online and GT.DB:CharacterExists(characterName) then
+			table.insert(onlineCharacters, characterName)
+			classColors[characterName] = RCC[GT.L[string.upper(class)]]['colorStr']
 		end
 	end
+	local characters = GT.DB:GetCharacters()
+	for characterName, _ in pairs(characters) do
+		local character = characters[characterName]
+		if not character.isGuildMember
+			and character.class ~= nil
+			and character.isOnline
+		then
+			if character.class ~= 'UNKNOWN' then
+				classColors[characterName] = RCC[GT.L[character.class]]['colorStr']
+				table.insert(onlineCharacters, characterName)
+			end
+		end
+	end
+	local currentCharacterName = GT.GetCurrentCharacter()
+	onlineCharacters = GT.Table:Insert(onlineCharacters, nil, currentCharacterName)
+	local _, playerClass = UnitClass('player')
+	classColors[currentCharacterName] = RCC[playerClass]['colorStr']
 
 	local sortedKeys = GT.Table:GetSortedKeys(charactersToAdd, function(a, b) return a < b end)
 	for _, key in ipairs(sortedKeys) do
 		local characterName = charactersToAdd[key]
+		local character = GT.DB:GetCharacter(characterName)
 		local characterLabel = AceGUI:Create('InteractiveLabel')
-		local labelText = string.gsub(GT.L['GUILD_OFFLINE'], '%{{guild_member}}', characterName)
-		if GT.Table:Contains(onlineGuildMembers, characterName) then
-			labelText = string.gsub(GT.L['GUILD_ONLINE'], '%{{guild_member}}', characterName)
+		local labelText = string.gsub(GT.L['OFFLINE_TAG'], '%{{guild_member}}', characterName)
+		if GT.Table:Contains(onlineCharacters, characterName) or GT:IsCurrentCharacter(characterName) then
+			labelText = string.gsub(GT.L['ONLINE_TAG'], '%{{guild_member}}', characterName)
 			labelText = string.gsub(labelText, '%{{class_color}}', classColors[characterName])
 		end
 		characterLabel:SetText(labelText)
 		characterLabel:SetHighlight("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 		characterLabel:SetCallback('OnClick', function(widget, event, button)
-			local labelText = widget.label:GetText()
-			local characterName = GT.Text:ConvertCharacterName(labelText)
-			characterName = string.sub(characterName, 11)
-			characterName = string.sub(characterName, 0, #characterName - 3)
 			if button == 'RightButton' then
+
+				local labelText = widget.label:GetText()
+				local characterName = string.sub(labelText, 11)
+				local dashIndex = string.find(characterName, '-')
+				characterName = string.sub(characterName, 0, dashIndex - 4)
+
 				local online = string.gsub(labelText, characterName, '')
 				online = string.gsub(online, '- ' , '')
 				online = string.sub(online, 24)
 				online = string.sub(online, 0, #online - 2)
-				if string.lower(online) == 'online' and Search.lastSkillLinkClicked ~= nil then
+
+				GT.Log:Info('Search_Click', characterName, online)
+
+				local msg = GT.L['WHISPER_REQUEST']
+				msg = string.gsub(msg, '%{{character_name}}', characterName)
+				msg = string.gsub(msg, '%{{item_link}}', Search.lastSkillLinkClicked)
+				if string.lower(online) == string.lower(GT.L['ONLINE']) and Search.lastSkillLinkClicked ~= nil then
 					local whisperSent = false
-					local totalGuildMembers = GetNumGuildMembers()
-					for i = 1, totalGuildMembers do
-						local guildCharacterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
-						local tempCharacterName = GT.Text:ConvertCharacterName(guildCharacterName)
-						if online and tempCharacterName == characterName then
-							local msg = GT.L['WHISPER_REQUEST']
-							msg = string.gsub(msg, '%{{character_name}}', characterName)
-							msg = string.gsub(msg, '%{{item_link}}', Search.lastSkillLinkClicked)
-							ChatThrottleLib:SendChatMessage('ALERT', 'GT', msg, 'WHISPER', 'Common', guildCharacterName)
+
+					for _, tempCharacterName in pairs(onlineCharacters) do
+						if tempCharacterName == characterName then
+							ChatThrottleLib:SendChatMessage('ALERT', 'GT', msg, 'WHISPER', 'Common', tempCharacterName)
 							whisperSent = true
 						end
 					end
+					-- local totalGuildMembers = GetNumGuildMembers()
+					-- for i = 1, totalGuildMembers do
+					-- 	local guildCharacterName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(i)
+					-- 	local tempCharacterName = Ambiguate(guildCharacterName, 'none')
+					-- 	if online and tempCharacterName == characterName then
+					-- 		ChatThrottleLib:SendChatMessage('ALERT', 'GT', msg, 'WHISPER', 'Common', guildCharacterName)
+					-- 		whisperSent = true
+					-- 	end
+					-- end
 					if not whisperSent then
-						GT.Log:PlayerWarn(string.gsub(GT.L['WHISPER_NO_CHARACTER_FOUND'], '%{{character_name}}', characterName))
+						local message = string.gsub(GT.L['WHISPER_NO_CHARACTER_FOUND'], '%{{character_name}}', characterName)
+						GT.Log:PlayerWarn(message)
 					end
-
+				elseif string.lower(online) == string.lower(GT.L['NON_GUILD']) then
+					ChatThrottleLib:SendChatMessage('ALERT', 'GT', msg, 'WHISPER', 'Common', characterName)
 				elseif Search.lastSkillLinkClicked == nil then
 					GT.Log:PlayerWarn(GT.L['WHISPER_SELECT_REQUIRED'])
 				end

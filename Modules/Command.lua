@@ -50,7 +50,8 @@ function Command:OnCommand(input)
 		return
 	end
 
-	GT.Log:PlayerWarn(string.gsub(GT.L['UNKNOWN_COMMAND'], '%{{command}}', userCommand))
+	local message = string.gsub(GT.L['UNKNOWN_COMMAND'], '%{{command}}', userCommand)
+	GT.Log:PlayerWarn(message)
 end
 
 function Command:DoCommand(commands, userCommand)
@@ -66,17 +67,32 @@ function Command:DoCommand(commands, userCommand)
 end
 
 function Command:Help()
-	GT.Log:Info('Command_Help')
+	GT.Log:Info('Command_Help', Command.tokens)
 	Command:_Help(GT.L['SLASH_COMMANDS'])
 end
 
-function GT.Command:_Help(commands)
-	for command, info in pairs(commands) do
-		GT.Log:PlayerInfo(info.help)
+function Command:_Help(commands)
+	local sortedKeys = GT.Table:GetSortedKeys(commands, function(a, b) return Command:_CompareCommands(a, commands[a], b, commands[b]) end)
+	for _, command in pairs(sortedKeys) do
+		local info = commands[command]
+		if info.help ~= nil then
+			GT.Log:PlayerInfo(info.help)
+		end
 		if info.subCommands then
 			GT.Command:_Help(info.subCommands)
 		end
 	end
+end
+
+function Command:_CompareCommands(a, aInfo, b, bInfo)
+	if aInfo.order ~= nil and bInfo.order ~= nil then
+		return aInfo.order < bInfo.order
+	end
+	return a < b
+end
+
+function Command:Options()
+	GT.Options:ToggleOptions(Command.tokens)
 end
 
 function Command:InitAddProfession()
@@ -86,9 +102,7 @@ end
 
 function Command:RemoveProfession()
 	GT.Log:Info('Command_RemoveProfession', Command.tokens)
-	local professionName = GT.Table:RemoveToken(Command.tokens)
-	local characterName = UnitName('player')
-	GT.Profession:DeleteProfession(characterName, professionName)
+	GT.Profession:DeleteProfession(Command.tokens)
 end
 
 function Command:SetChatFrame()
@@ -109,18 +123,65 @@ function Command:Search()
 end
 
 function Command:LogDump()
-	GT.Log:Info('Command_LogDump')
-	GT.Log:LogDump()
+	GT.Log:Info('Command_LogDump', Command.tokens)
+	GT.Log:LogDump(Command.tokens)
 end
 
 function Command:DBDump()
-	GT.Log:Info('Command_DBDump')
-	GT.Log:DBDump()
+	GT.Log:Info('Command_DBDump', Command.tokens)
+	GT.Log:DBDump(Command.tokens)
 end
 
 function Command:ToggleAdvertising()
-	GT.Log:Info('Command_ToggleAdvertising')
+	GT.Log:Info('Command_ToggleAdvertising', Command.tokens)
 	GT.Advertise:ToggleAdvertising(Command.tokens)
+end
+
+function Command:SendRequest()
+	GT.Log:Info('Command_SendRequest', Command.tokens)
+	GT.CommWhisper:SendRequest(Command.tokens)
+end
+
+function Command:SendReject()
+	GT.Log:Info('Command_SendReject', Command.tokens)
+	GT.CommWhisper:SendReject(Command.tokens)
+end
+
+function Command:SendIgnore()
+	GT.Log:Info('Command_SendIgnore', Command.tokens)
+	GT.CommWhisper:SendIgnore(Command.tokens)
+end
+
+function Command:ShowRequests()
+	local comms = GT.DB:GetCommsWithCommand(GT.CommWhisper.INCOMING, GT.CommWhisper.REQUEST)
+	local characterNames = {}
+	for _, comm in pairs(comms) do
+		local characterName = comm.characterName:gsub("(%l)(%w*)", function(a,b) return string.upper(a)..b end)
+		table.insert(characterNames, characterName)
+	end
+	local message = nil
+	if #characterNames <= 0 then
+		message = GT.L['WHISPER_NO_INCOMING_REQUESTS']
+	else
+		local characters = table.concat(characterNames, GT.L['PRINT_DELIMITER'])
+		message = string.gsub(GT.L['WHISPER_INCOMING_REQUESTS'], '%{{character_names}}', characters)
+	end
+	GT.Log:PlayerInfo(message)
+end
+
+function Command:ToggleBroadcast()
+	GT.Log:Info('Command_ToggleBroadcast', Command.tokens)
+	local token = GT.Table:RemoveToken(Command.tokens)
+	if token == nil or token == GT.L['SEND'] or token == GT.L['RECEIVE'] then
+		GT.CommYell:ToggleBroadcast({token})
+		return
+	end
+	if token ~= nil and (token == GT.L['SEND_FORWARDS'] or token == GT.L['RECEIVE_FORWARDS']) then
+		GT.CommYell:ToggleForwards({token})
+		return
+	end
+	local message = string.gsub(GT.L['BROADCAST_UNKNOWN'], '%{{broadcast_type}}', token)
+	GT.Log:PlayerWarn(message)
 end
 
 --@debug@

@@ -4,6 +4,7 @@
 	<Script file='Comm.lua'/>
 	<Script file='CommWhisper.lua'/>
 	<Script file='CommGuild.lua'/>
+	<Script file='CommYell.lua'/>
 	<Script file='CommValidator.lua'/>
 	<Script file='Event.lua'/>
 	<Script file='Database.lua'/>
@@ -11,4 +12,6 @@
 	<Script file='Whisper.lua'/>
 	<Script file='Search.lua'/>
 	<Script file='Advertise.lua'/>
+	<Script file='Friends.lua'/>
+	<Script file='Options.lua'/>
 </Ui>
