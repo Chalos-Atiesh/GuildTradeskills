@@ -10,9 +10,28 @@ local LONG_TAG = GREEN .. 'Guild' .. COLOR_END .. YELLOW .. 'Tradeskills' .. COL
 local WHISPER_TAG = 'GT: '
 local TRIGGER_CHAR = '?'
 
+local ONLINE = 'Online'
+local OFFLINE = 'Offline'
+local NON_GUILD = 'Non Guild'
+
 local CHARACTER_NIL = 'You must pass a character name. \''
 
 if L then
+	---------- CLASSES START ----------
+
+	-- The KEY should be the localized value here.
+	-- It should be in all caps.
+	-- We use it for getting class colors.
+	L['DRUID'] = 'DRUID'
+	L['HUNTER'] = 'HUNTER'
+	L['MAGE'] = 'MAGE'
+	L['PALADIN'] = 'PALADIN'
+	L['PRIEST'] = 'PRIEST'
+	L['ROGUE'] = 'ROGUE'
+	L['SHAMAN'] = 'SHAMAN'
+	L['WARLOCK'] = 'WARLOCK'
+	L['WARRIOR'] = 'WARRIOR'
+
 	---------- CHARACTER START ----------
 
 	L['CHARACTER'] = 'character'
@@ -28,50 +47,102 @@ if L then
 	L['FORCE'] = 'force'
 	--@end-debug@
 
+	L['PRINT_DELIMITER'] = ', '
+
 	L['SLASH_COMMANDS'] = {
 		gt = {
+			order = 0,
 			methodName = 'OnCommand',
 			help = YELLOW .. '/gt' .. COLOR_END .. ': Toggle the search pane.',
 			subCommands = {
 				help = {
+					order = 0,
 					methodName = 'Help',
 					help = YELLOW .. '/gt help' .. COLOR_END .. ': Print this mesage.'
 				},
-				search = {
-					methodName = 'Search',
-					help = YELLOW .. '/gt search' .. COLOR_END .. ': Toggle the search pane.'
+				opt = {
+					order = 1,
+					methodName = 'Options',
+					help = YELLOW .. '/gt opt' .. COLOR_END .. ': Toggles the options panel.'
 				},
 				addprofession = {
+					order = 2,
 					methodName = 'InitAddProfession',
-					help = YELLOW .. '/gt addprofession' .. COLOR_END .. ': Toggle adding a profession.'
+					help = YELLOW .. '/gt addprofession' .. COLOR_END .. ': Toggles adding a profession. Open the profession you want to add after.'
 				},
 				removeprofession = {
+					order = 3,
 					methodName = 'RemoveProfession',
 					help = YELLOW .. '/gt removeprofession {profession_name}' .. COLOR_END .. ': Removes a profession.'
 				},
-				window = {
-					methodName = 'SetChatFrame',
-					help = YELLOW .. '/gt window {window_name}' .. COLOR_END .. ': Sets the output to a chat window.'
-				},
-				reset = {
-					methodName = 'Reset',
-					help = YELLOW .. '/gt reset' .. COLOR_END .. ': Resets all stored info. |cffff0000This cannot be undone.|r'
-				},
 				advertise = {
+					order = 4,
 					methodName = 'ToggleAdvertising',
-					help = YELLOW .. '/gt advertise' .. COLOR_END .. ': Toggles whether you are advertising.' .. YELLOW .. ' /gt advertise {seconds}' .. COLOR_END .. ': Sets the number of seconds between advertisements.'
+					help = YELLOW .. '/gt advertise' .. COLOR_END .. ': Toggles whether you are advertising.',
+					subCommands = {
+						seconds = {
+							parens = true,
+							methodName = 'ToggleAdvertising',
+							help =  YELLOW .. '/gt advertise {seconds}' .. COLOR_END .. ': Sets the number of seconds between advertisements.'
+						}
+					}
 				},
 				add = {
+					order = 5,
 					methodName = 'SendRequest',
 					help = YELLOW .. '/gt add {character_name}' .. COLOR_END .. ': Requests to add a specific character.'
 				},
 				reject = {
-					methodName = 'RejectRequest',
+					order = 6,
+					methodName = 'SendReject',
 					help = YELLOW .. '/gt reject {character_name}' .. COLOR_END .. ': Rejects someone\'s request to add you. They can request again.'
 				},
 				ignore = {
-					methodName = 'IgnoreRequest',
+					order = 7,
+					methodName = 'SendIgnore',
 					help = YELLOW .. '/gt ignore {character_name}' .. COLOR_END .. ': Ignores that person. No requests from that account should get through.'
+				},
+				requests = {
+					order = 8,
+					methodName = 'ShowRequests',
+					help = YELLOW .. '/gt requests' .. COLOR_END .. ': Lists the characters that have requested to add you.'
+				},
+				broadcast = {
+					order = 9,
+					methodName = 'ToggleBroadcast',
+					subCommands = {
+						send = {
+							order = 0,
+							methodName = 'ToggleBroadcast',
+							help = YELLOW .. '/gt broadcast send' .. COLOR_END .. ': Toggles whether you are sending broadcasts to everyone. ' .. YELLOW .. 'Yes, everyone everyone.' .. COLOR_END
+						},
+						receive = {
+							order = 1,
+							methodName = 'ToggleBroadcast',
+							help = YELLOW .. '/gt broadcast receive' .. COLOR_END .. ': Toggles whether you are receiving broadcasts from everyone. ' .. YELLOW .. 'Yes, everyone everyone.' .. COLOR_END
+						},
+						sendforwards = {
+							order = 2,
+							methodName = 'ToggleForwards',
+							help = YELLOW .. '/gt broadcast sendforwards' .. COLOR_END .. ': Toggles whether you are frowarding broadcasts that you have received. ' .. YELLOW .. 'Use with caution. This may impact performance.' .. COLOR_END
+						},
+						receiveforwards = {
+							order = 3,
+							methodName = 'ToggleForwards',
+							help = YELLOW .. '/gt broadcast receiveforwards' .. COLOR_END .. ': Toggles whether you are accepting forwarded broadcasts that you ahve received. ' .. YELLOW .. 'Use with caution. This may impact performance.' .. COLOR_END
+						}
+
+					}
+				},
+				window = {
+					order = 10,
+					methodName = 'SetChatFrame',
+					help = YELLOW .. '/gt window {window_name}' .. COLOR_END .. ': Sets the output to a chat window.'
+				},
+				reset = {
+					order = 11,
+					methodName = 'Reset',
+					help = YELLOW .. '/gt reset' .. COLOR_END .. ': Resets all stored info. |cffff0000This cannot be undone.|r'
 				}
 			}
 		}
@@ -108,6 +179,9 @@ if L then
     L['WHISPER_SELECT_REQUIRED'] = 'No selected skill found. You must select a skill first.'
     L['WHISPER_NO_CHARACTER_FOUND'] = 'It doesn\'t look like the character \'{{character_name}}\' is online.'
 
+    L['WHISPER_INCOMING_REQUESTS'] = 'You have requests from: {{character_names}}'
+    L['WHISPER_NO_INCOMING_REQUESTS'] = 'You have no requests.'
+
 	---------- WHISPER END ----------
 	---------- LOG START ----------
 
@@ -136,7 +210,7 @@ if L then
 
 	L['PROFESSION_ADD_INIT'] = 'Please open the profession you want to add.'
 	L['PROFESSION_ADD_CANCEL'] = 'Canceling profession add.'
-	L['PROFESSION_ADD_SUCCESS'] = 'Successfully added profession \'{{profession_name}}\' to character \'{{character_name}}\'.'
+	L['PROFESSION_ADD_SUCCESS'] = 'Successfully added profession \'{{profession_name}}\'.'
 	L['PROFESSION_REMOVE_NIL_PROFESSION'] = 'Looks like you did not pass a profession name. You can remove a profession with \'/gt removeprofession {prfession_name}'
 	L['PROFESSION_REMOVE_NOT_FOUND'] = 'Could not find profession \'{{profession_name}}\' for character \'{{character_name}}\'.'
 	L['PROFESSION_REMOVE_SUCCESS'] = 'Successfully removed profession \'{{profession_name}}\' from character \'{{character_name}}\'.'
@@ -147,6 +221,76 @@ if L then
 	---------- PROFESSION END ----------
 	---------- GUI START ----------
 
+		---------- OPTIONS START -----------
+
+		L['CANCEL'] = 'Cancel'
+		L['STATIC_PROFESSION_ADD'] = 'Please open the profession you want to add.'
+		L['OKAY'] = 'Okay'
+
+		L['DESC_PROFESSIONS'] = 'Your currently tracked professions on this character.'
+
+		L['PROFESSION_ADD_NAME'] = 'Add Profession'
+		L['PROFESSION_ADD_DESC'] = 'Add a profession to this character.'
+		L['PROFESSION_ADD_CANCEL_DESC'] = 'Cancel adding profession.'
+
+		L['PROFESSION_DELETE_NAME'] = 'Remove Profession'
+		L['PROFESSION_DELETE_DESC'] = 'Stop tracking this profession on this character.'
+		L['PROFESSION_DELETE_CONFIRM'] = 'Are you sure you want to stop tracking {{profession_name}}?'
+
+		L['LABEL_ADD_CHARACTER'] = 'Add Non-Guild Character'
+		L['DESC_ADD_CHARACTER'] = 'Add a character that is not in your guild.'
+
+		L['LABEL_NON_GUILD_CHARACTERS'] = 'Non-Guild Characters'
+		L['DESC_NON_GUILD_CHARACTERS'] = 'Characters you have added that are not in your guild.'
+
+		L['LABEL_CHARACTER_REMOVE'] = 'Remove Character'
+		L['DESC_CHARACTER_REMOVE'] = 'Stop tracking this character.'
+		L['CHARACTER_REMOVE_CONFIRM'] = 'Are you sure you want to remove {{character_name}}?'
+
+		L['LABEL_REQUESTS_TOGGLE_ALL'] = 'Allow All'
+		L['LABEL_REQUESTS_TOGGLE_CONFIRM'] = 'Require Confirm'
+		L['LABEL_REQUESTS_TOGGLE_NONE'] = 'Allow None'
+		L['DESC_REQUESTS_TOGGLE'] = 'Set how many requests you allow.'
+
+		L['LABEL_REQUESTS'] = 'Requests'
+		L['DESC_REQUESTS'] = 'These characters have requested to add you.'
+
+		L['LABEL_SEND_CONFIRM'] = 'Accept'
+		L['DESC_SEND_CONFIRM'] = 'Accept their request.'
+
+		L['LABEL_SEND_REJECT'] = 'Deny'
+		L['DESC_SEND_REJECT'] = 'Deny their request.'
+
+		L['LABEL_SEND_IGNORE'] = 'Ignore'
+		L['DESC_SEND_IGNORE'] = 'Ignore this character.'
+		L['CHARACTER_IGNORE_CONFIRM'] = 'Are you sure you want to ignore {{character_name}}?'
+
+		L['LABEL_ADVERTISING'] = 'Advertising'
+		L['DESC_ADVERTISE_TOGGLE'] = 'Toggle auto-advertising.'
+
+		L['LABEL_ADVERTISING_INTERVAL'] = 'Advertising Interval'
+		L['DESC_ADVERTISING_INTERVAL'] = 'How many minutes you want to wait between advertisements.'
+
+		L['BROADCASTING'] = 'Broadcasting'
+
+		L['LABEL_SEND_BROADCAST'] = 'Send Broadcasts'
+		L['DESC_SEND_BROADCAST'] = 'Broadcast your skills to everyone.'
+
+		L['LABEL_RECEIVE_BROADCASTS'] = 'Accept Broadcasts'
+		L['DESC_RECEIVE_BROADCASTS'] = 'Accept broadcasts from everyone.'
+
+		L['LABEL_SEND_FORWARDS'] = 'Forward Broadcasts'
+		L['DESC_SEND_FORWARDS'] = 'Forward other player\'s broadcasts.'
+
+		L['LABEL_RECEIVE_FORWARDS'] = 'Receive Forwards'
+		L['DESC_RECEIVE_FORWARDS'] = 'Accept forwarded broadcasts.'
+
+		L['LABEL_BROADCAST_INTERVAL'] = 'Broadcast Interval'
+		L['DESC_BROADCAST_INTERVAL'] = 'Ho wmany minutes between broadcasts.'
+
+		---------- OPTIONS END ----------
+
+	L['BARE_LONG_TAG'] = 'GuildTradeskills'
 	L['LONG_TAG'] = LONG_TAG
 
 	L['WELCOME'] = 'Welcome to ' .. LONG_TAG .. '! For help getting started you can type \'/gt help\'.'
@@ -161,8 +305,11 @@ if L then
 
     L['BUTTON_FILTERS_RESET'] = 'Clear Filters'
     
-	L['GUILD_OFFLINE'] = '|cff7f7f7f{{guild_member}}|r - |cff7f7f7fOffline|r'
-	L['GUILD_ONLINE'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00Online|r'
+    L['ONLINE'] = ONLINE
+    L['OFFLINE'] = OFFLINE
+	L['OFFLINE_TAG'] = '|cff7f7f7f{{guild_member}}|r - |cff7f7f7f' .. OFFLINE ..'|r'
+	L['ONLINE_TAG'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00' .. ONLINE .. '|r'
+	L['NON_GUILD_TAG'] = '|cffffffff{{guild_member}}|r - |cffffffff' .. NON_GUILD .. '|r'
 
 	L['CHAT_FRAME_NIL'] = 'Looks like you didn\'t pass a chat window name. You can do so with \'/gt chatwindow {window_name}\'.'
 	L['CHAT_WINDOW_SUCCESS'] = 'Set ouput chat window to \'{{frame_name}}\'.'
@@ -190,67 +337,92 @@ if L then
 	L['ADVERTISE_ADVERTISEMENT'] = WHISPER_TAG .. 'Offering my crafting services! I have {{first_profession}}{{second_profession}} recipies. Whisper {{first_whisper}}{{second_whisper}}.'
 
 	---------- ADVERTISE END ----------
+	---------- BROADCAST START ----------
+
+	L['SEND'] = 'send'
+	L['RECEIVE'] = 'receive'
+	L['SEND_FORWARDS'] = 'sendforwards'
+	L['RECEIVE_FORWARDS'] = 'receiveforwards'
+
+	L['BROADCAST_UNKNOWN'] = 'Sorry! We don\'t know the broadcast type \'{{broadcast_type}}\'.'
+
+	L['BROADCAST_SEND_ON'] = 'You are now broadcasting to everyone.'
+	L['BROADCAST_SEND_OFF'] = 'You are no longer broadcasting to anyone.'
+
+	L['BROADCAST_RECEIVE_ON'] = 'You are now accepting broadcasts from everyone.'
+	L['BROADCAST_RECEIVE_OFF'] = 'You are no longer accepting broadcasts from everyone.'
+
+	L['BROADCAST_SEND_FORWARD_ON'] = 'You are now forwarding broadcasts.'
+	L['BROADCAST_SEND_FORWARD_OFF'] = 'You are no longer forwarding broadcasts.'
+
+	L['BROADCAST_FORWARDING_ON'] = 'You are now sending and accepting all forwarded broadcasts.'
+	L['BROADCAST_FORWARDING_OFF'] = 'You are no longer sending or accepting forwarded broadcasts.'
+
+	L['BROADCAST_FORWARD_UNKNOWN'] = 'Sorry! We dont\'t know the forwarded broadcast type \'{{broadcast_type}}\'.'
+
+	L['BROADCAST_ALL_ON'] = 'You are now sending and receiving all broadcasts.'
+	L['BROADCAST_ALL_OFF'] = 'You are no longer accepting any broadcasts.'
+
+	---------- BROADCAST END ----------
 	---------- SYSTEM START ----------
 
 	L['GUILD_MEMBER_ONLINE'] = '^.*%[(.*)%].* has come online'
 	L['GUILD_MEMBER_OFFLINE'] = '(.*) has gone offline'
-	L['PLAYER_NOT_FOUND'] = 'Player not found'
 
 	---------- SYSTEM END ----------
 	---------- NON-GUILD REQUEST START ----------
-	L['PLAYER_REQUEST_NIL'] = 'You must pass a character name. \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
-	L['PLAYER_REQUEST_NOT_FOUND'] = 'Whoops! Looks like the character \'{{character_name}}\' does not exist.'
-	L['PLAYER_REQUEST_REPEAT'] = 'You already have an outstanding request to {{character_name}}. You cannot send another.'
-	L['PLAYER_REQUEST_OFFLINE'] = '{{character_name}} is offline. The request will be sent when you both are online at the same time.'
-	L['PLAYER_REQUEST_SENT'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
-	L['PLAYER_REQUEST_SENT_TIMEOUT'] = 
-	L['PLAYER_REQUEST_MAX'] = 'You cannot have more than {{max_requests}} pending requests.'
-
-	L['PLAYER_REQUEST_RECEIVED'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
-	L['PLAYER_REQUEST_CONFIRM_OFFLINE'] = '{{character_name}} is offline. We will confirm wwith them when you are both online at the same time.'
-	L['PLAYER_REQUEST_CONFIRM_OUTGOING'] = 'Confirmation was sent to {{character_name}}! You should see their items shortly.'
-	L['PLAYER_REQUEST_CONFIRM_INCOMING'] = 'Got confirmation from {{character_name}}! You should see their items shortly.'
-
-
-
 
 	L['REQUEST_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['REQUEST_NOT_SELF'] = 'You cannot add yourself.'
+	L['REQUEST_REPEAT'] = 'You already have an outgoing request to {{character_name}}. You cannot send another.'
+	L['REQUEST_EXISTS'] = 'You have already added {{character_name}}. You cannot add them again.'
+	L['REQUEST_INCOMING'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
+
+	L['CONFIRM_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['CONFIRM_NOT_SELF'] = 'You cannot confirm yourself.'
+	L['CONFIRM_REPEAT'] = 'You already have an outgoing confirmation to {{character_name}}. You cannot send another.'
+	L['CONFIRM_EXISTS'] = 'You have already added {{character_name}}. You cannot confirm them again.'
+	L['CONFIRM_INCOMING'] = '{{character_name}} has accepted your request! You should see their items shortly.'
+
 	L['REJECT_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt reject {character_name}' .. COLOR_END .. '\'.'
-	L['REJECT_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt ignore {character_name}' .. COLOR_END .. '\'.'
-	L['REJECT_CHARACTER_NOT_FOUND'] = '{{character_name}} has not sent you a request to reject. You can ignore them with \'' .. YELLOW .. '/gt ignore {{character_name}}' .. COLOR_END .. '\'.'
-	L['REJECT_COUNT_WARN'] = 'You have rejected this person {{ignore_count}} times. If you reject them {{ignore_threshold}} times they will automatically be ignored.'
-	L['REJECT_AUTO_IGNORE'] = 'You have rejected this person {{ignore_threshold}} times. Automatically ignoring them.'
-	L['REJECT_THRESHOLD_EXCEEDED'] = 'This person has already automatically been placed on your ignore list. You cannot reject them again.'
-	L['REQUEST_CHARACTER_NOT_FOUND'] = 'Whoops! Looks like the character \'{{character_name}}\' does not exist.'
-	L['REQUEST_MAX_COUNT'] = 'You cannot have more than {{max_requests}} pending requests.'
-	L['REQUEST_OUTGOING_REPEAT'] = 'You already have an outgoing message to {{character_name}}. You cannot send another.'
+	L['REJECT_NOT_SELF'] = 'You cannot reject yourself.'
+	L['REJECT_ALREADY_IGNORED'] = 'You have already ignored {{character_name}}. You cannot reject them.'
+	L['REJECT_REPEAT'] = 'You already have an outgoing rejection to {{character_name}}. You cannot send another at this time.'
+	L['REJECT_NIL'] = '{{character_name}} has not sent you a request to reject.'
 
-	L['COMM_QUEUE_INCOMING_REQUEST'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
-	L['COMM_QUEUE_OUTGOING_REQUEST'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
-	L['COMM_QUEUE_INCOMING_CONFIRM'] = '{{character_name}} has accepted your request! You should see their items shortly.'
-	L['COMM_QUEUE_OUTGOING_CONFIRM'] = 'Accepted request from {{character_name}}! You should see their items shortly.'
-	L['COMM_QUEUE_INCOMING_REJECT'] = '{{character_name}} has rejected your invitation.'
-	L['COMM_QUEUE_OUTGOING_REJECT'] = 'Your rejection has been sent to {{character_name}}.'
-	L['COMM_QUEUE_INCOMING_IGNORE'] = 'You have been ignored by {{character_name}}. You can no longer send requests to them.'
-	L['COMM_QUEUE_OUTGOING_IGNORE'] = '{{character_name}} has been notified that they have been ignored.'
+	L['IGNORE_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt ignore {character_name}' .. COLOR_END .. '\'.'
+	L['IGNORE_NOT_SELF'] = 'You cannot ignore yourself.'
+	L['IGNORE_REPEAT'] = 'You have already ignored {{character_name}}. You cannot ignore them again.'
+	L['IGNORE_INCOMING'] = 'You have been ignored by {{character_name}}. You can no longer send requests to them.'
+	L['IGNORE_OUTGOING'] = '{{character_name}} has been added to your ignore list. You should not receive any requests from this account.'
+	L['IGNORE_REMOVE'] = 'Removed {{character_name}} from your ignore list. You will now receive requests from that account.'
 
-	L['COMM_QUEUE_INCOMING_REQUEST_TIMEOUT'] = 'Your message to {{character_name}} has timed out and has been canceled. You can re-request with \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
-	L['COMM_QUEUE_OUTGOING_REQUEST_TIMEOUT'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
-	L['COMM_QUEUE_INCOMING_CONFIRM_TIMEOUT'] = 'Got confirmation from {{character_name}}! You should see their items shortly.'
-	L['COMM_QUEUE_OUTGOING_CONFIRM_TIMEOUT'] = 'Your confirmation to {{character_name}} has timed out. You can refresh it with \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
-	L['COMM_QUEUE_INCOMING_REJECT_TIMEOUT'] = 'This shouldn\'t ever happen. The incoming rejection from {{character_name}} has timed out.'
-	L['COMM_QUEUE_OUTGOING_REJECT_TIMEOUT'] = 'Your rejection to {{character_name}} has timed out. You can refresh it with \'' .. YELLOW .. '/gt reject {character_name}' .. COLOR_END .. '\'.'
-	L['COMM_QUEUE_INCOMING_IGNORE_TIMEOUT'] = 'This shouldn\'t ever happen. The incoming ignore from {{character_name}} has timed out.'
-	L['COMM_QUEUE_OUTGOING_IGNORE_TIMEOUT'] = 'Your ignore of {{character_name}} has timed out. However you will still not receive requests from them.'
+	L['CHARACTER_NOT_FOUND'] = 'Whoops! Looks like the character \'{{character_name}}\' does not exist.'
 
-	L['COMM_QUEUE_INCOMING_REQUEST_OFFLINE'] = 'This shouldn\'t ever happen. An incoming request from {{character_name}} came in when you were offline.'
-	L['COMM_QUEUE_OUTGOING_REQUEST_OFFLINE'] = '{{character_name}} is offline. The request will be sent when you both are online at the same time.'
-	L['COMM_QUEUE_INCOMING_CONFIRM_OFFLINE'] = 'This shouldn\'t ever happen. An incoming confirm from {{character_name}} came in when you were offline.'
-	L['COMM_QUEUE_OUTGOING_CONFIRM_OFFLINE'] = '{{character_name}} is offline. We will confirm wwith them when you both are online at the same time.'
-	L['COMM_QUEUE_INCOMING_REJECT_OFFLINE'] = 'This shouldn\'t ever happen. An incoming rejection from {{character_name}} came in when you were offline.'
-	L['COMM_QUEUE_OUTGOING_REJECT_OFFLINE'] = '{{character_name}} is offline. The rejection will be sent when you both are online at the same time.'
-	L['COMM_QUEUE_INCOMING_IGNORE_OFFLINE'] = 'This shouldn\'t ever happen. An incoming ignore from {{character_name}} came in when you were offline.'
-	L['COMM_QUEUE_OUTGOING_IGNORE_OFFLINE'] = '{{character_name}} is offline so the ignore cannot be sent but you will stop receiving requests from them.'
+	L['INCOMING_REQUEST'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
+	L['INCOMING_CONFIRM'] = '{{character_name}} has accepted your request! You should see their items shortly.'
+	L['INCOMING_REJECT'] = '{{character_name}} has rejected your invitation.'
+	L['INCOMING_IGNORE'] = 'You have been ignored by {{character_name}}. You can no longer send requests to them.'
+
+	L['INCOMING_REQUEST_TIMEOUT'] = 'The request from {{character_name}} has timed out and has been canceled. You can re-request with \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+
+	L['OUTGOING_REQUEST_ONLINE'] = 'A request has been sent to {{character_name}}. If they accept they will be added to your list.'
+	L['OUTGOING_CONFIRM_ONLINE'] = 'Accepted request from {{character_name}}! You should see their items shortly.'
+	L['OUTGOING_REJECT_ONLINE'] = 'Your rejection has been sent to {{character_name}}.'
+	L['OUTGOING_IGNORE_ONLINE'] = '{{character_name}} has been notified that they have been ignored.'
+
+	L['OUTGOING_REQUEST_TIMEOUT'] = 'Your request to {{character_name}} has timed out and has been canceled. You can re-request with \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['OUTGOING_CONFIRM_TIMEOUT'] = 'Your confirmation to {{character_name}} has timed out. You can refresh it with \'' .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
+	L['OUTGOING_REJECT_TIMEOUT'] = 'Your rejection to {{character_name}} has timed out. You can refresh it with \'' .. YELLOW .. '/gt reject {character_name}' .. COLOR_END .. '\'.'
+	L['OUTGOING_IGNORE_TIMEOUT'] = 'Your ignore of {{character_name}} has timed out. However you will still not receive requests from them.'
+
+	L['OUTGOING_REQUEST_OFFLINE'] = '{{character_name}} is offline. The request will be sent when you both are online at the same time.'
+	L['OUTGOING_CONFIRM_OFFLINE'] = '{{character_name}} is offline. We will confirm with them when you both are online at the same time.'
+	L['OUTGOING_REJECT_OFFLINE'] = '{{character_name}} is offline. The rejection will be sent when you both are online at the same time.'
+	L['OUTGOING_IGNORE_OFFLINE'] = '{{character_name}} is offline. Then ignore cannot be sent but you will stop receiving requests from them.'
 
 	---------- NON-GUILD REQUEST END ----------
+	---------- MISC START ----------
+
+	---------- MISC END ----------
 end

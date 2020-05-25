@@ -20,8 +20,7 @@ function Event:OnEnable()
 		CRAFT_UPDATE = 'TradeSkillUpdate',
 		CHAT_MSG_WHISPER = 'WhisperReceived',
 		CHAT_MSG_CHANNEL_NOTICE = 'ChannelNotice',
-		CHAT_MSG_SYSTEM = 'ChatMessageSystem',
-		FRIENDLIST_UPDATE = 'FriendListUpdate'
+		CHAT_MSG_SYSTEM = 'ChatMessageSystem'
 	}
 
 	for event, methodName in pairs(EVENT_MAP) do
@@ -67,9 +66,4 @@ end
 
 function Event:ChatMessageSystem(event, message)
 	GT.CommGuild:ChatMessageSystem(message)
-	GT.CommWhisper:ChatMessageSystem(message)
-end
-
-function Event:FriendListUpdate()
-	GT.Friends:FriendListUpdate()
 end

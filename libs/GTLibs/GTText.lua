@@ -126,13 +126,13 @@ function lib:UUID()
 end
 
 function lib:IsUUIDValid(uuid)
-    local _, countDash = string.gsub(message, '-', '-')
-    if #message ~= 36 then
-        GT.Log:Error('CommValidator_IsRequestValid_IvalidLength', 36, #message, message)
+    local _, countDash = string.gsub(uuid, '-', '-')
+    if #uuid ~= 36 then
+        GT.Log:Error('CommValidator_IsRequestValid_IvalidLength', 36, #uuid, uuid)
         return false
     end
     if countDash ~= 4 then
-        GT.Log:Error('CommValidator_IsRequestValid_InvalidDashCount', 4, countDash, message)
+        GT.Log:Error('CommValidator_IsRequestValid_InvalidDashCount', 4, countDash, uuid)
         return false
     end
     return true

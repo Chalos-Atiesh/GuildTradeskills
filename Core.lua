@@ -28,6 +28,7 @@ function GT:OnInitialize()
 	GT.Comm:Enable()
 	GT.Whisper:Enable()
 	GT.Friends:Enable()
+	GT.Options:Enable()
 
 	GT:Wait(INITIAL_DELAY, GT['InitMessages'])
 end
@@ -41,7 +42,10 @@ function GT:InitMessages()
 	GT.Advertise:Advertise()
 	GT.DB:PurgeGuild()
 	GT.CommGuild:RequestStartVote()
-	GT.CommWhisper:ProcessPendingRequests()
+	GT.CommWhisper:RollCall()
+	GT.CommWhisper:SendTimestamps()
+	GT.CommWhisper:ProcessPendingCommQueues()
+	GT.CommYell:Broadcast()
 	if not GT.DB.valid then
 		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
 	end
@@ -158,6 +162,15 @@ function GT:GetCurrentVersion()
 	return version
 end
 
+function GT:GetWait(interval, variance)
+	local adjustment = math.random(interval * variance)
+	local invert = math.random(2) - 1
+	if invert > 0 then
+		adjustment = adjustment * -1
+	end
+	return interval + adjustment
+end
+
 function GT:Wait(delay, func, ...)
   if(type(delay)~="number" or type(func)~="function") then
     return false;
@@ -187,7 +200,7 @@ function GT:Wait(delay, func, ...)
 end
 
 function GT:IsCurrentCharacter(characterName)
-	if GT:GetCurrentCharacter() == characterName then
+	if string.lower(GT:GetCurrentCharacter()) == string.lower(characterName) then
 		return true
 	end
 	return false

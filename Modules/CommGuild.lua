@@ -71,6 +71,13 @@ end
 ---------- START VOTE NEGOTIATION ----------
 
 function CommGuild:RequestStartVote()
+	voteStart = time()
+	GT.Log:Info('CommGuild_RequestStartVote', voteStart)
+	if not GT.DB:IsCommEnabled() then
+		GT.Log:Warn('CommGuild_RequestStartVote_CommDisabled')
+		return
+	end
+
 	if not GT.DB:IsCommEnabled() then
 		GT.Log:Warn('CommGuild_RequestStartVote_CommDisabled')
 		return
@@ -80,11 +87,9 @@ function CommGuild:RequestStartVote()
 		GT.Log:Info('CommGuild_RequestStartVote_InvalidVoteState', voteState)
 		return
 	end
-	voteStart = time()
-	GT.Log:Info('CommGuild_RequestStartVote', voteStart)
 
-	if not GT.DB:IsCommEnabled() then
-		GT.Log:Warn('CommGuild_RequestStartVote_CommDisabled')
+	if GetNumGuildMembers() <= 0 then
+		GT.Log:Info('CommGuild_RequestStartVote_NotInGuild')
 		return
 	end
 
@@ -233,7 +238,6 @@ function CommGuild:OnTimestampsReceived(sender, toGet, toPost)
 	timestampCollection = CommGuild:_CollectTimestamps(sender, toPost)
 
 	if voteState == VOTE_STATE_REGISTERING then
-		GT.Log:Info('CommGuild_OnTimestampsReceived_ScheduleVote')
 		GT:Wait(VOTE_WINDOW, CommGuild['DoVote'])
 	end
 	voteState = VOTE_STATE_TIMESTAMPS
@@ -260,8 +264,13 @@ function CommGuild:DoVote()
 		for professionName, _ in  pairs(character) do
 			local profession = character[professionName]
 			local candidates = profession.candidates
-			local vote = GT.Table:Random(candidates)
-			local voteMessage = GT.Text:Concat(GT.Comm.DELIMITER, characterName, professionName, vote)
+			local voteMessage = nil
+			if GT.Table:Contains(candidates, characterName) then
+				voteMessage = GT.Text:Concat(GT.Comm.DELIMITER, characterName, professionName, characterName)
+			else
+				local vote = GT.Table:Random(candidates)
+				local voteMessage = GT.Text:Concat(GT.Comm.DELIMITER, characterName, professionName, vote)
+			end
 			table.insert(votes, voteMessage)
 		end
 	end

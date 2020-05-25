@@ -50,7 +50,8 @@ function Command:OnCommand(input)
 		return
 	end
 
-	GT.Log:PlayerWarn(string.gsub(GT.L['UNKNOWN_COMMAND'], '%{{command}}', userCommand))
+	local message = string.gsub(GT.L['UNKNOWN_COMMAND'], '%{{command}}', userCommand)
+	GT.Log:PlayerWarn(message)
 end
 
 function Command:DoCommand(commands, userCommand)
@@ -70,18 +71,33 @@ function Command:Help()
 	Command:_Help(GT.L['SLASH_COMMANDS'])
 end
 
-function GT.Command:_Help(commands)
-	for command, info in pairs(commands) do
-		GT.Log:PlayerInfo(info.help)
+function Command:_Help(commands)
+	local sortedKeys = GT.Table:GetSortedKeys(commands, function(a, b) return Command:_CompareCommands(a, commands[a], b, commands[b]) end)
+	for _, command in pairs(sortedKeys) do
+		local info = commands[command]
+		if info.help ~= nil then
+			GT.Log:PlayerInfo(info.help)
+		end
 		if info.subCommands then
 			GT.Command:_Help(info.subCommands)
 		end
 	end
 end
 
+function Command:_CompareCommands(a, aInfo, b, bInfo)
+	if aInfo.order ~= nil and bInfo.order ~= nil then
+		return aInfo.order < bInfo.order
+	end
+	return a < b
+end
+
+function Command:Options()
+	GT.Options:ToggleOptions(Command.tokens)
+end
+
 function Command:InitAddProfession()
-	GT.Log:Info('Command_InitAddProfession', Command.tokens)
-	GT.Profession:InitAddProfession(Command.tokens)
+	GT.Log:Info('Command_InitAddProfession')
+	GT.Profession:InitAddProfession()
 end
 
 function Command:RemoveProfession()
@@ -123,7 +139,44 @@ end
 
 function Command:SendRequest()
 	GT.Log:Info('Command_SendRequest', Command.tokens)
-	GT.CommWhisper:InitSendRequest(Command.tokens)
+	GT.CommWhisper:SendRequest(Command.tokens)
+end
+
+function Command:SendReject()
+	GT.Log:Info('Command_SendReject', Command.tokens)
+	GT.CommWhisper:SendReject(Command.tokens)
+end
+
+function Command:SendIgnore()
+	GT.Log:Info('Command_SendIgnore', Command.tokens)
+	GT.CommWhisper:SendIgnore(Command.tokens)
+end
+
+function Command:ShowRequests()
+	local comms = GT.DB:GetCommsWithCommand(GT.CommWhisper.INCOMING, GT.CommWhisper.REQUEST)
+	local characterNames = {}
+	for _, comm in pairs(comms) do
+		local characterName = comm.characterName:gsub("(%l)(%w*)", function(a,b) return string.upper(a)..b end)
+		table.insert(characterNames, characterName)
+	end
+	local message = nil
+	if #characterNames <= 0 then
+		message = GT.L['WHISPER_NO_INCOMING_REQUESTS']
+	else
+		local characters = table.concat(characterNames, GT.L['PRINT_DELIMITER'])
+		message = string.gsub(GT.L['WHISPER_INCOMING_REQUESTS'], '%{{character_names}}', characters)
+	end
+	GT.Log:PlayerInfo(message)
+end
+
+function Command:ToggleBroadcast()
+	GT.Log:Info('Command_ToggleBroadcast', Command.tokens)
+	GT.CommYell:ToggleBroadcast(Command.tokens)
+end
+
+function Command:ToggleForwards()
+	GT.Log:Info('Command_ToggleForwards', Command.tokens)
+	GT.CommYell:ToggleForwards(Command.tokens)
 end
 
 --@debug@
