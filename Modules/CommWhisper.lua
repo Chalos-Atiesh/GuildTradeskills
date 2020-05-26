@@ -79,7 +79,7 @@ function CommWhisper:RollCall()
 	local characters = GT.DB:GetCharacters()
 	for characterName, _ in pairs(characters) do
 		local character = characters[characterName]
-		if not character.isGuildMember then
+		if not character.isGuildMember and not character.isBroadcasted then
 			-- GT.Log:Info('CommWhisper_RollCall', characterName)
 			GT.Friends:IsOnline(characterName, CommWhisper['_RollCall'])
 			if character.class == nil then
@@ -328,9 +328,10 @@ function CommWhisper:SendConfirm(characterName, isPlayerInitiated)
 		if isPlayerInitiated then
 			playerInitComm = GT.DB:GetCommWithCommand(CommWhisper.OUTGOING, CommWhisper.CONFIRM, characterName)
 		end
+
 		GT.Friends:CancelIsOnline(characterName)
-		GT.Friends:IsOnline(characterName, CommWhisper['SendComm'])
-		GT.Friends:GetCharacterName(characterName, CommWhisper['CreateCharacter'])
+		GT.Friends:IsOnline(characterName, CommWhisper['CreateCharacter'])
+		GT:Wait(5, CommWhisper['SendTimestamps'])
 	end
 end
 
@@ -382,11 +383,8 @@ function CommWhisper:OnConfirmReceived(prefix, uuid, distribution, sender)
 
 	local message = string.gsub(GT.L['CONFIRM_INCOMING'], '%{{character_name}}', sender)
 	GT.Log:PlayerInfo(message)
-	local character = GT.DB:GetCharacter(sender)
-	character.isOnline = true
-	character.isGuildMember = false
-	GT.Friends:GetCharacterClass(sender, CommWhisper['SetCharacterClass'])
-	CommWhisper:SendTimestamps()
+	GT.Friends:IsOnline(characterName, CommWhisper['CreateCharacter'])
+	GT:Wait(5, CommWhisper['SendTimestamps'])
 end
 
 function CommWhisper:SendReject(characterName, autoReject)
@@ -689,7 +687,7 @@ function CommWhisper:SendTimestamps()
 	local characters = GT.DB:GetCharacters()
 	for characterName, _ in pairs(characters) do
 		local character = characters[characterName]
-		if not character.isGuildMember then
+		if not character.isGuildMember and not character.isBroadcasted then
 			GT.Log:Info('CommWhisper_SendTimestamps', characterName)
 			GT.Friends:IsOnline(characterName, CommWhisper['_SendTimestamps'])
 		end
