@@ -28,7 +28,7 @@ function CommYell:Broadcast()
 	end
 
 	local wait = GT:GetWait(GT.DB:GetBroadcastInterval(), GT.Comm.COMM_VARIANCE)
-	GT:Wait(wait, CommYell['Broadcast'])
+	GT:ScheduleTimer(CommYell['Broadcast'], wait)
 end
 
 function CommYell:ToggleBroadcast(tokens)

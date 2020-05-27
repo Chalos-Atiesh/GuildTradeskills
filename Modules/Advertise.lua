@@ -68,7 +68,7 @@ function Advertise:Advertise()
 		Advertise:_Advertise()
 	end
 
-	GT:Wait(GT.DB:GetAdvertisingInterval(), Advertise['Advertise'])
+	GT:ScheduleTimer(Advertise['Advertise'], GT.DB:GetAdvertisingInterval())
 end
 
 function Advertise:_Advertise()

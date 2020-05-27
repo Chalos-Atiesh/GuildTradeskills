@@ -425,5 +425,7 @@ if L then
 	---------- NON-GUILD REQUEST END ----------
 	---------- MISC START ----------
 
+	L['ADDED_BY'] = 'Added by'
+
 	---------- MISC END ----------
 end

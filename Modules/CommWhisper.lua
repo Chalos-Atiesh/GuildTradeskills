@@ -7,14 +7,10 @@ GT.CommWhisper = CommWhisper
 
 LibStub('AceComm-3.0'):Embed(CommWhisper)
 
-local PROCESS_COMM_INTERVAL = 60
-local ROLL_CALL_INTERVAL = 30
-
 CommWhisper.INCOMING = true
 CommWhisper.OUTGOING = false
 
-local GET = 'GET'
-
+CommWhisper.GET = 'GET'
 CommWhisper.HANDSHAKE = 'HANDSHAKE'
 CommWhisper.REQUEST = 'REQUEST'
 CommWhisper.CONFIRM = 'CONFIRM'
@@ -26,8 +22,12 @@ CommWhisper.REQUEST_FILTER_ALLOW_NONE = false
 CommWhisper.REQUEST_FILTER_ALLOW_ALL = true
 
 local COMM_TIMEOUT = 7 * 24 * 60 * 60
+local PROCESS_COMM_INTERVAL = 60
+local ROLL_CALL_INTERVAL = 30
+local ADD_DELAY = 5
 
 local COMMAND_MAP = {}
+local STARTUP_TASKS = {}
 
 local INCOMING_TIMEOUT_MAP = {
 	REQUEST = 'INCOMING_REQUEST_TIMEOUT'
@@ -59,6 +59,10 @@ local playerInitComm = nil
 function CommWhisper:OnEnable()
 	GT.Log:Info('CommWhisper_OnEnable')
 
+	table.insert(STARTUP_TASKS, CommWhisper['RollCall'])
+	table.insert(STARTUP_TASKS, CommWhisper['SendTimestamps'])
+	table.insert(STARTUP_TASKS, CommWhisper['ProcessPendingCommQueues'])
+
 	COMMAND_MAP = {
 		GET = 'OnGetReceived',
 		HANDSHAKE = 'OnHandshakeReceived',
@@ -75,6 +79,10 @@ function CommWhisper:OnEnable()
 	end
 end
 
+function CommWhisper:StartupTasks()
+	GT:CreateActionQueue(GT.STARTUP_DELAY, STARTUP_TASKS)
+end
+
 function CommWhisper:RollCall()
 	local characters = GT.DB:GetCharacters()
 	for characterName, _ in pairs(characters) do
@@ -82,13 +90,10 @@ function CommWhisper:RollCall()
 		if not character.isGuildMember and not character.isBroadcasted then
 			-- GT.Log:Info('CommWhisper_RollCall', characterName)
 			GT.Friends:IsOnline(characterName, CommWhisper['_RollCall'])
-			if character.class == nil then
-				GT.Friends:GetCharacterClass(characterName, CommWhisper['SetCharacterClass'])
-			end
 		end
 	end
 	local wait = GT:GetWait(ROLL_CALL_INTERVAL, GT.Comm.COMM_VARIANCE)
-	GT:Wait(wait, CommWhisper['RollCall'])
+	GT:ScheduleTimer(CommWhisper['RollCall'], wait)
 end
 
 function CommWhisper:_RollCall(info)
@@ -96,6 +101,9 @@ function CommWhisper:_RollCall(info)
 	if info.exists then
 		local character = GT.DB:GetCharacter(info.name)
 		character.isOnline = info.connected
+		if info.className ~= 'UNKNOWN' then
+			character.class = info.className
+		end
 	end
 end
 
@@ -104,11 +112,14 @@ function CommWhisper:CreateCharacter(info)
 		GT.Log:Info('CommWhisper_CreateCharacter', info.name)
 		local character = GT.DB:GetCharacter(info.name)
 		character.isGuildMember = false
+		if info.className ~= 'UNKNOWN' then
+			character.class = info.className
+		end
 	end
 end
 
 function CommWhisper:SetCharacterClass(info)
-	GT.Log:Info('CommWhisper_SetClass', characterName, class)
+	GT.Log:Info('CommWhisper_SetClass', characterName, info.className)
 	if info.exists and info.className ~= 'UNKNOWN' then
 		local character = GT.DB:GetCharacter(info.name)
 		character.class = string.upper(info.className)
@@ -324,14 +335,14 @@ function CommWhisper:SendConfirm(characterName, isPlayerInitiated)
 	if comm ~= nil and comm.command == CommWhisper.REQUEST then
 		GT.Log:Info('CommWhisper_SendConfirm_Send', characterName)
 		GT.DB:DequeueComm(CommWhisper.INCOMING, CommWhisper.REQUEST, characterName)
-		GT.DB:EnqueueComm(CommWhisper.OUTGOING, CommWhisper.CONFIRM, characterName, GT.DB:GetUUID())
+		comm = GT.DB:EnqueueComm(CommWhisper.OUTGOING, CommWhisper.CONFIRM, characterName, GT.DB:GetUUID())
+		CommWhisper:ProcessPendingComm(comm)
 		if isPlayerInitiated then
 			playerInitComm = GT.DB:GetCommWithCommand(CommWhisper.OUTGOING, CommWhisper.CONFIRM, characterName)
 		end
-
-		GT.Friends:CancelIsOnline(characterName)
+		GT.Log:Info('CommWhisper_SendConfirm_CreateCharacter', characterName)
 		GT.Friends:IsOnline(characterName, CommWhisper['CreateCharacter'])
-		GT:Wait(5, CommWhisper['SendTimestamps'])
+		GT:ScheduleTimer(CommWhisper['SendTimestamps'], ADD_DELAY)
 	end
 end
 
@@ -373,7 +384,8 @@ function CommWhisper:OnConfirmReceived(prefix, uuid, distribution, sender)
 	if comm ~= nil and comm.command == CommWhisper.REQUEST then
 		GT.Log:Info('CommWhisper_OnConfirmReceived_OutgoingRequest', sender, uuid)
 		GT.DB:DequeueComm(CommWhisper.OUTGOING, CommWhisper.REQUEST, sender)
-		GT.DB:EnqueueComm(CommWhisper.OUTGOING, CommWhisper.CONFIRM, sender, GT.DB:GetUUID())
+		comm = GT.DB:EnqueueComm(CommWhisper.OUTGOING, CommWhisper.CONFIRM, sender, GT.DB:GetUUID())
+		CommWhisper:ProcessPendingComm(comm)
 	end
 
 	if GT.DB:CharacterExists(sender) then
@@ -383,8 +395,8 @@ function CommWhisper:OnConfirmReceived(prefix, uuid, distribution, sender)
 
 	local message = string.gsub(GT.L['CONFIRM_INCOMING'], '%{{character_name}}', sender)
 	GT.Log:PlayerInfo(message)
-	GT.Friends:IsOnline(characterName, CommWhisper['CreateCharacter'])
-	GT:Wait(5, CommWhisper['SendTimestamps'])
+	GT.Friends:IsOnline(sender, CommWhisper['CreateCharacter'])
+	GT:ScheduleTimer(CommWhisper['SendTimestamps'], ADD_DELAY)
 end
 
 function CommWhisper:SendReject(characterName, autoReject)
@@ -481,12 +493,12 @@ function CommWhisper:OnRejectReceived(prefix, uuid, distribution, sender)
 
 	local comm = GT.DB:GetCommForCharacter(CommWhisper.OUTGOING, sender)
 	if comm ~= nil and comm.command == CommWhisper.CONFIRM then
-		GT.Log:Info('CommValidator_OnRejectReceived_OutgoingConfirm', sender, uuid)
+		GT.Log:Info('CommWhisper_OnRejectReceived_OutgoingConfirm', sender, uuid)
 		GT.DB:DequeueComm(CommWhisper.OUTGOING, CommWhisper.CONFIRM, sender)
 	end
 
 	if comm ~= nil and comm.command == CommWhisper.REQUEST then
-		GT.Log:Info('CommValidator_OnRejectReceived_OutgoingRequest', sender, uuid)
+		GT.Log:Info('CommWhisper_OnRejectReceived_OutgoingRequest', sender, uuid)
 		GT.DB:DequeueComm(CommWhisper.OUTGOING, CommWhisper.REQUEST, sender)
 	end
 
@@ -497,7 +509,7 @@ function CommWhisper:OnRejectReceived(prefix, uuid, distribution, sender)
 
 	comm = GT.DB:GetCommForCharacter(CommWhisper.INCOMING, sender)
 	if comm ~= nil and comm.command == CommWhisper.REQUEST then
-		GT.Log:Info('CommValidator_OnRejectReceived_IncomingRequest', sender, uuid)
+		GT.Log:Info('CommWhisper_OnRejectReceived_IncomingRequest', sender, uuid)
 		GT.DB:DequeueComm(CommWhisper.INCOMING, CommWhisper.REQUEST, sender)
 	end
 end
@@ -598,7 +610,7 @@ function CommWhisper:ProcessPendingCommQueues()
 	end
 
 	local wait = GT:GetWait(PROCESS_COMM_INTERVAL, GT.Comm.COMM_VARIANCE)
-	GT:Wait(wait, CommWhisper['ProcessPendingCommQueues'])
+	GT:ScheduleTimer(CommWhisper['ProcessPendingCommQueues'], wait)
 end
 
 function CommWhisper:ProcessPendingCommQueue(queue)
@@ -729,7 +741,7 @@ function CommWhisper:OnTimestampsReceived(sender, toGet, toPost)
 	if #sendLines > 0 then
 		message = table.concat(sendLines, GT.Comm.DELIMITER)
 		GT.Log:Info('CommWhisper_OnTimestampsReceived_SendGet', sender, message)
-		GT.Comm:SendCommMessage(GET, message, GT.Comm.WHISPER, sender, 'NORMAL')
+		GT.Comm:SendCommMessage(CommWhisper.GET, message, GT.Comm.WHISPER, sender, 'NORMAL')
 	end
 
 	for characterName, _ in pairs(toPost) do

@@ -82,13 +82,13 @@ function DB:OnEnable(force)
 	end
 
 	--@debug@
-	-- DB.db.char.incomingCommQueue = {}
-	-- DB.db.char.outgoingCommQueue = {}
+	DB.db.char.incomingCommQueue = {}
+	DB.db.char.outgoingCommQueue = {}
 
 	-- DB.db.global.incomingIgnores = {}
 	-- DB.db.global.outgoingIgnores = {}
 
-	-- DB.db.global.handshakes = {}
+	DB.db.global.handshakes = {}
 	--@end-debug@
 
 	DB.valid = DB:Validate()
@@ -218,6 +218,10 @@ end
 function DB:EnqueueComm(isIncoming, command, characterName, message)
 	characterName = string.lower(characterName)
 
+	if DB:GetCommWithCommand(isIncoming, command, characterName) ~= nil then
+		return false
+	end
+
 	queue = DB:GetCommQueue(isIncoming)
 	comm = {}
 	comm.isIncoming = isIncoming
@@ -226,7 +230,7 @@ function DB:EnqueueComm(isIncoming, command, characterName, message)
 	comm.timestamp = time()
 	comm.message = message
 	queue[GT.Text:UUID()] = comm
-	return true
+	return comm
 end
 
 function DB:DequeueComm(isIncoming, command, characterName)

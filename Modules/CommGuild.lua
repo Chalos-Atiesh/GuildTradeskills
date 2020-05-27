@@ -140,7 +140,7 @@ function CommGuild:OnRequestStartVoteReceived(prefix, message, distribution, sen
 	GT.Log:Info('CommGuild_OnRequestStartVoteReceived_RegisterSelf', GT:GetCurrentCharacter())
 	registeredVoters = GT.Table:Insert(registeredVoters, nil, GT:GetCurrentCharacter())
 	registeredVoters = GT.Table:Insert(registeredVoters, nil, sender)
-	GT:Wait(START_WINDOW, CommGuild['SendTimestamps'])
+	GT:ScheduleTimer(CommGuild['SendTimestamps'], START_WINDOW)
 	CommGuild:SendCommMessage(START_VOTE_ACK, tostring(voteStart), GT.Comm.GUILD,  nil, GT.Comm.NORMAL)
 end
 
@@ -167,7 +167,7 @@ function CommGuild:OnVoteStartAckReceived(prefix, message, distribution, sender)
 	if voteState < VOTE_STATE_REGISTERING then
 		GT.Log:Info('CommGuild_OnVoteStartAckReceived_RegisterSelf', GT:GetCurrentCharacter())
 		registeredVoters = GT.Table:Insert(registeredVoters, nil, GT:GetCurrentCharacter())
-		GT:Wait(START_WINDOW, CommGuild['SendTimestamps'])
+		GT:ScheduleTimer(CommGuild['SendTimestamps'], START_WINDOW)
 	end
 
 	GT.Log:Info('CommGuild_OnVoteStartAckReceived_Register', sender, message)
@@ -199,7 +199,7 @@ function CommGuild:OnVoteStartDenyReceived(prefix, message, distribution, sender
 	local reRequestTime = tonumber(message) + math.random(VOTE_DENY_VARIANCE)
 	local waitTime = reRequestTime - time()
 	GT.Log:Info('CommGuild_OnVoteStartDenyReceived_Waiting', sender, message, reRequestTime, waitTime)
-	GT:Wait(waitTime, CommGuild['RequestStartVote'])
+	GT:ScheduleTimer(CommGuild['RequestStartVote'], waitTime)
 end
 
 ---------- END VOTE NEGOTIATION ----------
@@ -238,7 +238,7 @@ function CommGuild:OnTimestampsReceived(sender, toGet, toPost)
 	timestampCollection = CommGuild:_CollectTimestamps(sender, toPost)
 
 	if voteState == VOTE_STATE_REGISTERING then
-		GT:Wait(VOTE_WINDOW, CommGuild['DoVote'])
+		GT:ScheduleTimer(CommGuild['DoVote'], VOTE_WINDOW)
 	end
 	voteState = VOTE_STATE_TIMESTAMPS
 end
@@ -283,7 +283,7 @@ function CommGuild:DoVote()
 
 	timestampCollection = {}
 
-	GT:Wait(VOTE_WINDOW, CommGuild['FinalizeVote'])
+	GT:ScheduleTimer(CommGuild['FinalizeVote'], VOTE_WINDOW)
 end
 
 function CommGuild:OnVoteReceived(prefix, message, distribution, sender)
@@ -396,7 +396,7 @@ function CommGuild:FinalizeVote()
 		end
 	end
 
-	GT:Wait(POST_WINDOW, CommGuild['FinalizePost'])
+	GT:ScheduleTimer(CommGuild['FinalizePost'], POST_WINDOW)
 end
 
 function CommGuild:FinalizePost()

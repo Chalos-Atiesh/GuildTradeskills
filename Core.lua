@@ -1,6 +1,6 @@
 local AddOnName, GT = ...
 
-GT = LibStub('AceAddon-3.0'):NewAddon(AddOnName, 'AceComm-3.0', 'AceConsole-3.0', 'AceEvent-3.0')
+GT = LibStub('AceAddon-3.0'):NewAddon(AddOnName, 'AceComm-3.0', 'AceConsole-3.0', 'AceEvent-3.0', 'AceTimer-3.0')
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true)
 GT.L = L
@@ -15,12 +15,20 @@ GT.Table = LibStub:GetLibrary('GTTable')
 GT.resetWarned = false
 GT.version = '@project-version@'
 
-local INITIAL_DELAY = 5
+GT.STARTUP_DELAY = 5
+
+local STARTUP_TASKS = {}
 
 function GT:OnInitialize()
 	GT.Log:Enable()
 
 	GT.Log:Info('GT_OnInitialize')
+
+	table.insert(STARTUP_TASKS, GT.Log['InitChatFrame'])
+	table.insert(STARTUP_TASKS, GT.Comm['StartupTasks'])
+	table.insert(STARTUP_TASKS, GT['Welcome'])
+	table.insert(STARTUP_TASKS, GT.DB['PurgeGuild'])
+	table.insert(STARTUP_TASKS, GT.Advertise['Advertise'])
 
 	GT.Advertise:Enable()
 	GT.Command:Enable()
@@ -30,24 +38,27 @@ function GT:OnInitialize()
 	GT.Friends:Enable()
 	GT.Options:Enable()
 
-	GT:Wait(INITIAL_DELAY, GT['InitMessages'])
+	GT:ScheduleTimer(GT['StartupTasks'], GT.STARTUP_DELAY)
 end
 
 local waitTable = {};
 local waitFrame = nil;
 
-function GT:InitMessages()
-	GT.Log:InitChatFrame()
+function GT:StartupTasks()
+	GT:CreateActionQueue(GT.STARTUP_DELAY, STARTUP_TASKS)
+end
+
+function GT:Welcome()
 	GT.Log:PlayerInfo(L['WELCOME'])
-	GT.Advertise:Advertise()
-	GT.DB:PurgeGuild()
-	GT.CommGuild:RequestStartVote()
-	GT.CommWhisper:RollCall()
-	GT.CommWhisper:SendTimestamps()
-	GT.CommWhisper:ProcessPendingCommQueues()
-	GT.CommYell:Broadcast()
 	if not GT.DB.valid then
 		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
+	end
+end
+
+function GT:CreateActionQueue(delay, queue)
+	local wait = 0
+	for i, task in pairs(queue) do
+		GT:ScheduleTimer(task, (i - 1) * delay)
 	end
 end
 
@@ -169,34 +180,6 @@ function GT:GetWait(interval, variance)
 		adjustment = adjustment * -1
 	end
 	return interval + adjustment
-end
-
-function GT:Wait(delay, func, ...)
-  if(type(delay)~="number" or type(func)~="function") then
-    return false;
-  end
-  if(waitFrame == nil) then
-    waitFrame = CreateFrame("Frame","WaitFrame", UIParent);
-    waitFrame:SetScript("onUpdate",function (self,elapse)
-      local count = #waitTable;
-      local i = 1;
-      while(i<=count) do
-        local waitRecord = tremove(waitTable,i);
-        local d = tremove(waitRecord,1);
-        local f = tremove(waitRecord,1);
-        local p = tremove(waitRecord,1);
-        if(d>elapse) then
-          tinsert(waitTable,i,{d-elapse,f,p});
-          i = i + 1;
-        else
-          count = count - 1;
-          f(unpack(p));
-        end
-      end
-    end);
-  end
-  tinsert(waitTable,{delay,func,{...}});
-  return true;
 end
 
 function GT:IsCurrentCharacter(characterName)

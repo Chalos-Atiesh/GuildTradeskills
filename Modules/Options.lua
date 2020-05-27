@@ -14,6 +14,9 @@ Options.CD = CD
 local CR = LibStub('AceConfigRegistry-3.0')
 Options.CR = CR
 
+local ADD_DELAY = 1
+local PANEL_NAME = AddOnName .. '_Options'
+
 local options = {
 	type = 'group',
 	args = {
@@ -236,7 +239,7 @@ local options = {
 
 function Options:OnEnable()
 	GT.Log:Info('Options_OnEnable')
-	Config:RegisterOptionsTable(AddOnName, options)
+	Config:RegisterOptionsTable(PANEL_NAME, options)
 	CD:AddToBlizOptions(GT.L['BARE_LONG_TAG'], GT.L['LONG_TAG'])
 end
 
@@ -251,7 +254,7 @@ function Options:GetRequestFilter()
 	elseif filterState == false then
 		toggle.name = GT.L['LABEL_REQUESTS_TOGGLE_NONE']
 	end
-	CR:NotifyChange(AddOnName)
+	CR:NotifyChange(PANEL_NAME)
 	return filterState
 end
 
@@ -264,25 +267,25 @@ function Options:SendConfirm()
 	local characterName = Options:GetSelectedRequest()
 	GT.CommWhisper:SendConfirm(characterName, true)
 	Options.selectedRequest = nil
-	GT:Wait(1, Options['_SendConfirm'])
+	GT:Wait(Options['_SendConfirm'], ADD_DELAY)
 end
 
 function Options:_SendConfirm()
 	GT.Log:Info('Options__SendConfirm')
 	options.args.nonGuildMembers.args.characters.values = Options:GetCharacters()
-	CR:NotifyChange(AddOnName)
+	CR:NotifyChange(PANEL_NAME)
 end
 
 function Options:SendReject()
 	local characterName = Options:GetSelectedRequest()
 	GT.CommWhisper:SendReject({characterName})
-	CR:NotifyChange(AddOnName)
+	CR:NotifyChange(PANEL_NAME)
 end
 
 function Options:SendIgnore()
 	local characterName = Options:GetSelectedRequest()
 	GT.CommWhisper:SendIgnore({characterName})
-	CR:NotifyChange(AddOnName)
+	CR:NotifyChange(PANEL_NAME)
 end
 
 function Options:GetRequests()
@@ -366,7 +369,7 @@ function Options:DeleteCharacter()
 	GT.Log:Info('Options_DeleteCharacter', Options.selectedCharacter)
 	GT.DB:DeleteCharacter(Options.selectedCharacter)
 	Options.selectedCharacter = nil
-	CR:NotifyChange(AddOnName)
+	CR:NotifyChange(PANEL_NAME)
 end
 
 function Options:ToggleAddProfession()
@@ -385,13 +388,13 @@ function Options:_ToggleAddProfession()
 	GT.Log:Info('Options__ToggleAddProfession')
 	options.args.professionGroup.args.professionAdd.name = GT.L['PROFESSION_ADD_NAME']
 	options.args.professionGroup.args.professionAdd.desc = GT.L['PROFESSION_ADD_DESC']
-	CR:NotifyChange(AddOnName)
+	CR:NotifyChange(PANEL_NAME)
 end
 
 function Options:DeleteProfession()
 	GT.Profession:DeleteProfession({Options:GetSelectedProfession()})
 	Options.selectedProfession = nil
-	CR:NotifyChange(AddOnName)
+	CR:NotifyChange(PANEL_NAME)
 end
 
 function Options:GetConfirmText(info, template, fn)
@@ -405,8 +408,8 @@ function Options:GetConfirmText(info, template, fn)
 end
 
 function Options:ToggleOptions()
-	if not CD:Close(AddOnName) then
-		CD:Open(AddOnName)
+	if not CD:Close(PANEL_NAME) then
+		CD:Open(PANEL_NAME)
 	end
 end
 

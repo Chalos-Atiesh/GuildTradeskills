@@ -32,9 +32,14 @@ Comm.DELETE = 'DELETE'
 Comm.VERSION = 'VERSION'
 
 local COMMAND_MAP = {}
+local STARTUP_TASKS = {}
 
 function Comm:OnEnable()
 	GT.Log:Info('Comm_OnEnable')
+
+	table.insert(STARTUP_TASKS, GT.CommWhisper['StartupTasks'])
+	table.insert(STARTUP_TASKS, GT.CommGuild['RequestStartVote'])
+	table.insert(STARTUP_TASKS, GT.CommYell['Broadcast'])
 
 	COMMAND_MAP = {
 		TIMESTAMP = 'OnTimestampsReceived',
@@ -54,6 +59,10 @@ function Comm:OnEnable()
 	for command, functionName in pairs(COMMAND_MAP) do
 		Comm:RegisterComm(command, functionName)
 	end
+end
+
+function Comm:StartupTasks()
+	GT:CreateActionQueue(GT.STARTUP_DELAY, STARTUP_TASKS)
 end
 
 function Comm:SendTimestamps(distribution, recipient)
