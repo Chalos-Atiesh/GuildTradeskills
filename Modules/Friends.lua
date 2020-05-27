@@ -25,7 +25,7 @@ local initialized = false
 
 function Friends:OnEnable()
 	if initialized then return end
-	-- GT.Log:Info('Friends_OnEnable')
+	GT.Log:Info('Friends_OnEnable')
 
 	NOTE = GT.Text:Concat(' ', GT.L['ADDED_BY'], AddOnName)
 
@@ -41,8 +41,8 @@ function Friends:AddFriend(characterName, callback)
 	if callback ~= nil then
 		pendingFriendsQueue = GT.Table:InsertField(pendingFriendsQueue, characterName)
 		local queue = pendingFriendsQueue[characterName]
-		pendingFriendsQueue[characterName] = GT.Table:Insert(queue, nil, uuid)
-		-- GT.Log:Info('Friends_AddFriend_RegisterCallback', characterName, uuid)
+		pendingFriendsQueue[characterName] = GT.Table:Insert(queue, uuid, callback)
+		GT.Log:Info('Friends_AddFriend_RegisterCallback', characterName, uuid)
 		Friends:RegisterCallback(uuid, callback)
 	end
 
@@ -51,14 +51,14 @@ function Friends:AddFriend(characterName, callback)
 		uuid = GT.Text:UUID()
 		friendsAddedQueue = GT.Table:InsertField(friendsAddedQueue, characterName)
 		local queue = friendsAddedQueue[characterName]
-		friendsAddedQueue[characterName] = GT.Table:Insert(queue, nil, uuid)
-		-- GT.Log:Info('Friends_FriendAdded_RegisterCallback', characterName, uuid)
+		friendsAddedQueue[characterName] = GT.Table:Insert(queue, uuid, callback)
+		GT.Log:Info('Friends_FriendAdded_RegisterCallback', characterName, uuid)
 		Friends:RegisterCallback(uuid, Friends['FriendAdded'])
 	end
 end
 
 function Friends:FriendAdded(info)
-	-- GT.Log:Info('Friends_FriendAdded', info.name, info.exists)
+	GT.Log:Info('Friends_FriendAdded', info.name, info.exists)
 
 	local tempCharacterName = string.lower(info.name)
 	if info.exists then
@@ -76,11 +76,11 @@ function Friends:FriendAdded(info)
 
 	local characterToRemove = nil
 	if pendingFriendsQueue[tempCharacterName] ~= nil then
-		local uuids = pendingFriendsQueue[tempCharacterName]
-		for _, uuid in pairs(uuids) do
-			-- GT.Log:Info('Friends_FriendAdded_Callback', info.name, uuid)
+		local callbacks = pendingFriendsQueue[tempCharacterName]
+		for uuid, callback in pairs(callbacks) do
+			GT.Log:Info('Friends_FriendAdded_Callback', info.name, uuid)
 			Friends.callbacks:Fire(uuid, info)
-			Friends.UnregisterCallback(uuid, uuid)
+			Friends.UnregisterCallback(callback, uuid)
 		end
 	end
 	pendingFriendsQueue[tempCharacterName] = nil
@@ -93,8 +93,8 @@ function Friends:IsOnline(characterName, callback)
 	characterName = string.lower(characterName)
 	local uuid = GT.Text:UUID()
 	isOnlineQueue = GT.Table:InsertField(isOnlineQueue, characterName)
-	isOnlineQueue[characterName] = GT.Table:Insert(isOnlineQueue[characterName], nil, uuid)
-	-- GT.Log:Info('Friends_IsOnline', characterName, uuid)
+	isOnlineQueue[characterName] = GT.Table:Insert(isOnlineQueue[characterName], uuid, callback)
+	GT.Log:Info('Friends_IsOnline', characterName, uuid)
 	Friends:RegisterCallback(uuid, callback)
 	Friends:AddFriend(characterName, Friends['_IsOnline'])
 end
@@ -102,9 +102,9 @@ end
 function Friends:_IsOnline(info)
 	local characterName = string.lower(info.name)
 	if isOnlineQueue[characterName] ~= nil then
-		local uuids = isOnlineQueue[characterName]
-		for _, uuid in pairs(uuids) do
-			-- GT.Log:Info('Friends__IsOnline_Callback', info.name, uuid)
+		local callbacks = isOnlineQueue[characterName]
+		for uuid, callback in pairs(callbacks) do
+			GT.Log:Info('Friends__IsOnline_Callback', info.name, uuid)
 			Friends.callbacks:Fire(uuid, info)
 			Friends.UnregisterCallback(uuid, uuid)
 		end
@@ -114,8 +114,8 @@ end
 
 function Friends:CancelIsOnline(characterName)
 	if characterName == nil then
-		for characterName, uuids in pairs(pendingFriendsQueue) do
-			for _, uuid in pairs(uuids) do
+		for characterName, callbacks in pairs(pendingFriendsQueue) do
+			for uuid, callback in pairs(callbacks) do
 				Friends.UnregisterCallback(uuid, uuid)
 			end
 		end
@@ -127,8 +127,8 @@ function Friends:CancelIsOnline(characterName)
 
 	if pendingFriendsQueue[characterName] == nil then return end
 
-	for _, uuid in pairs(pendingFriendsQueue[characterName]) do
-		Friends.UnregisterCallback(uuid, uuid)
+	for uuid, callback in pairs(pendingFriendsQueue[characterName]) do
+		Friends.UnregisterCallback(callback, uuid)
 	end
 	pendingFriendsQueue = {}
 end
@@ -136,18 +136,18 @@ end
 function Friends:IsFriend(characterName)
 	local friendInfo = C_FriendList.GetFriendInfo(characterName)
 	if friendInfo == nil then
-		-- GT.Log:Info('Friends_IsFriend_No', characterName)
+		GT.Log:Info('Friends_IsFriend_No', characterName)
 		return false
 	end
-	-- GT.Log:Info('Friends_IsFriend_Yes', characterName)
+	GT.Log:Info('Friends_IsFriend_Yes', characterName)
 	return true
 end
 
 function Friends:PurgeFriendList()
-	-- GT.Log:Info('Friends_PurgeFriendList')
+	GT.Log:Info('Friends_PurgeFriendList')
 	for i = 1, C_FriendList.GetNumFriends() do
 		local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
-		-- GT.Log:Info('Friends_PurgeFriendList', friendInfo)
+		GT.Log:Info('Friends_PurgeFriendList', friendInfo)
 		Friends:RemoveFriend(friendInfo.name)
 	end
 end
@@ -157,12 +157,8 @@ function Friends:RemoveFriend(characterName)
 
 	for i = 1, C_FriendList.GetNumFriends() do
 		local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
-		if pendingFriendsQueue[characterName] == nil
-			and friendsAddedQueue[characterName] == nil
-			and isOnlineQueue[characterName] == nil
-			and friendInfo.notes == NOTE
-		then
-			-- GT.Log:Info('Friends_RemoveFriend', friendInfo.name)
+		if friendInfo.notes == NOTE then
+			GT.Log:Info('Friends_RemoveFriend', friendInfo.name)
 			C_FriendList.RemoveFriendByIndex(i)
 			return true
 		end
@@ -173,14 +169,14 @@ end
 function Friends:FakeFriendFilter(...)
 	local message = select(2, ...)
 	if string.find(message, ERR_FRIEND_NOT_FOUND) then
-		for characterName, uuids in pairs(friendsAddedQueue) do
-			for _, uuid in pairs(uuids) do
-				-- GT.Log:Info('Friends_FakeFriendFilter_NotFound', characterName, uuid)
+		for characterName, callbacks in pairs(friendsAddedQueue) do
+			for uuid, callback in pairs(callbacks) do
+				GT.Log:Info('Friends_FakeFriendFilter_NotFound', characterName, uuid)
 				local info = {}
 				info.name = characterName
 				info.exists = false
 				Friends.callbacks:Fire(uuid, info)
-				Friends.UnregisterCallback(uuid, uuid)
+				Friends.UnregisterCallback(callback, uuid)
 			end
 		end
 		friendsAddedQueue = {}
@@ -191,23 +187,24 @@ function Friends:FakeFriendFilter(...)
     	characterName = message:match(string.gsub(ERR_FRIEND_ALREADY_S, '(%%s)', '(.+)'))
     end
 	if characterName ~= nil then
-		-- GT.Log:Info('Friends_FakeFriendFilter_Found', characterName)
+		GT.Log:Info('Friends_FakeFriendFilter_Found', characterName)
 
 		local tempCharacterName = string.lower(characterName)
 		if friendsAddedQueue[tempCharacterName] ~= nil then
-			local uuids = friendsAddedQueue[tempCharacterName]
-			for _, uuid in pairs(uuids) do
+			GT.Log:Info('Friends_FakeFriendFilter_InQueue', friendsAddedQueue)
+			local callbacks = friendsAddedQueue[tempCharacterName]
+			for uuid, callback in pairs(callbacks) do
 				local info = {}
 				info.name = characterName
 				info.exists = true
 
-				-- GT.Log:Info('Friends_FakeFriendFilter_Callback', characterName, uuid)
 				Friends.callbacks:Fire(uuid, info)
-				Friends.UnregisterCallback(uuid, uuid)
+				GT.Log:Info('Friends_FakeFriendFilter_Callback', characterName, uuid)
+				Friends.UnregisterCallback(callback, uuid)
 			end
-			friendsAddedQueue[tempCharacterName] = nil
+			friendsAddedQueue = GT.Table:RemoveByValue(friendsAddedQueue, tempCharacterName, true)
+			return true
 		end
-		return true
 	end
 	return false
 end
