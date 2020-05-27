@@ -62,6 +62,7 @@ function CommWhisper:OnEnable()
 	table.insert(STARTUP_TASKS, CommWhisper['RollCall'])
 	table.insert(STARTUP_TASKS, CommWhisper['SendTimestamps'])
 	table.insert(STARTUP_TASKS, CommWhisper['ProcessPendingCommQueues'])
+	table.insert(STARTUP_TASKS, CommWhisper['SendVersion'])
 
 	COMMAND_MAP = {
 		GET = 'OnGetReceived',
@@ -81,6 +82,22 @@ end
 
 function CommWhisper:StartupTasks()
 	GT:CreateActionQueue(GT.STARTUP_DELAY, STARTUP_TASKS)
+end
+
+function CommWhisper:SendVersion()
+	local characters = GT.DB:GetCharacters()
+	for characterName, _ in pairs(characters) do
+		local character = characters[characterName]
+		if not character.isGuildMember and not character.isBroadcasted then
+			GT.Friends:IsOnline(characterName, CommWhisper['_SendVersion'])
+		end
+	end
+end
+
+function CommWhisper:_SendVersion(info)
+	if not info.connected then return end
+	GT.Log:Info('CommWhisper__SendVersion', info.name)
+	GT.Comm:SendVersion(GT.Comm.WHISPER, info.name)
 end
 
 function CommWhisper:RollCall()

@@ -150,7 +150,7 @@ function GT:DeconvertVersion(version)
 end
 
 function GT:GetCurrentVersion()
-	local version = GT:ConvertVersion(98, 99, 99)
+	local version = GT:ConvertVersion(99, 99, 99)
 	--@debug@
 	if true then
 		GT.DB:InitVersion(version)

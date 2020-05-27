@@ -21,6 +21,7 @@ local START_VOTE_DENY = 'START_VOTE_DENY'
 local VOTE = 'VOTE'
 
 local COMMAND_MAP = {}
+local STARTUP_TASKS = {}
 
 local VOTE_STATE_PRE_VOTE = -1
 local VOTE_STATE_START_REQUESTED = 0
@@ -39,7 +40,11 @@ local goneOffline = {}
 local voteState = VOTE_STATE_PRE_VOTE
 
 function CommGuild:OnEnable()
-	GT.Log:Info('CommGuild_OnEnable_Enter')
+	GT.Log:Info('CommGuild_OnEnable')
+
+	table.insert(STARTUP_TASKS, CommGuild['SendVersion'])
+	table.insert(STARTUP_TASKS, CommGuild['RequestStartVote'])
+
 	COMMAND_MAP = {
 		START_VOTE = 'OnRequestStartVoteReceived',
 		START_VOTE_ACK = 'OnVoteStartAckReceived',
@@ -52,20 +57,41 @@ function CommGuild:OnEnable()
 	end
 end
 
+function CommGuild:StartupTasks()
+	GT:CreateActionQueue(GT.STARTUP_DELAY, STARTUP_TASKS)
+end
+
 function CommGuild:ChatMessageSystem(message)
-	local _, _, characterName = string.find(message, GT.L['GUILD_MEMBER_OFFLINE'])
-	if not characterName then return end
+	local offlineName = message:match(string.gsub(ERR_FRIEND_OFFLINE_S, '(%%s)', '(.+)'))
+	if offlineName ~= nil then
+		if GT.DB:CharacterExists(offlineName) then
+			local character = GT.DB:GetCharacter(offlineName)
+			character.isOnline = false
+		end
+	end
+
+	local onlineName = message:match(string.gsub(ERR_FRIEND_ONLINE_SS, '(%%s)', '(.+)'))
+	if onlineName ~= nil then
+		if GT.DB:CharacterExists(onlineName) then
+			local character = GT.DB:GetCharacter(onlineName)
+			character.isOnline = true
+		end
+	end
 
 	if voteState < VOTE_STATE_REGISTERING then
 		return
 	end
 
-	if not GT.Table:Contains(registeredVoters, characterName) then
-		return
+	if offlineName ~= nil then
+		goneOffline = GT.Table:Insert(goneOffline, nil, offlineName)
 	end
+	if onlineName ~= nil then
+		goneOffline = GT.Table:Insert(goneOffline, nil, onlineName)
+	end
+end
 
-	GT.Log:Info('CommGuild_ChatMessageSystem', characterName)
-	table.insert(goneOffline, characterName)
+function CommGuild:SendVersion()
+	GT.Comm:SendVersion(GT.Comm.GUILD, nil)
 end
 
 ---------- START VOTE NEGOTIATION ----------

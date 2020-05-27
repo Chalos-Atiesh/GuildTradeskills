@@ -11,6 +11,24 @@ CommYell.MIN_BROADCAST_INTERVAL = 60
 CommYell.MAX_BROADCAST_INTERVAL = 300
 CommYell.DEFAULT_BROADCAST_INTERVAL = 120
 
+local STARTUP_TASKS = {}
+
+
+function CommYell:OnEnable()
+	table.insert(STARTUP_TASKS, CommYell['SendVersion'])
+	table.insert(STARTUP_TASKS, CommYell['Broadcast'])
+end
+
+function CommYell:StartupTasks()
+	GT:CreateActionQueue(GT.STARTUP_DELAY, STARTUP_TASKS)
+end
+
+function CommYell:SendVersion()
+	GT.Comm:SendVersion(GT.Comm.YELL, nil)
+	local wait = GT:GetWait(GT.DB:GetBroadcastInterval(), GT.Comm.COMM_VARIANCE)
+	GT:ScheduleTimer(CommYell['SendVersion'], wait)
+end
+
 function CommYell:Broadcast()
 	if not GT.DB:IsCommEnabled() then
 		GT.Log:Warn('CommYell_Broadcast_CommDisabled')

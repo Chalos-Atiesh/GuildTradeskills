@@ -365,12 +365,6 @@ if L then
 	L['BROADCAST_ALL_OFF'] = 'You are no longer accepting any broadcasts.'
 
 	---------- BROADCAST END ----------
-	---------- SYSTEM START ----------
-
-	L['GUILD_MEMBER_ONLINE'] = '^.*%[(.*)%].* has come online'
-	L['GUILD_MEMBER_OFFLINE'] = '(.*) has gone offline'
-
-	---------- SYSTEM END ----------
 	---------- NON-GUILD REQUEST START ----------
 
 	L['REQUEST_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'

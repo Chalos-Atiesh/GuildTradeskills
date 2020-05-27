@@ -38,8 +38,8 @@ function Comm:OnEnable()
 	GT.Log:Info('Comm_OnEnable')
 
 	table.insert(STARTUP_TASKS, GT.CommWhisper['StartupTasks'])
-	table.insert(STARTUP_TASKS, GT.CommGuild['RequestStartVote'])
-	table.insert(STARTUP_TASKS, GT.CommYell['Broadcast'])
+	table.insert(STARTUP_TASKS, GT.CommGuild['StartupTasks'])
+	table.insert(STARTUP_TASKS, GT.CommYell['StartupTasks'])
 
 	COMMAND_MAP = {
 		TIMESTAMP = 'OnTimestampsReceived',
@@ -55,6 +55,7 @@ function Comm:OnEnable()
 
 	GT.CommGuild:Enable()
 	GT.CommWhisper:Enable()
+	GT.CommYell:Enable()
 
 	for command, functionName in pairs(COMMAND_MAP) do
 		Comm:RegisterComm(command, functionName)
@@ -316,22 +317,22 @@ function Comm:OnDeleteReceived(prefix, message, distribution, sender)
 	end
 end
 
-function Comm:SendVersion()
+function Comm:SendVersion(distribution, recipient)
 	local version = GT:GetCurrentVersion()
-	GT.Log:Info('Comm_SendVersion', version)
+	GT.Log:Info('Comm_SendVersion', distribution, recipient, version)
 
 	if not GT.DB:IsCommEnabled() then
 		GT.Log:Warn('Comm_SendVersion_CommDisabled')
 		return
 	end
-
+	
 	--[===[@non-debug@
-	Comm:SendCommMessage(Comm.VERSION, tostring(version), GUILD, nil, Comm.NORMAL)
+	Comm:SendCommMessage(Comm.VERSION, tostring(version), distribution, recipient, Comm.NORMAL)
 	--@end-non-debug@]===]
 end
 
 function Comm:OnVersionReceived(prefix, message, distribution, sender)
-	GT.Log:Info('Comm_OnVersionReceived', prefix, distribution, sender, message)
+	GT.Log:Info('Comm_OnVersionReceived', distribution, sender, message)
 
 	if not GT.DB:IsCommEnabled() then
 		GT.Log:Warn('Comm_OnVersionReceived_CommDisabled')
