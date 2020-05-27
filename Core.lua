@@ -195,13 +195,27 @@ function GT:GetCurrentCharacter()
 end
 
 function GT:IsGuildMember(characterName)
+	characterName = string.lower(characterName)
 	local countTotalMembers, countOnlineMembers = GetNumGuildMembers()
 	for i = 1, countTotalMembers do
 		local tempCharacterName = GetGuildRosterInfo(i)
 		tempCharacterName = Ambiguate(tempCharacterName, 'none')
-		if string.lower(characterName) == string.lower(tempCharacterName) then
+		if characterName == string.lower(tempCharacterName) then
 			return true
 		end
 	end
 	return false
+end
+
+function GT:GetGuildMemberClass(characterName)
+	characterName = string.lower(characterName)
+	local countTotalMembers, countOnlineMembers = GetNumGuildMembers()
+	for i = 1, countTotalMembers do
+		local characterName, _, _, _, class = GetGuildRosterInfo(i)
+		tempCharacterName = Ambiguate(tempCharacterName, 'none')
+		if characterName == string.lower(tempCharacterName) then
+			return string.upper(class)
+		end
+	end
+	return 'UNKNOWN'
 end

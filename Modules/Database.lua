@@ -678,6 +678,9 @@ function DB:_ValidateData()
 		if character.isBroadcasted == nil then
 			character.isBroadcasted = false
 		end
+		if character.class == nil then
+			character.class = 'UNKNOWN'
+		end
 		local professions = character.professions
 		for professionName, _ in pairs(professions) do
 			if tonumber(professionName) ~= nil 

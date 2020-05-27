@@ -267,7 +267,7 @@ function Options:SendConfirm()
 	local characterName = Options:GetSelectedRequest()
 	GT.CommWhisper:SendConfirm(characterName, true)
 	Options.selectedRequest = nil
-	GT:Wait(Options['_SendConfirm'], ADD_DELAY)
+	GT:ScheduleTimer(Options['_SendConfirm'], ADD_DELAY)
 end
 
 function Options:_SendConfirm()

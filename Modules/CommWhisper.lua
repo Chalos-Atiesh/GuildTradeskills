@@ -118,14 +118,6 @@ function CommWhisper:CreateCharacter(info)
 	end
 end
 
-function CommWhisper:SetCharacterClass(info)
-	GT.Log:Info('CommWhisper_SetClass', characterName, info.className)
-	if info.exists and info.className ~= 'UNKNOWN' then
-		local character = GT.DB:GetCharacter(info.name)
-		character.class = string.upper(info.className)
-	end
-end
-
 function CommWhisper:OnHandshakeReceived(prefix, uuid, distribution, sender)
 	GT.Log:Info('CommWhisper_OnHandshakeReceived', distribution, sender, uuid)
 

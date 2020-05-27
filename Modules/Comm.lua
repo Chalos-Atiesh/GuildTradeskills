@@ -245,17 +245,22 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 		return
 	elseif profession == nil or profession.lastUpdate < lastUpdate then
 		GT.Log:Info('Comm_OnPostReceived_LocalOutOfDate', characterName, professionName)
+		local character = GT.DB:GetCharacter(characterName)
 		profession = GT.DB:AddProfession(characterName, professionName)
 		if distribution == Comm.YELL
 			or distribution == Comm.SAY
 			or distribution == Comm.WHISPER
 		then
 			if not GT:IsGuildMember(characterName) then
-				local character = GT.DB:GetCharacter(characterName)
 				character.isGuildMember = false
 				if distribution == Comm.YELL or distribution == Comm.SAY then
 					character.isBroadcasted = true
 				end
+			end
+		else
+			local class = GT:GetGuildMemberClass(characterName)
+			if class ~= 'UNKNOWN' then
+				character.class = class
 			end
 		end
 	end

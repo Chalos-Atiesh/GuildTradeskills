@@ -147,7 +147,6 @@ function Friends:PurgeFriendList()
 	GT.Log:Info('Friends_PurgeFriendList')
 	for i = 1, C_FriendList.GetNumFriends() do
 		local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
-		GT.Log:Info('Friends_PurgeFriendList', friendInfo)
 		Friends:RemoveFriend(friendInfo.name)
 	end
 end
