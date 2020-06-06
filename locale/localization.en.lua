@@ -1,7 +1,7 @@
 local AddOnName, GT = ...
 
 local GREEN = '|cff3ce13f'
-local YELLOW = '|cfffcba03'
+local YELLOW = '|cffe0ca0a'
 local COLOR_END = '|r'
 
 local L = LibStub('AceLocale-3.0'):NewLocale(AddOnName, 'enUS', true, true)
@@ -15,6 +15,14 @@ local OFFLINE = 'Offline'
 local NON_GUILD = 'Non Guild'
 
 local CHARACTER_NIL = 'You must pass a character name. \''
+
+local ALCHEMY = 'Alchemy'
+local BLACKSMITHING = 'Blacksmithing'
+local ENCHANTING = 'Enchanting'
+local ENGINEERING = 'Engineering'
+local LEATHERWORKING = 'Leatherworking'
+local TAILORING = 'Tailoring'
+local COOKING = 'Cooking'
 
 if L then
 	---------- CLASSES START ----------
@@ -46,8 +54,6 @@ if L then
 	--@debug@
 	L['FORCE'] = 'force'
 	--@end-debug@
-
-	L['PRINT_DELIMITER'] = ', '
 
 	L['SLASH_COMMANDS'] = {
 		gt = {
@@ -201,13 +207,15 @@ if L then
 
 	L['PROFESSION'] = 'profession'
 
-    L['ALCHEMY'] = 'Alchemy'
-    L['BLACKSMITHING'] = 'Blacksmithing'
-    L['ENCHANTING'] = 'Enchanting'
-    L['ENGINEERING'] = 'Engineering'
-    L['LEATHERWORKING'] = 'Leatherworking'
-    L['TAILORING'] = 'Tailoring'
-    L['COOKING'] = 'Cooking'
+	L['PROFESSIONS_LIST'] = {
+		ALCHEMY = ALCHEMY,
+		BLACKSMITHING = BLACKSMITHING,
+		ENCHANTING = ENCHANTING,
+		ENGINEERING = ENGINEERING,
+		LEATHERWORKING = LEATHERWORKING,
+		TAILORING = TAILORING,
+		COOKING = COOKING
+	}
 
 	L['PROFESSION_ADD_INIT'] = 'Please open the profession you want to add.'
 	L['PROFESSION_ADD_CANCEL'] = 'Canceling profession add.'
@@ -308,11 +316,11 @@ if L then
     
     L['ONLINE'] = ONLINE
     L['OFFLINE'] = OFFLINE
-	L['OFFLINE_TAG'] = '|cff7f7f7f{{guild_member}}|r - |cff7f7f7f' .. OFFLINE ..'|r'
+	L['OFFLINE_TAG'] = '|c{{class_color}}{{guild_member}}|r - |cff7f7f7f' .. OFFLINE ..'|r'
 	L['ONLINE_TAG'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00' .. ONLINE .. '|r'
 	L['NON_GUILD_TAG'] = '|cffffffff{{guild_member}}|r - |cffffffff' .. NON_GUILD .. '|r'
 
-	L['CHAT_FRAME_NIL'] = 'Looks like you didn\'t pass a chat window name. You can do so with \'/gt chatwindow {window_name}\'.'
+	L['CHAT_FRAME_NIL'] = 'Looks like you didn\'t pass a chat window name. You can do so with ' .. YELLOW .. '\'/gt chatwindow {window_name}\'' .. COLOR_END ..'.'
 	L['CHAT_WINDOW_SUCCESS'] = 'Set ouput chat window to \'{{frame_name}}\'.'
 	L['CHAT_WINDOW_INVALID'] = 'Sorry! We couldn\'t find a chat window with name \'{{frame_name}}\'.'
 
@@ -369,28 +377,34 @@ if L then
 
 	L['REQUEST_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
 	L['REQUEST_NOT_SELF'] = 'You cannot add yourself.'
+	L['REQUEST_NOT_GUILD'] = '{{character_name}} is a guildmate so you cannot add them.'
 	L['REQUEST_REPEAT'] = 'You already have an outgoing request to {{character_name}}. You cannot send another.'
 	L['REQUEST_EXISTS'] = 'You have already added {{character_name}}. You cannot add them again.'
 	L['REQUEST_INCOMING'] = '{{character_name}} would like to add you in ' .. LONG_TAG .. '. Type \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' to see what to do.'
 
 	L['CONFIRM_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
 	L['CONFIRM_NOT_SELF'] = 'You cannot confirm yourself.'
+	L['CONFIRM_NOT_GUILD'] = '{{character_name}} is a guildmate so you cannot confirm them.'
 	L['CONFIRM_REPEAT'] = 'You already have an outgoing confirmation to {{character_name}}. You cannot send another.'
 	L['CONFIRM_EXISTS'] = 'You have already added {{character_name}}. You cannot confirm them again.'
 	L['CONFIRM_INCOMING'] = '{{character_name}} has accepted your request! You should see their items shortly.'
+	L['CONFIRM_NIL'] = '{{character_name}} has not sent you a request to confirm.'
 
 	L['REJECT_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt reject {character_name}' .. COLOR_END .. '\'.'
 	L['REJECT_NOT_SELF'] = 'You cannot reject yourself.'
+	L['REJECT_NOT_GUILD'] = 'Sorry! {{character_name}} is a guildmate so you cannot reject them.'
 	L['REJECT_ALREADY_IGNORED'] = 'You have already ignored {{character_name}}. You cannot reject them.'
 	L['REJECT_REPEAT'] = 'You already have an outgoing rejection to {{character_name}}. You cannot send another at this time.'
 	L['REJECT_NIL'] = '{{character_name}} has not sent you a request to reject.'
 
 	L['IGNORE_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt ignore {character_name}' .. COLOR_END .. '\'.'
 	L['IGNORE_NOT_SELF'] = 'You cannot ignore yourself.'
+	L['IGNORE_NOT_GUILD'] = '{{character_name}} is a guildmate so you cannot ignore them.'
 	L['IGNORE_REPEAT'] = 'You have already ignored {{character_name}}. You cannot ignore them again.'
 	L['IGNORE_INCOMING'] = 'You have been ignored by {{character_name}}. You can no longer send requests to them.'
 	L['IGNORE_OUTGOING'] = '{{character_name}} has been added to your ignore list. You should not receive any requests from this account.'
 	L['IGNORE_REMOVE'] = 'Removed {{character_name}} from your ignore list. You will now receive requests from that account.'
+	L['IGNORE_ALREADY_IGNORED'] = 'You have already ignored {{character_name}}. You cannot ignore them again.'
 
 	L['CHARACTER_NOT_FOUND'] = 'Whoops! Looks like the character \'{{character_name}}\' does not exist.'
 
@@ -414,12 +428,18 @@ if L then
 	L['OUTGOING_REQUEST_OFFLINE'] = '{{character_name}} is offline. The request will be sent when you both are online at the same time.'
 	L['OUTGOING_CONFIRM_OFFLINE'] = '{{character_name}} is offline. We will confirm with them when you both are online at the same time.'
 	L['OUTGOING_REJECT_OFFLINE'] = '{{character_name}} is offline. The rejection will be sent when you both are online at the same time.'
-	L['OUTGOING_IGNORE_OFFLINE'] = '{{character_name}} is offline. Then ignore cannot be sent but you will stop receiving requests from them.'
+	L['OUTGOING_IGNORE_OFFLINE'] = '{{character_name}} is offline. Then ignore will be sent when you both are online and you will stop receiving requests from them.'
 
 	---------- NON-GUILD REQUEST END ----------
 	---------- MISC START ----------
 
+	L['PRINT_DELIMITER'] = ', '
 	L['ADDED_BY'] = 'Added by'
+
+	L['REMOVE_GUILD'] = 'These characters are no longer part of the guild and have been removed: {{character_names}}'
+	L['REMOVE_GUILD_INACTIVE'] = 'These characters in the guild have been inactive for {{timeout_days}} days and have been removed: {{character_names}}'
+
+	L['REMOVE_WHISPER_INACTIVE'] = 'These characters that you have added have been inactive for {{timeout_days}} and have been removed: {{character_names}}'
 
 	---------- MISC END ----------
 end

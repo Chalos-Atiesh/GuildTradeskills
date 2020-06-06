@@ -10,10 +10,11 @@ GT.Profession = Profession
 Profession.callbacks = Profession.callbacks or CallbackHandler:New(Profession)
 
 local ADD_PROFESSION = 'ADD_PROFESSION'
-
-Profession.adding = false
-
 local STATIC_PROFESSION_ADD = 'STATIC_PROFESSION_ADD'
+
+local adding = false
+local callbackQueue = {}
+local profession = nil
 
 local staticProfessionAdd = {
 	text = GT.L[STATIC_PROFESSION_ADD],
@@ -24,17 +25,18 @@ local staticProfessionAdd = {
 
 function Profession:InitAddProfession(callback)
 	GT.Log:Info('Profession_AddProfession')
-	if not Profession.adding then
+	if not adding then
 		StaticPopupDialogs[STATIC_PROFESSION_ADD] = staticProfessionAdd
 		StaticPopup_Show(STATIC_PROFESSION_ADD)
-		Profession.adding = true
+		adding = true
 		if callback ~= nil then
 			Profession:RegisterCallback(ADD_PROFESSION, callback)
+			table.insert(callbackQueue, callback)
 		end
 	else
 		StaticPopup_Hide(STATIC_PROFESSION_ADD)
 		GT.Log:PlayerInfo(GT.L['PROFESSION_ADD_CANCEL'])
-		Profession.adding = false
+		adding = false
 	end
 end
 
@@ -49,47 +51,19 @@ function Profession:AddProfession()
 		GT.Log:Error('Profession_UpdateProfession_ProfessionNameNil')
 		return
 	end
+	profession = GT.DBProfession:AddProfession(professionName)
 
 	local characterName = UnitName('player')
-	local profession = nil
-	if Profession.adding then
+	if adding then
 		GT.Log:Info('Profession_AddProfession', characterName, professionName)
-		profession = GT.DB:AddProfession(characterName, professionName)
-
-		local msg = GT.L['PROFESSION_ADD_SUCCESS']
-		msg = string.gsub(msg, '%{{profession_name}}', professionName)
-		GT.Log:PlayerInfo(msg)
-	else
-		GT.Log:Info('Profession_AddProfession_NotAdding', nil, professionName)
-		profession = GT.DB:AddProfession(nil, professionName)
+		profession = GT.DBCharacter:AddProfession(characterName, professionName)
 	end
 
-	if Profession.adding then
-	    CloseTradeSkill()
-	    CloseCraft()
-	end
-
-	local updated = Profession:UpdateProfession(profession)
-	
-	if GT.DB:GetProfession(characterName, professionName) == nil then
-		GT.Log:Info('Profession_AddProfession_NilProfession', professionName)
-		return
-	end
-	--[===[@non-debug@
-	if updated then
-	--@end-non-debug@]===]
-		GT.CommGuild:RequestStartVote()
-	--[===[@non-debug@
-	end
-	--@end-non-debug@]===]
-
-	Profession.adding = false
-	StaticPopup_Hide(STATIC_PROFESSION_ADD)
-	Profession.callbacks:Fire(ADD_PROFESSION, profession)
-	Profession.UnregisterCallback(ADD_PROFESSION, ADD_PROFESSION)
+	GT:ScheduleTimer(Profession['UpdateProfession'], 1)
 end
 
-function Profession:UpdateProfession(profession)
+function Profession:UpdateProfession()
+	if profession == nil then return end
 	GT.Log:Info('Profession_UpdateProfession' , profession.professionName)
 
 	local GetNumTradeSkills = GetNumTradeSkills
@@ -113,60 +87,88 @@ function Profession:UpdateProfession(profession)
 
 	local characterName = UnitName('player')
 
+	local trackingProfession = GT.DBCharacter:ProfessionExists(characterName, profession.professionName)
+
 	local updated = false
 	for i = 1, GetNumTradeSkills() do
 		local skillName, kind, num = GetTradeSkillInfo(i)
 
-		if kind and kind ~= 'header' and kind ~= 'subheader' then
+		if kind ~= nil and kind ~= 'header' and kind ~= 'subheader' then
 			local skillLink = GetTradeSkillItemLink(i)
+			GT.DBProfession:AddSkill(profession.professionName, skillName, skillLink)
 
-			if Profession.adding then
-				if GT.DB:GetSkill(characterName, profession.professionName, skillName) == nil then
-					GT.Log:Info('Profession_UpdateProfession_AddProfession', characterName, profession.professionName, skillName, skillLink)
-					skill = GT.DB:AddSkill(characterName, profession.professionName, skillName, skillLink)
+			if adding or trackingProfession then
+				if not GT.DBCharacter:SkillExists(characterName, profession.professionName, skillName) then
+					GT.Log:Info('Profession_UpdateProfession_AddSkill', characterName, profession.professionName, skillName, skillLink)
+					skill = GT.DBCharacter:AddSkill(characterName, profession.professionName, skillName, skillLink)
 					profession.lastUpdate = time()
 					updated = true
 				end
-			else
-				GT.DB:AddSkill(nil, profession.professionName, skillName, skillLink)
 			end
 
 			for j = 1, GetTradeSkillNumReagents(i) do
 				local reagentAdded = false
 				local retries = 0
-				while not reagentAdded and retries < 4 do
+				while not reagentAdded and retries < 10 do
 					local reagentName, _, reagentCount = GetTradeSkillReagentInfo(i, j)
-					if reagentName then
-						-- GT.Log:Info('Profession_UpdateProfession_AddReagent', profession.professionName, skillName, reagentName, reagentCount)
-						GT.DB:AddReagent(profession.professionName, skillName, reagentName, reagentCount)
+					if reagentName ~= nil then
 						reagentAdded = true
+						if not GT.DBProfession:ReagentExists(profession.professionName, skillName, reagentName) then
+							GT.Log:Info('Profession_UpdateProfession_AddReagent', profession.professionName, skillName, reagentName, reagentCount)
+							local reagentLink = GetTradeSkillReagentItemLink(i, j)
+							GT.DBProfession:AddReagent(profession.professionName, skillName, reagentName, reagentLink, reagentCount)
+							reagentAdded = true
+						end
 					end
 					retries = retries + 1
+				end
+				if not reagentAdded then
+					GT.Log:Error('Profession_UpdateProfession_ReagentFailure', skillName, j)
 				end
 			end
 		end
 	end
 
-	return updated
+	if adding then
+	    CloseTradeSkill()
+	    CloseCraft()
+
+		local msg = GT.L['PROFESSION_ADD_SUCCESS']
+		msg = string.gsub(msg, '%{{profession_name}}', profession.professionName)
+		GT.Log:PlayerInfo(msg)
+	end
+
+	adding = false
+	StaticPopup_Hide(STATIC_PROFESSION_ADD)
+	Profession.callbacks:Fire(ADD_PROFESSION, profession)
+	Profession.UnregisterCallback(ADD_PROFESSION, ADD_PROFESSION)
+
+	--[===[@non-debug@
+	if updated then
+	--@end-non-debug@]===]
+		GT.CommGuild:RequestStartVote()
+	--[===[@non-debug@
+	end
+	--@end-non-debug@]===]
 end
 
 function Profession:DeleteProfession(tokens)
 	GT.Log:Info('Profession_RemoveProfession', tokens)
 
 	local characterName = UnitName('player')
-	local professionName = GT.Table:RemoveToken(tokens)
+	local professionName = Table:RemoveToken(tokens)
 	
 	if professionName == nil then
 		GT.Log:PlayerError(GT.L['PROFESSION_REMOVE_NIL_PROFESSION'])
 		return
 	end
 
-	local professions = GT.DB:GetCharacter(characterName).professions
+	local professions = GT.DBCharacter:GetProfessions(characterName)
 
 	local removed = false
 	for dbProfessionName, _ in pairs(professions) do
 		if string.lower(dbProfessionName) == string.lower(professionName) then
-			removed = GT.DB:DeleteProfession(characterName, dbProfessionName)
+			removed = GT.DBCharacter:DeleteProfession(characterName, dbProfessionName)
 			professionName = dbProfessionName
 			break
 		end

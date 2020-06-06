@@ -59,7 +59,7 @@ function Event:ChannelNotice(...)
 
 	GT.Log:Info('Event_ChannelNotice', event, subEvent, channelType, channelNumber)
 
-	if GT.Table:Contains(GT.Advertise.events, subEvent) then
+	if Table:Contains(GT.Advertise.events, subEvent) then
 		GT.Advertise:ChannelNotice(subEvent, channelType, channelNumber)
 	end
 end

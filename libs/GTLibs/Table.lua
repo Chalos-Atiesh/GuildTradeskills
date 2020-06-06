@@ -1,9 +1,17 @@
-local majorVersion = 'GTTable'
-local minorVersion = 1
+local TABLE_VERSION = 1
 
-local lib, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
+local _G = _G
 
-function lib:RemoveToken(tokens)
+if not _G.Table then
+    _G.Table = {}
+end
+
+Table = _G.Table
+local Table = _G.Table
+
+Table.version = Table_VERSION
+
+function Table:RemoveToken(tokens)
 	if tokens == nil then return nil, {} end
 	for i = 1, #tokens do
 		local token = tokens[1]
@@ -13,7 +21,7 @@ function lib:RemoveToken(tokens)
 	return nil, {}
 end
 
-function lib:RemoveByValue(tbl, value, valueIsKey)
+function Table:RemoveByValue(tbl, value, valueIsKey)
 	local returnTable = {}
 	for k, v in pairs(tbl) do
 		if valueIsKey and k ~= value then
@@ -33,7 +41,7 @@ function lib:RemoveByValue(tbl, value, valueIsKey)
 	return returnTable
 end
 
-function lib:Contains(tbl, value)
+function Table:Contains(tbl, value)
 	if tbl == nil then
 		return false
 	end
@@ -45,7 +53,7 @@ function lib:Contains(tbl, value)
 	return false
 end
 
-function lib:InsertField(tbl, fieldName)
+function Table:InsertField(tbl, fieldName)
 	if tbl == nil then
 		tbl = {}
 	end
@@ -55,19 +63,19 @@ function lib:InsertField(tbl, fieldName)
 	return tbl
 end
 
-function lib:Insert(tbl, key, value)
+function Table:Insert(tbl, key, value)
 	if tbl == nil then
 		tbl = {}
 	end
-	if key == nil and not lib:Contains(tbl, value) then
+	if key == nil and not Table:Contains(tbl, value) then
 		table.insert(tbl, value)
-	elseif key ~= nil and not lib:Contains(tbl[key], value) then
+	elseif key ~= nil and not Table:Contains(tbl[key], value) then
 		tbl[key] = value
 	end
 	return tbl
 end
 
-function lib:GetSortedKeys(tbl, sortFunction, sortByKey)
+function Table:GetSortedKeys(tbl, sortFunction, sortByKey)
 	local keys = {}
 	for key in pairs(tbl) do
 		table.insert(keys, key)
@@ -92,21 +100,21 @@ function lib:GetSortedKeys(tbl, sortFunction, sortByKey)
 	return keys
 end
 
-function lib:Lower(tbl)
+function Table:Lower(tbl)
 	local returnTable = {}
 	for k, v in pairs(tbl) do
 		if type(k) == 'table' then
-			k = lib:Lower(tbl)
+			k = Table:Lower(tbl)
 		end
 		if type(v) == 'table' then
-			v = lib:Lower(tbl)
+			v = Table:Lower(tbl)
 		end
 		returnTable[k] = v
 	end
 	return returnTable
 end
 
-function lib:Random(tbl)
+function Table:Random(tbl)
 	local keys = {}
 	for k, _ in pairs(tbl) do
 		table.insert(keys, k)
@@ -114,7 +122,7 @@ function lib:Random(tbl)
 	return tbl[keys[math.random(#keys)]]
 end
 
-function lib:Count(tbl)
+function Table:Count(tbl)
 	local count = 0
 	for k, v in pairs(tbl) do
 		count = count + 1

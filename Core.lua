@@ -7,36 +7,37 @@ GT.L = L
 
 ---------- START LOAD LIBRARIES ----------
 
-GT.Text = LibStub:GetLibrary('GTText')
-GT.Table = LibStub:GetLibrary('GTTable')
+GT.Friends = LibStub:GetLibrary('Friends')
+GT.Log = LibStub:GetLibrary('Log')
 
 ---------- END LOAD LIBRARIES ----------
 
 GT.resetWarned = false
 GT.version = '@project-version@'
 
+GT.DAY = 24 * 60 * 60
 GT.STARTUP_DELAY = 5
 
 local STARTUP_TASKS = {}
 
 function GT:OnInitialize()
-	GT.Log:Enable()
+	local frameNumber = GT.DB:GetChatFrameNumber()
+	GT.Log:SetChatFrameByNumber(frameNumber)
+	GT.Log:SetLogTag(GT.L['LOG_TAG'])
 
 	GT.Log:Info('GT_OnInitialize')
 
-	table.insert(STARTUP_TASKS, GT.Log['InitChatFrame'])
-	table.insert(STARTUP_TASKS, GT.Comm['StartupTasks'])
-	table.insert(STARTUP_TASKS, GT['Welcome'])
-	table.insert(STARTUP_TASKS, GT.DB['PurgeGuild'])
-	table.insert(STARTUP_TASKS, GT.Advertise['Advertise'])
-
+	GT.DB:Enable()
 	GT.Advertise:Enable()
 	GT.Command:Enable()
 	GT.Event:Enable()
 	GT.Comm:Enable()
 	GT.Whisper:Enable()
-	GT.Friends:Enable()
 	GT.Options:Enable()
+
+	table.insert(STARTUP_TASKS, GT['Welcome'])
+	table.insert(STARTUP_TASKS, GT.Comm['StartupTasks'])
+	table.insert(STARTUP_TASKS, GT.Advertise['Advertise'])
 
 	GT:ScheduleTimer(GT['StartupTasks'], GT.STARTUP_DELAY)
 end
@@ -49,6 +50,9 @@ function GT:StartupTasks()
 end
 
 function GT:Welcome()
+	local characterName = GT:GetCurrentCharacter()
+	GT.DBCharacter:AddCharacter(characterName)
+	
 	GT.Log:PlayerInfo(L['WELCOME'])
 	if not GT.DB.valid then
 		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
@@ -62,70 +66,37 @@ function GT:CreateActionQueue(delay, queue)
 	end
 end
 
-function GT:OnDisable()
-	GT.Log:Info('GT_OnDisable')
-end
-
 function GT:InitReset(tokens)
-	tokens = GT.Table:Lower(tokens)
+	tokens = Table:Lower(tokens)
 	GT.Log:Info('GT_InitReset', tokens)
-	local force = false
-	--@debug@
-	if GT.Table:Contains(tokens, L['FORCE']) then
-		GT.Log:PlayerWarn('Forcing reset.')
-		tokens = GT.Table:RemoveByValue(tokens, L['FORCE'])
-		force = true
-	end
-	--@end-debug@
-	if not GT.resetWarned and not force then
+	if not GT.resetWarned then
 		GT.Log:PlayerWarn(L['RESET_WARN'])
 		GT.resetWarned = true
 		return
 	end
 	GT.resetWarned = false
 
-	if GT.Table:Contains(tokens, L['RESET_CANCEL']) then
+	if Table:Contains(tokens, L['RESET_CANCEL']) then
 		GT.Log:PlayerInfo(L['RESET_CANCEL'])
 		return
 	end
 
-	if not GT.Table:Contains(tokens, L['RESET_EXPECT_COMFIRM']) and not force then
-		local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', GT.Text:Concat(' ', tokens))
+	if not Table:Contains(tokens, L['RESET_EXPECT_COMFIRM']) then
+		local message = string.gsub(L['RESET_UNKNOWN'], '%{{token}}', Text:Concat(' ', tokens))
 		GT.Log:PlayerWarn(message)
 		return
 	end
 
-	GT:Reset(force)
+	GT:Reset()
 end
 
-function GT:Reset(force)
+function GT:Reset()
 	GT.Log:PlayerWarn(L['RESET_FINAL'])
 
-	GT.Log:Reset(force)
-	GT.DB:Reset(force)
-	GT.Advertise:Reset(force)
-end
-
-function GT:ResetProfession(professionName, force)
-	local reset = GT.DB:ResetProfession(professionName)
-	if not reset then
-		local message = string.gsub(L['PROFESSION_RESET_NOT_FOUND'], '%{{profession_name}}', professionName)
-		GT.Log:PlayerError(message)
-		return
-	end
-	local message = string.gsub(L['PROFESSION_RESET_FINAL'], '%{{profession_name}}', professionName)
-	GT.Log:PlayerInfo(message)
-end
-
-function GT:ResetCharacter(characterName, force)
-	local reset = GT.DB:ResetCharacter(characterName)
-	if not reset then
-		local message = string.gsub(L['CHARACTER_RESET_NOT_FOUND'], '%{{character_name}}', characterName)
-		GT.Log:PlayerError(message)
-		return
-	end
-	local message = string.gsub(L['CHARACTER_RESET_FINAL'], '%{{character_name}}', characterName)
-	GT.Log:PlayerInfo(message)
+	GT.DB:Reset()
+	GT.Log:Reset()
+	GT.Advertise:Reset()
+	GT.CommYell:Reset()
 end
 
 function GT:ConvertVersion(releaseVersion, betaVersion, alphaVersion)
@@ -153,22 +124,19 @@ function GT:GetCurrentVersion()
 	local version = GT:ConvertVersion(99, 99, 99)
 	--@debug@
 	if true then
-		GT.DB:InitVersion(version)
 		GT.Log:Info('GT_GetCurrentVersion', version)
 		return version
 	end
 	--@end-debug@
-	local tokens = GT.Text:Tokenize(GT.version, '_')
+	local tokens = Text:Tokenize(GT.version, '_')
 	local version = tokens[2]
-	tokens = GT.Text:Tokenize(version, '.')
-	rVersion, tokens = GT.Table:RemoveToken(tokens)
-	bVersion, tokens = GT.Table:RemoveToken(tokens)
-	aVersion, tokens = GT.Table:RemoveToken(tokens)
+	tokens = Text:Tokenize(version, '.')
+	rVersion, tokens = Table:RemoveToken(tokens)
+	bVersion, tokens = Table:RemoveToken(tokens)
+	aVersion, tokens = Table:RemoveToken(tokens)
 
 	version = GT:ConvertVersion(rVersion, bVersion, aVersion)
 	GT.Log:Info('GT_GetCurrentVersion', version)
-
-	GT.DB:InitVersion(version)
 
 	return version
 end

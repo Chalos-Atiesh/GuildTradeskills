@@ -1,11 +1,12 @@
-local AddOnName = ...
+local majorVersion = 'Log'
+local minorVersion = 1
 
-local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
+local Log, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
 
 local AceGUI = LibStub('AceGUI-3.0')
 
-local Log = GT:NewModule('Log')
-GT.Log = Log
+local Text = assert(Text, 'Log-1.0 requires the Text library.')
+local Table = assert(Table, 'Log-1.0 requires the Table library.')
 
 Log.DEFAULT_CHAT_FRAME = 1
 
@@ -50,7 +51,7 @@ local LOG_STRING_MAP = {}
 
 local DEFAULT_LOG_COLOR = COLOR_INFO
 
-function Log:OnEnable()
+function Log:Init()
 	LOG_COLOR_MAP[INFO] = COLOR_INFO
 	LOG_COLOR_MAP[DEBUG] = COLOR_DEBUG
 	LOG_COLOR_MAP[WARN] = COLOR_WARN
@@ -67,18 +68,26 @@ function Log:OnEnable()
 	LOG_STRING_MAP[PLAYER_WARN] = STRING_PLAYER_WARN
 	LOG_STRING_MAP[PLAYER_ERROR] = STRING_PLAYER_ERROR
 
-	if GTDB == nil then
-		GTDB = {}
+	if Log.DB == nil then
+		Log.DB = {}
 	end
 
-	if GTDB.log == nil then
-		GTDB.log = {}
+	if Log.DB.log == nil then
+		Log.DB.log = {}
+	end
+
+	if Log.DB.logTag == nil then
+		Log.DB.logTag = ''
+	end
+
+	if Log.DB.frameNumber == nil then
+		Log.DB.frameNumber = Log.DEFAULT_CHAT_FRAME
 	end
 end
 
-function Log:Reset(force)
-	Log:Info('Log_Reset', force)
-	GTDB.log = {}
+function Log:Reset()
+	Log.DB.log = {}
+	Log.DB.frameNumber = Log.DEFAULT_CHAT_FRAME
 end
 
 function Log:Info(...)
@@ -108,65 +117,71 @@ end
 function Log:PlayerError(...)
 	Log:_Log(PLAYER_ERROR, ...)
 end
-	
-function Log:InitChatFrame()
-	GT.Log:Info('Log_InitChatFrame')
-	local frameNumber = GT.DB:GetChatFrameNumber()
-	for i = 1, NUM_CHAT_WINDOWS do
-		local name = GetChatWindowInfo(i)
-		local shown = select(7, GetChatWindowInfo(i))
-		if i == frameNumber and not shown then
-			GT.Log:Warn('Log_InitChatFrame_NotShown', name)
-			GT.DB:SetChatFrameNumber(1)
-		end
+
+function Log:GetChatFrameNumber()
+	if Log.DB.frameNumber == nil then
+		return Log.DEFAULT_CHAT_FRAME
 	end
+	return Log.DB.frameNumber
 end
 
-function Log:SetChatFrame(frameName)
+function Log:SetChatFrameByName(frameName)
 	Log:Info('Log_SetChatFrame', frameName)
-	if frameName == nil then
-		Log:PlayerWarn(GT.L['CHAT_FRAME_NIL'])
-	end
 
 	for i = 1, NUM_CHAT_WINDOWS do
 		local name = GetChatWindowInfo(i) or ''
 		local shown = select(7, GetChatWindowInfo(i))
 		if name ~= '' and string.lower(name) == string.lower(frameName) and shown then
-			GT.DB:SetChatFrameNumber(i)
-			local msg = string.gsub(GT.L['CHAT_WINDOW_SUCCESS'], '%{{frame_name}}', name)
-			Log:PlayerInfo(msg)
-			return
+			Log.DB.frameNumber = i
+			return i
 		end
 	end
-	local msg = string.gsub(GT.L['CHAT_WINDOW_INVALID'], '%{{frame_name}}', frameName)
-	Log:PlayerError(msg)
+	return nil
+end
+
+
+function Log:SetChatFrameByNumber(frameNumber)
+	local name = GetChatWindowInfo(frameNumber)
+	local shown = select(7, GetChatWindowInfo(frameNumber))
+	if shown then
+		Log.DB.frameNumber = i
+		return true
+	end
+	return false
+end
+function Log:GetLogTag()
+	return Log.DB.logTag
+end
+
+function Log:SetLogTag(logTag)
+	Log.DB.logTag = logTag
 end
 
 function Log:_Log(logLevel, ...)
 	local color = LOG_COLOR_MAP[logLevel] or DEFAULT_LOG_COLOR
 
-	local original = GT.Text:Concat(DELIMITER, ...)
+	local original = Text:Concat(DELIMITER, ...)
 	
 	local printMessage = string.gsub(LOG_FORMAT, '%{{message}}', original)
 	printMessage = string.gsub(printMessage, '|r', '|r' .. color)
-	local logMessage = GT.Text:Strip(printMessage)
+	local logMessage = Text:Strip(printMessage)
 	if logLevel < PLAYER_INFO and #logMessage >= LOG_LINE_LENGTH_LIMIT then
 		printMessage = string.sub(logMessage, 0, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
 	end
-	printMessage = Log:_FormatLogLine(printMessage, color, GT.L['LOG_TAG'])
+	printMessage = Log:_FormatLogLine(printMessage, color, Log.DB.logTag)
 	logMessage = Log:_FormatLogLine(logMessage, color, '')
 
 	if GTDB ~= nil and GTDB.log ~= nil then
 		local levelWithColor = nil
 		if color == '' then
-			levelWithColor = GT.Text:Concat(DELIMITER, tostring(logLevel),  LOG_STRING_MAP[logLevel])
+			levelWithColor = Text:Concat(DELIMITER, tostring(logLevel),  LOG_STRING_MAP[logLevel])
 		else
-			levelWithColor = color .. GT.Text:Concat(tostring(logLevel), LOG_STRING_MAP[logLevel]) .. '|r'
+			levelWithColor = color .. Text:Concat(tostring(logLevel), LOG_STRING_MAP[logLevel]) .. '|r'
 		end
 		while #GTDB.log > LOG_ARCHIVE_LIMIT do
 			table.remove(GTDB.log, 1)
 		end
-		logMessage = GT.Text:Concat(DELIMITER, levelWithColor, date('%y-%m-%d %H:%M:%S', time()), logMessage)
+		logMessage = Text:Concat(DELIMITER, levelWithColor, date('%y-%m-%d %H:%M:%S', time()), logMessage)
 		table.insert(GTDB.log, logMessage)
 	end
 
@@ -174,7 +189,7 @@ function Log:_Log(logLevel, ...)
 		return
 	end
 
-	local chatFrame = _G['ChatFrame' .. GT.DB:GetChatFrameNumber()]
+	local chatFrame = _G['ChatFrame' .. Log:GetChatFrameNumber()]
 	chatFrame:AddMessage(printMessage)
 end
 
@@ -189,8 +204,8 @@ function Log:_FormatLogLine(message, color, tag)
 	return message
 end
 
-function Log:LogDump()
-	Log:Info('Log_LogDump')
+function Log:LogDump(args)
+	Log:Info('Log_LogDump', args)
 	local editBox = Log:GetEditBox()
 	editBox:SetDisabled(true)
 
@@ -199,7 +214,7 @@ function Log:LogDump()
 		if text == nil then
 			text = logLine
 		else
-			text = GT.Text:Concat('\n', text, logLine)
+			text = Text:Concat('\n', text, logLine)
 		end
 		editBox:SetText(text)
 	end
@@ -208,29 +223,25 @@ function Log:LogDump()
 	editBox:SetDisabled(false)
 end
 
-function Log:DBDump()
-	Log:Info('Log_DBDump')
-
+function Log:DumpText(text)
+	Log:Info('Log_DumpText', text)
 	local editBox = Log:GetEditBox()
-	local characterDump = GT.Text:FormatTable(GT.DB:GetCharacters())
-	local professionDump = GT.Text:FormatTable(GT.DB:GetProfessions())
-	local text = GT.Text:Concat('\n', GT.L['CHARACTERS'], characterDump, GT.L['PROFESSIONS'], professionDump)
 	editBox:SetText(text)
 	editBox:HighlightText(0, #text)
 end
 
 function Log:GetEditBox()
-	local frame = AceGUI:Create("Frame")
+	local frame = AceGUI:Create('Frame')
 
 	frame:SetCallback('OnClose', function(widget)
 		widget:ReleaseChildren()
 		AceGUI:Release(widget)
 	end)
-	frame:SetTitle(GT.L['LOG_DUMP'])
+	frame:SetTitle('LOG DUMP')
 	frame:SetLayout('Flow')
 
 	_G['GT_CopyLogFrame'] = frame.frame
-	tinsert(UISpecialFrames, "GT_CopyLogFrame")
+	tinsert(UISpecialFrames, 'GT_CopyLogFrame')
 
 	local editBox = AceGUI:Create('MultiLineEditBox')
 	editBox:SetFullWidth(true)
@@ -242,3 +253,5 @@ function Log:GetEditBox()
 
 	return editBox
 end
+
+Log:Init()

@@ -1,4 +1,6 @@
 <Ui xmlns='http://www.blizzard.com/wow/ui/'>
-	<Script file='GTTable.lua'/>
-	<Script file='GTText.lua'/>
+	<Script file='Text.lua'/>
+	<Script file='Table.lua'/>
+	<Script file='Log.lua'/>
+	<Script file='Friends.lua'/>
 </Ui>

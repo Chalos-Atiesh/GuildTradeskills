@@ -1,0 +1,6 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+	<Script file='DB.lua'/>
+	<Script file='DBCharacter.lua'/>
+	<Script file='DBComm.lua'/>
+	<Script file='DBProfession.lua'/>
+</Ui>

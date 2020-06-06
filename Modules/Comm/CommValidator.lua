@@ -5,10 +5,60 @@ local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 local CommValidator = GT:NewModule('CommValidator')
 GT.CommValidator = CommValidator
 
-function CommValidator:IsVoteStartValid(message)
-	if message == nil
-		or tonumber(message) == nil
-	then
+function CommValidator:IsOutgoingRequestValid(characterName, nilTemplate, notSelfTemplate, notGuildTemplate)
+	if characterName == nil then
+		GT.Log:PlayerWarn(nilTemplate)
+		return false
+	end
+
+	if GT:IsCurrentCharacter(characterName) then
+		GT.Log:PlayerWarn(notSelfTemplate)
+		return false
+	end
+
+	if GT:IsGuildMember(characterName) then
+		local message = string.gsub(notGuildTemplate, '%{{character_name}}', characterName)
+		GT.Log:PlayerWarn(message)
+		return false
+	end
+
+	if GT.DBComm:IsIgnored(GT.CommWhisper.INCOMING, uuid, characterName) then
+		-- We were ignored by them.
+		local message = string.gsub(GT.L['IGNORE_INCOMING'], '%{{character_name}}', characterName)
+		GT.Log:PlayerError(message)
+		return false
+	end
+	return true
+end
+
+function CommValidator:IsIncomingRequestValid(distribution, sender, uuid)
+	if distribution ~= GT.Comm.WHISPER then
+		GT.Log:Error('CommValidator_IsIncomingRequestValid_InvalidDistribution', distribution, sender, uuid)
+		return false
+	end
+
+	if sender == nil then
+		GT.Log:Error('CommValidator_IsIncomingRequestValid_SenderNil', uuid)
+		return false
+	end
+
+	if not Text:IsUUIDValid(uuid) then
+		GT.Log:Error('CommValidator_IsIncomingRequestValid_InvalidUUID', sender, uuid)
+		return false
+	end
+
+	if GT:IsCurrentCharacter(sender) then
+		GT.Log:Error('CommValidator_IsIncomingRequestValid_FromSelf', sender, uuid)
+		return false
+	end
+
+	if GT:IsGuildMember(sender) then
+		GT.Log:Warn('CommValidator_IsIncomingRequestValid_FromGuildmate', sender, uuid)
+		return false
+	end
+
+	if GT.DBComm:IsIgnored(CommWhisper.OUTGOING, uuid, sender) then
+		GT.Log:Info('CommWhisper_OnRequestReceived_Ignored', sender, uuid)
 		return false
 	end
 	return true
@@ -16,12 +66,12 @@ end
 
 function CommValidator:IsTimestampValid(message)
 	-- GT.Log:Info('CommValidator_IsTimestampValid', message)
-	local tokens = GT.Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
 	
 	while #tokens > 0 do
-		local characterName, tokens = GT.Table:RemoveToken(tokens)
-		local professionName, tokens = GT.Table:RemoveToken(tokens)
-		local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
+		local characterName, tokens = Table:RemoveToken(tokens)
+		local professionName, tokens = Table:RemoveToken(tokens)
+		local lastUpdate, tokens = Table:RemoveToken(tokens)
 
 		if characterName == nil
 			or tonumber(characterName) ~= nil
@@ -52,12 +102,12 @@ end
 
 function CommValidator:IsVoteValid(message)
 	-- GT.Log:Info('CommValidator_IsVoteValid', message)
-	local tokens = GT.Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
 	
 	while #tokens > 0 do
-		local characterName, tokens = GT.Table:RemoveToken(tokens)
-		local professionName, tokens = GT.Table:RemoveToken(tokens)
-		local vote, tokens = GT.Table:RemoveToken(tokens)
+		local characterName, tokens = Table:RemoveToken(tokens)
+		local professionName, tokens = Table:RemoveToken(tokens)
+		local vote, tokens = Table:RemoveToken(tokens)
 
 		if characterName == nil
 			or tonumber(characterName) ~= nil
@@ -88,11 +138,11 @@ end
 
 function CommValidator:IsGetValid(message)
 	-- GT.Log:Info('CommValidator_IsGetValid', message)
-	local tokens = GT.Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
 
 	while #tokens > 0 do
-		local characterName, tokens = GT.Table:RemoveToken(tokens)
-		local professionName, tokens = GT.Table:RemoveToken(tokens)
+		local characterName, tokens = Table:RemoveToken(tokens)
+		local professionName, tokens = Table:RemoveToken(tokens)
 
 		if characterName == nil
 			or tonumber(characterName) ~= nil
@@ -115,11 +165,11 @@ end
 
 function CommValidator:IsPostValid(message)
 	-- GT.Log:Info('CommValidator_IsPostValid', message)
-	local tokens = GT.Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
 	
-	local characterName, tokens = GT.Table:RemoveToken(tokens)
-	local professionName, tokens = GT.Table:RemoveToken(tokens)
-	local lastUpdate, tokens = GT.Table:RemoveToken(tokens)
+	local characterName, tokens = Table:RemoveToken(tokens)
+	local professionName, tokens = Table:RemoveToken(tokens)
+	local lastUpdate, tokens = Table:RemoveToken(tokens)
 
 	-- GT.Log:Info('Comm_IsPostValidFormat_IntroCheck', characterName, professionName, lastUpdate)
 
@@ -139,18 +189,18 @@ function CommValidator:IsPostValid(message)
 	if lastUpdate == nil
 		or tonumber(lastUpdate) == nil
 	then
-		GT.Log:Error('Comm_IsPostValidFormat_InvalidLastUpdate', GT.Text:ToString(lastUpdate))
+		GT.Log:Error('Comm_IsPostValidFormat_InvalidLastUpdate', Text:ToString(lastUpdate))
 		return false
 	end
 
 	-- GT.Log:Info('Comm_IsPostValidFormat_ValidIntro', characterName, professionName, lastUpdate)
 
 	while #tokens > 0 do
-		local skillName, tokens = GT.Table:RemoveToken(tokens)
-		local skillLink, tokens = GT.Table:RemoveToken(tokens)
-		local uniqueReagentCount, tokens = GT.Table:RemoveToken(tokens)
+		local skillName, tokens = Table:RemoveToken(tokens)
+		local skillLink, tokens = Table:RemoveToken(tokens)
+		local uniqueReagentCount, tokens = Table:RemoveToken(tokens)
 
-		-- GT.Log:Info('Comm_IsPostValidFormat_SkillCheck', skillName, skillLink, GT.Text:ToString(uniqueReagentCount))
+		-- GT.Log:Info('Comm_IsPostValidFormat_SkillCheck', skillName, skillLink, Text:ToString(uniqueReagentCount))
 
 		if skillName == nil
 			or string.find(skillName, ']')
@@ -171,30 +221,30 @@ function CommValidator:IsPostValid(message)
 		if uniqueReagentCount == nil
 			or tonumber(uniqueReagentCount) == nil
 		then
-			GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GT.Text:ToString(uniqueReagentCount))
+			GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', Text:ToString(uniqueReagentCount))
 			return false
 		end
 		uniqueReagentCount = tonumber(uniqueReagentCount)
 
 		local actualReagentCount = 0
 		for i = 1, uniqueReagentCount do
-			local reagentName, tokens = GT.Table:RemoveToken(tokens)
-			local thisReagentCount, tokens = GT.Table:RemoveToken(tokens)
+			local reagentName, tokens = Table:RemoveToken(tokens)
+			local thisReagentCount, tokens = Table:RemoveToken(tokens)
 
-			-- GT.Log:Info('Comm_IsPostValidFormat_ReagentCheck', reagentName, GT.Text:ToString(thisReagentCount))
+			-- GT.Log:Info('Comm_IsPostValidFormat_ReagentCheck', reagentName, Text:ToString(thisReagentCount))
 
 			if reagentName == nil
 				or string.find(reagentName, ']')
 				or tonumber(reagentName) ~= nil
 			then
-				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentName', GT.Text:ToString(reagentName))
+				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentName', Text:ToString(reagentName))
 				return false
 			end
 
 			if thisReagentCount == nil
 				or string.find(reagentName, ']')
 				or tonumber(thisReagentCount) == nil then
-				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GT.Text:ToString(reagentCount))
+				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', Text:ToString(reagentCount))
 				return false
 			end
 			actualReagentCount = actualReagentCount + 1

@@ -290,7 +290,7 @@ function Search:PopulateSkills(shouldCascade)
 
 	Search.skillScrollFrame:ReleaseChildren()
 
-	local characters = GT.DB:GetCharacters()
+	local characters = GT.DBCharacter:GetCharacters()
 
 	skillsToAdd = {}
 	local count = 0
@@ -305,19 +305,19 @@ function Search:PopulateSkills(shouldCascade)
 					local skills = professions[professionName].skills
 					for _, skillName in pairs(skills) do
 						GT.Log:Info('Search_PopulateSkills_Skill', skillName)
-						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
+						local skill = GT.DBProfession:GetSkill(professionName, skillName)
 						local reagents = skill.reagents
 						for reagentName, _ in pairs(reagents) do
 							if reagentName == Search.lastReagentClicked then
 								GT.Log:Info('Search_PopulateSkills_Reagent', reagentName)
-								local skill = GT.DB:GetSkill(characterName, professionName, skillName)
-								local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+								local skill = GT.DBProfession:GetSkill(professionName, skillName)
+								local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
 								local searchMatch = true
 								if Search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(Search.skillSearchText)) then
 									GT.Log:Info('Search_PopulateSkills_ReagentMatch', reagentName)
 									searchMatch = false
 								end
-								if not GT.Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
+								if not Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
 									GT.Log:Info('Search_PopulateSkills_AddSkill', tempSkillName)
 									count = count + 1
 									skillsToAdd[tempSkillName] = skill.skillLink
@@ -338,13 +338,13 @@ function Search:PopulateSkills(shouldCascade)
 					if GT.DB:GetSearch(professionName) then
 						local skills = professions[professionName].skills
 						for _, skillName in pairs(skills) do
-							local skill = GT.DB:GetSkill(characterName, professionName, skillName)
-							local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+							local skill = GT.DBProfession:GetSkill(professionName, skillName)
+							local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
 							local searchMatch = true
 							if Search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(Search.skillSearchText)) then
 								searchMatch = false
 							end
-							if not GT.Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
+							if not Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
 								skillsToAdd[tempSkillName] = skill.skillLink
 								count = count + 1
 							end
@@ -360,13 +360,13 @@ function Search:PopulateSkills(shouldCascade)
 				if GT.DB:GetSearch(professionName) then
 					local skills = professions[professionName].skills
 					for _, skillName in pairs(skills) do
-						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
-						local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+						local skill = GT.DBProfession:GetSkill(professionName, skillName)
+						local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
 						local searchMatch = true
 						if Search.skillSearchText ~= nil and not string.find(string.lower(tempSkillName), string.lower(Search.skillSearchText)) then
 							searchMatch = false
 						end
-						if not GT.Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
+						if not Table:Contains(skillsToAdd, tempSkillName) and searchMatch and count < Search.scrollLimit then
 							skillsToAdd[tempSkillName] = skill.skillLink
 							count = count + 1
 						end
@@ -376,7 +376,7 @@ function Search:PopulateSkills(shouldCascade)
 		end
 	end
 
-	local sortedKeys = GT.Table:GetSortedKeys(skillsToAdd, function(a, b) return a < b end, true)
+	local sortedKeys = Table:GetSortedKeys(skillsToAdd, function(a, b) return a < b end, true)
 	for _, key in ipairs(sortedKeys) do
 		local skillLink = skillsToAdd[key]
 		local skillLabel = AceGUI:Create('InteractiveLabel')
@@ -384,7 +384,7 @@ function Search:PopulateSkills(shouldCascade)
 		skillLabel:SetHighlight("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 		skillLabel:SetCallback('OnClick', function(widget, event, button)
 			local skillLink = widget.label:GetText()
-			local skillName = GT.Text:GetTextBetween(skillLink, '%[', ']')
+			local skillName = Text:GetTextBetween(skillLink, '%[', ']')
 
 			Search.lastSkillClicked = skillName
 			Search.lastSkillLinkClicked = skillLink
@@ -412,7 +412,7 @@ function Search:PopulateReagents(shouldCascade)
 
 	local reagentsToAdd = {}
 	if Search.lastSkillClicked ~= nil then
-		local characters = GT.DB:GetCharacters()
+		local characters = GT.DBCharacter:GetCharacters()
 		local reagentsAdded = false
 		for characterName, _ in pairs(characters) do
 			if not reagentsAdded then
@@ -420,8 +420,8 @@ function Search:PopulateReagents(shouldCascade)
 				for professionName, _ in pairs(professions) do
 					local skills = professions[professionName].skills
 					for _, skillName in pairs(skills) do
-						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
-						local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+						local skill = GT.DBProfession:GetSkill(professionName, skillName)
+						local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
 						if tempSkillName == Search.lastSkillClicked then
 							local reagents = skill.reagents
 							for reagentName, _ in pairs(reagents) do
@@ -449,7 +449,7 @@ function Search:PopulateReagents(shouldCascade)
 	elseif Search.lastCharacterClicked ~= nil then
 	elseif Search.lastReagentClicked ~= nil then
 	else
-		local characters = GT.DB:GetCharacters()
+		local characters = GT.DBCharacter:GetCharacters()
 		local reagentsAdded = false
 		for characterName, _ in pairs(characters) do
 			if not reagentsAdded then
@@ -457,8 +457,8 @@ function Search:PopulateReagents(shouldCascade)
 				for professionName, _ in pairs(professions) do
 					local skills = professions[professionName].skills
 					for _, skillName in pairs(skills) do
-						local skill = GT.DB:GetSkill(characterName, professionName, skillName)
-						local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+						local skill = GT.DBProfession:GetSkill(professionName, skillName)
+						local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
 						if tempSkillName == Search.lastSkillClicked then
 							local reagents = skills[skillName].reagents
 							for reagentName, _ in pairs(reagents) do
@@ -485,7 +485,7 @@ function Search:PopulateReagents(shouldCascade)
 		end
 	end
 
-	local sortedKeys = GT.Table:GetSortedKeys(reagentsToAdd, function(a, b) return a < b end, true)
+	local sortedKeys = Table:GetSortedKeys(reagentsToAdd, function(a, b) return a < b end, true)
 	for _, reagentName in ipairs(sortedKeys) do
 		local reagentCount = reagentsToAdd[reagentName]
 		local reagentLabel = AceGUI:Create('InteractiveLabel')
@@ -493,7 +493,7 @@ function Search:PopulateReagents(shouldCascade)
 		reagentLabel:SetHighlight("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 		reagentLabel:SetCallback('OnClick', function(widget, event, button)
 			local text = widget.label:GetText()
-			local tokens = GT.Text:Tokenize(text, ' ')
+			local tokens = Text:Tokenize(text, ' ')
 			table.remove(tokens, #tokens)
 			local reagentName = table.concat(tokens, ' ')
 
@@ -523,22 +523,22 @@ function Search:PopulateCharacters(shouldCascade)
 	local charactersToAdd = {}
 	local count = 0
 	if Search.lastSkillClicked ~= nil then
-		local characters = GT.DB:GetCharacters()
+		local characters = GT.DBCharacter:GetCharacters()
 		for characterName, _ in pairs(characters) do
 			local addCharacter = false
 			local professions = characters[characterName].professions
 			for professionName, _ in pairs(professions) do
 				local skills = professions[professionName].skills
 				for _, skillName in pairs(skills) do
-					local skill = GT.DB:GetSkill(characterName, professionName, skillName)
-					local tempSkillName = GT.Text:GetTextBetween(skill.skillLink, '%[', ']')
+					local skill = GT.DBProfession:GetSkill(professionName, skillName)
+					local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
 					if tempSkillName == Search.lastSkillClicked then
 						addCharacter = true
 						break
 					end
 				end
 			end
-			if addCharacter and not GT.Table:Contains(charactersToAdd, characterName) and count < Search.scrollLimit then
+			if addCharacter and not Table:Contains(charactersToAdd, characterName) and count < Search.scrollLimit then
 				table.insert(charactersToAdd, characterName)
 				count = count + 1
 			end
@@ -546,13 +546,13 @@ function Search:PopulateCharacters(shouldCascade)
 	elseif Search.lastReagentClicked ~= nil then
 	elseif Search.lastCharacterClicked ~= nil then
 	else
-		local characters = GT.DB:GetCharacters()
+		local characters = GT.DBCharacter:GetCharacters()
 		for characterName, _ in pairs(characters) do
 			local searchMatch = false
 			if Search.characterSearchText ~= nil and string.find(string.lower(characterName), string.lower(Search.characterSearchText)) then
 				searchMatch = true
 			end
-			if searchMatch and not GT.Table:Contains(charactersToAdd, characterName) and count < Search.scrollLimit then
+			if searchMatch and not Table:Contains(charactersToAdd, characterName) and count < Search.scrollLimit then
 				table.insert(charactersToAdd, characterName)
 				count = count + 1
 			end
@@ -565,12 +565,12 @@ function Search:PopulateCharacters(shouldCascade)
 	for i=1,countTotalMembers do
 		local characterName, _, _, _, class, _, _, _, online = GetGuildRosterInfo(i)
 		characterName = Ambiguate(characterName, 'none')
-		if online and GT.DB:CharacterExists(characterName) then
+		if online and GT.DBCharacter:CharacterExists(characterName) then
 			table.insert(onlineCharacters, characterName)
 			classColors[characterName] = RCC[GT.L[string.upper(class)]]['colorStr']
 		end
 	end
-	local characters = GT.DB:GetCharacters()
+	local characters = GT.DBCharacter:GetCharacters()
 	for characterName, _ in pairs(characters) do
 		local character = characters[characterName]
 		if not character.isGuildMember
@@ -584,17 +584,17 @@ function Search:PopulateCharacters(shouldCascade)
 		end
 	end
 	local currentCharacterName = GT.GetCurrentCharacter()
-	onlineCharacters = GT.Table:Insert(onlineCharacters, nil, currentCharacterName)
+	onlineCharacters = Table:Insert(onlineCharacters, nil, currentCharacterName)
 	local _, playerClass = UnitClass('player')
 	classColors[currentCharacterName] = RCC[playerClass]['colorStr']
 
-	local sortedKeys = GT.Table:GetSortedKeys(charactersToAdd, function(a, b) return a < b end)
+	local sortedKeys = Table:GetSortedKeys(charactersToAdd, function(a, b) return a < b end)
 	for _, key in ipairs(sortedKeys) do
 		local characterName = charactersToAdd[key]
-		local character = GT.DB:GetCharacter(characterName)
+		local character = GT.DBCharacter:GetCharacter(characterName)
 		local characterLabel = AceGUI:Create('InteractiveLabel')
 		local labelText = string.gsub(GT.L['OFFLINE_TAG'], '%{{guild_member}}', characterName)
-		if GT.Table:Contains(onlineCharacters, characterName) or GT:IsCurrentCharacter(characterName) then
+		if Table:Contains(onlineCharacters, characterName) or GT:IsCurrentCharacter(characterName) then
 			labelText = string.gsub(GT.L['ONLINE_TAG'], '%{{guild_member}}', characterName)
 			labelText = string.gsub(labelText, '%{{class_color}}', classColors[characterName])
 		end

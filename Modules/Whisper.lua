@@ -10,9 +10,6 @@ Whisper.characters = {}
 local PREFIX = 'GT'
 local SKILLS_PER_PAGE = 5
 
-function Whisper:OnEnable()
-end
-
 function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	GT.Log:Info('Whisper_OnWhisperReceived', sender, message)
 
@@ -21,10 +18,11 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		GT.Log:Info('Whisper_OnWhisperReceived_NoTrigger', sender, message)
 		return
 	end
+	GT.Log:Info('Whisper_OnWhisperReceived_Trigger', sender, message)
 
 	local modMessage = string.sub(message, 2, #message)
-	local tokens = GT.Text:Tokenize(modMessage, ' ')
-	local professionSearch, tokens = GT.Table:RemoveToken(tokens)
+	local tokens = Text:Tokenize(modMessage, ' ')
+	local professionSearch, tokens = Table:RemoveToken(tokens)
 	local searchTerm = table.concat(tokens, ' ')
 	if searchTerm == '' then
 		searchTerm = nil
@@ -35,8 +33,8 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		return
 	end
 
-	local characterName = UnitName('player')
-	local character = GT.DB:GetCharacter(characterName)
+	local characterName = GT:GetCurrentCharacter()
+	local character = GT.DBCharacter:GetCharacter(characterName)
 
 	local professions = character.professions
 	local finalProfession = nil
@@ -163,7 +161,7 @@ function Whisper:_SendResponse(recipient, professionName, skills, page)
 
 	local count = firstIndex
 	local i = 0
-	local sortedKeys = GT.Table:GetSortedKeys(skills, function(a, b) return a < b end, true)
+	local sortedKeys = Table:GetSortedKeys(skills, function(a, b) return a < b end, true)
 	for _, key in ipairs(sortedKeys) do
 		if i + 1 > firstIndex and i < lastIndex then
 			local skillLink = skills[key]
@@ -192,7 +190,7 @@ end
 
 function Whisper:_SearchSkills(professionName, searchTerm)
 	GT.Log:Info('Whisper__SearchSkills', professionName, searchTerm)
-	local characterName = UnitName('player')
+	local characterName = GT:GetCurrentCharacter()
 	local skills = GT.DB:GetProfession(characterName, professionName)
 	
 	if skills == nil then
@@ -210,7 +208,7 @@ function Whisper:_SearchSkills(professionName, searchTerm)
 		end
 		if addSkill then
 			local skillLink = GT.DB:GetSkill(characterName, professionName, skillName).skillLink
-			local tempSkillName = GT.Text:GetTextBetween(skillLink, '%[', ']')
+			local tempSkillName = Text:GetTextBetween(skillLink, '%[', ']')
 			returnSkills[tempSkillName] = skillLink
 		end
 	end

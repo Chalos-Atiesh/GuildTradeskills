@@ -1,12 +1,20 @@
-local majorVersion = 'GTText'
-local minorVersion = 1
+local TEXT_VERSION = 1
 
-local lib, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
+local _G = _G
+
+if not _G.Text then
+    _G.Text = {}
+end
+
+Text = _G.Text
+local Text = _G.Text
+
+Text.version = TEXT_VERSION
 
 local DEFAULT_DELIMITER = ' '
 local TABLE_INDENT = '  '
 
-function lib:Tokenize(text, delimiter)
+function Text:Tokenize(text, delimiter)
     delimiter = delimiter or DEFAULT_DELIMITER
     local tokens = {}
     local token = ''
@@ -25,23 +33,23 @@ function lib:Tokenize(text, delimiter)
     return tokens
 end
 
-function lib:Concat(delimiter, ...)
+function Text:Concat(delimiter, ...)
     delimiter = delimiter or DEFAULT_DELIMITER
     local args = {...}
     local txt = nil
     for i = 1, #args do
         local arg = args[i]
         if txt == nil then
-            txt = lib:ToString(arg)
+            txt = Text:ToString(arg)
         else
-            txt = txt .. delimiter .. lib:ToString(arg)
+            txt = txt .. delimiter .. Text:ToString(arg)
         end
     end
     if txt == nil then return 'nil' end
     return txt
 end
 
-function lib:ToString(object)
+function Text:ToString(object)
     if object == nil then
         return 'nil'
     end
@@ -64,7 +72,7 @@ function lib:ToString(object)
     if type(object) == 'table' then
         local txt = '{'
         for k, v in pairs(object) do
-            txt = txt .. '{' .. lib:ToString(k) .. ':' .. lib:ToString(v) .. '}'
+            txt = txt .. '{' .. Text:ToString(k) .. ':' .. Text:ToString(v) .. '}'
         end
         txt = txt .. '}'
         return txt
@@ -72,7 +80,13 @@ function lib:ToString(object)
     return type(object)
 end
 
-function lib:Strip(text)
+function Text:Lower(text)
+    if text == nil then return nil end
+    if type(text) ~= 'string' then return text end
+    return string.lower(text)
+end
+
+function Text:Strip(text)
     text = string.gsub(text, '|cff[%a%d][%a%d][%a%d][%a%d][%a%d][%a%d]', '')
     text = string.gsub(text, '|r', '')
     local returnText = ''
@@ -99,8 +113,8 @@ function lib:Strip(text)
     return returnText
 end
 
-function lib:ConvertCharacterName(characterName)
-    characterName = lib:GetTextBetween(characterName, '%[', ']')
+function Text:ConvertCharacterName(characterName)
+    characterName = Text:GetTextBetween(characterName, '%[', ']')
     if not string.find(characterName, '-') then
         return characterName
     end
@@ -108,7 +122,7 @@ function lib:ConvertCharacterName(characterName)
     return string.sub(characterName, 1, dashIndex - 1)
 end
 
-function lib:GetTextBetween(text, startCharacter, endCharacter)
+function Text:GetTextBetween(text, startCharacter, endCharacter)
     if not string.find(text, startCharacter) or not string.find(text, endCharacter) then
         return text
     end
@@ -117,15 +131,16 @@ function lib:GetTextBetween(text, startCharacter, endCharacter)
     return string.sub(text, startIndex + 1, endIndex - 1)
 end
 
-function lib:UUID()
+function Text:UUID()
     local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-    return string.gsub(template, '[xy]', function (c)
+    local uuid = string.gsub(template, '[xy]', function (c)
         local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
         return string.format('%x', v)
     end)
+    return uuid
 end
 
-function lib:IsUUIDValid(uuid)
+function Text:IsUUIDValid(uuid)
     local _, countDash = string.gsub(uuid, '-', '-')
     if #uuid ~= 36 then
         GT.Log:Error('CommValidator_IsRequestValid_IvalidLength', 36, #uuid, uuid)
@@ -138,12 +153,22 @@ function lib:IsUUIDValid(uuid)
     return true
 end
 
-function lib:FormatTable(tbl)
-    local txt = lib:_FormatTable(tbl, 1)
+function Text:IsNumber(str)
+    if tonumber(str) ~= nil then return true end
+    return false
+end
+
+function Text:IsLink(str)
+    if string.find(str, ']') then return true end
+    return false
+end
+
+function Text:FormatTable(tbl)
+    local txt = Text:_FormatTable(tbl, 1)
     return txt
 end
 
-function lib:_FormatTable(tbl, depth)
+function Text:_FormatTable(tbl, depth)
     txt = '{'
     local count = 0
     for k, v in pairs(tbl) do
@@ -152,9 +177,9 @@ function lib:_FormatTable(tbl, depth)
         end
         formatting = string.rep('    ', depth) .. k .. ': '
         if type(v) == 'table' then
-            txt = txt .. '\n' .. formatting .. lib:_FormatTable(v, depth + 1)
+            txt = txt .. '\n' .. formatting .. Text:_FormatTable(v, depth + 1)
         else
-            txt = txt .. '\n' .. formatting .. lib:ToString(v)
+            txt = txt .. '\n' .. formatting .. Text:ToString(v)
         end
         count = count + 1
     end
