@@ -25,7 +25,8 @@ function DBCharacter:Reset()
 	GT.Log:Info('DBCharacter_Reset')
 	DBCharacter.db.char.characters = {}
 
-	DBCharacter:AddCharacter(GT:GetCharacterName())
+	local character = DBCharacter:AddCharacter(GT:GetCharacterName())
+	character.isOnline = true
 end
 ----- CHARACTER START -----
 

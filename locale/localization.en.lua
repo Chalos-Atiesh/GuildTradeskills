@@ -219,6 +219,7 @@ if L then
 	}
 
 	L['PROFESSION_ADD_INIT'] = 'Please open the profession you want to add.'
+	L['PROFESSION_ADD_UNSUPPORTED'] = 'Sorry! {{profession_name}} is not currently supported.'
 	L['PROFESSION_ADD_CANCEL'] = 'Canceling profession add.'
 	L['PROFESSION_ADD_PROGRESS'] = 'Fetching data from the server. This should only take a few seconds.'
 	L['PROFESSION_ADD_SUCCESS'] = 'Successfully added profession: {{profession_name}}'

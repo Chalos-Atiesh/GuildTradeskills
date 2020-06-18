@@ -11,6 +11,7 @@ Profession.callbacks = Profession.callbacks or CallbackHandler:New(Profession)
 
 local ADD_PROFESSION = 'ADD_PROFESSION'
 local PROFESSION_ADD_INIT = 'PROFESSION_ADD_INIT'
+local PROFESSION_ADD_UNSUPPORTED = 'PROFESSION_ADD_UNSUPPORTED'
 local PROFESSION_ADD_PROGRESS = 'PROFESSION_ADD_PROGRESS'
 local PROFESSION_ADD_SUCCESS = 'PROFESSION_ADD_SUCCESS'
 local FRAME_DELAY = 10
@@ -23,6 +24,13 @@ local profession = nil
 
 local POPUP_PROFESSION_ADD_INIT = {
 	text = GT.L[PROFESSION_ADD_INIT],
+	button1 = GT.L['OKAY'],
+	timeout = 5,
+	hideOnEscape = true
+}
+
+local POPUP_PROFESSION_ADD_UNSUPPORTED = {
+	text = GT.L[PROFESSION_ADD_UNSUPPORTED],
 	button1 = GT.L['OKAY'],
 	timeout = 5,
 	hideOnEscape = true
@@ -67,6 +75,7 @@ end
 
 function Profession:CancelAddProfession()
 	GT.Log:Info('Profession_CancelAddProfession')
+	StaticPopup_Hide(PROFESSION_ADD_INIT)
 	adding = false
 end
 
@@ -82,9 +91,31 @@ function Profession:AddProfession()
 		GT.Log:Error('Profession_UpdateProfession_ProfessionNameNil')
 		return
 	end
+
+	local professionNameIsValid = false
+	for _, tempProfessionName in pairs(GT.L['PROFESSIONS_LIST']) do
+		if professionName == tempProfessionName then
+			professionNameIsValid = true
+			break
+		end
+	end
+	if not professionNameIsValid then
+		if adding then
+			StaticPopup_Hide(PROFESSION_ADD_INIT)
+			local message = string.gsub(GT.L[PROFESSION_ADD_UNSUPPORTED], '%{{profession_name}}', professionName)
+			POPUP_PROFESSION_ADD_UNSUPPORTED.text = message
+			StaticPopupDialogs[PROFESSION_ADD_UNSUPPORTED] = POPUP_PROFESSION_ADD_UNSUPPORTED
+			StaticPopup_Show(PROFESSION_ADD_UNSUPPORTED)
+			GT.Log:PlayerError(message)
+			
+		    CloseTradeSkill()
+		    CloseCraft()
+		end
+		adding = false
+		return
+	end
 	profession = GT.DBProfession:AddProfession(professionName)
 
-	local characterName = UnitName('player')
 	if adding then
 		-- GT.Log:Info('Profession_AddProfession', characterName, professionName)
 		if not progressShown then
@@ -93,7 +124,7 @@ function Profession:AddProfession()
 			StaticPopup_Show(PROFESSION_ADD_PROGRESS)
 			progressShown = true
 		end
-		profession = GT.DBCharacter:AddProfession(characterName, professionName)
+		profession = GT.DBCharacter:AddProfession(GT:GetCharacterName(), professionName)
 	end
 
 	GT:FrameDelay(FRAME_DELAY, Profession['UpdateProfession'])
@@ -124,9 +155,7 @@ function Profession:UpdateProfession()
 		end
 	end
 
-	local characterName = UnitName('player')
-
-	local trackingProfession = GT.DBCharacter:ProfessionExists(characterName, profession.professionName)
+	local trackingProfession = GT.DBCharacter:ProfessionExists(GT:GetCharacterName(), profession.professionName)
 
 	local _, kind = GetTradeSkillInfo(1)
 	if kind == nil or (kind ~= 'header' and kind ~= 'optimal') then
