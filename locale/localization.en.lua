@@ -380,6 +380,8 @@ if L then
 	---------- BROADCAST END ----------
 	---------- NON-GUILD REQUEST START ----------
 
+	L['REQUEST_ADDON_NOT_INSTALLED'] = 'It doesn\'t look like {{character_name}} has ' .. LONG_TAG .. ' installed.'
+
 	L['REQUEST_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt add {character_name}' .. COLOR_END .. '\'.'
 	L['REQUEST_NOT_SELF'] = 'You cannot add yourself.'
 	L['REQUEST_NOT_GUILD'] = '{{character_name}} is a guildmate so you cannot add them.'

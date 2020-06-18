@@ -143,6 +143,11 @@ function Comm:SendPost(distribution, characterName, professionName, recipient)
 	local message = Comm:GetPostMessage(characterName, professionName)
 	if message == nil then
 		GT.Log:Error('Comm_SendPost_LocalNil', characterName, professionName)
+		if GT:IsCurrentCharacter(characterName) then
+			local character = GT.DBCharacter:GetCharacter(characterName)
+			character.deletedProfessions = Table:Insert(character.deletedProfessions, nil, professionName)
+			Comm:SendDeletions(distribution, recipient)
+		end
 		return
 	end
 
@@ -303,6 +308,11 @@ function Comm:OnDeletionsReceived(prefix, message, distribution, sender)
 
 	if string.lower(characterName) ~= string.lower(sender) then
 		GT.Log:Warn('Comm_OnDeletionsReceived_NotAboutThemselves', distribution, sender, characterName)
+		return
+	end
+
+	if GT:IsCurrentCharacter(characterName) then
+		GT.Log:Info('Comm_OnDeletionsReceived_AboutMe', distribution, sender, characterName)
 		return
 	end
 

@@ -160,6 +160,7 @@ function DBCharacter:DeleteProfession(characterName, professionName)
 	local professions = DBCharacter:GetProfessions(characterName)
 	for tempProfessionName, _ in pairs(professions) do
 		if string.lower(tempProfessionName) == professionName then
+			character.deletedProfessions = Table:Insert(character.deletedProfessions, nil, professionName)
 			professions[tempProfessionName] = nil
 			return true
 		end

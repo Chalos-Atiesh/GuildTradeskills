@@ -63,6 +63,8 @@ local OFFLINE_MAP = {
 	IGNORE = 'OUTGOING_IGNORE_OFFLINE'
 }
 
+local pendingHandshakes = {}
+
 function CommWhisper:OnEnable()
 	GT.Log:Info('CommWhisper_OnEnable')
 
@@ -89,6 +91,24 @@ end
 
 function CommWhisper:StartupTasks()
 	GT:CreateActionQueue(GT.STARTUP_DELAY, STARTUP_TASKS)
+end
+
+function CommWhisper:AddonCheck()
+	for _, characterName in pairs(pendingHandshakes) do
+		GT.Log:Info('CommWhisper_AddonCheck', characterName)
+		GT.Friends:IsOnline(characterName, CommWhisper['_AddonCheck'])
+	end
+end
+
+function CommWhisper:_AddonCheck(info)
+	GT.Log:Info('CommWhisper__AddonCheck', info.name, info.exists, info.connected)
+	pendingHandshakes = Table:RemoveByValue(pendingHandshakes, info.name)
+	if not info.connected then return end
+	if GT.DBComm:GetHandshakeRecord(info.name) == nil then
+		local message = string.gsub(GT.L['REQUEST_ADDON_NOT_INSTALLED'], '%{{character_name}}', info.name)
+		GT.Log:PlayerWarn(message)
+		GT.DBComm:DeleteComm(info.name)
+	end
 end
 
 function CommWhisper:RemoveInactive()
@@ -791,12 +811,15 @@ function CommWhisper:_SendComm(info)
 		return
 	end
 
+	if not isOnline then return end
+
 	local uuid = GT.DBComm:GetHandshakeRecord(characterName)
-	if uuid == nil and isOnline then
+	if uuid == nil then
 		CommWhisper:SendCommMessage(GT.CommWhisper.HANDSHAKE, GT.DBComm:GetUUID(), GT.Comm.WHISPER, characterName, 'ALERT')
+		pendingHandshakes = Table:Insert(pendingHandshakes, nil, characterName)
+		GT:ScheduleTimer(CommWhisper['AddonCheck'], ADD_DELAY)
 	end
 
-	if not isOnline then return end
 	GT.Log:Info('CommWhisper__SendComm_Send', comm.command, characterName, comm.message)
 	CommWhisper:SendCommMessage(comm.command, comm.message, GT.Comm.WHISPER, characterName, 'ALERT')
 	if comm.removeOnSend then
