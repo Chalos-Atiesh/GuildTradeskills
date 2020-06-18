@@ -8,10 +8,10 @@
 ## SavedVariablesPerCharacter: GTCDB
 ## SavedVariables: GTDB
 
-Libs\LoadLibraries.xml
+Libs\Libs.xml
 
 Locale\localization.en.lua
 
 Core.lua
 
-Modules\LoadModules.xml
+Modules\Modules.xml

@@ -1,0 +1,11 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+	<Include file='Comm\Comm.xml'/>
+	<Include file='DB\DB.xml'/>
+	<Include file='Search.lua'/>
+	<Script file='Advertise.lua'/>
+	<Script file='Command.lua'/>
+	<Script file='Event.lua'/>
+	<Script file='Options.lua'/>
+	<Script file='Profession.lua'/>
+	<Script file='Whisper.lua'/>
+</Ui>

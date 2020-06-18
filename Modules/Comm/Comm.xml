@@ -1,0 +1,7 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+	<Script file='Comm.lua'/>
+	<Script file='CommGuild.lua'/>
+	<Script file='CommValidator.lua'/>
+	<Script file='CommWhisper.lua'/>
+	<Script file='CommYell.lua'/>
+</Ui>

@@ -10,11 +10,9 @@ LibStub('AceEvent-3.0'):Embed(Event)
 local EVENT_MAP = {}
 
 function Event:OnEnable()
-	-- GT.Log:Info('Event_OnEnable')
+	GT.Log:Info('Event_OnEnable')
 	
 	EVENT_MAP = {
-		PLAYER_LOGIN = 'PlayerLogin',
-		PLAYER_ENTERING_WORLD = 'PlayerEnteringWorld',
 		ADDON_LOADED = 'AddonLoaded',
 		TRADE_SKILL_UPDATE = 'TradeSkillUpdate',
 		CRAFT_UPDATE = 'TradeSkillUpdate',
@@ -29,20 +27,12 @@ function Event:OnEnable()
 	end
 end
 
-function Event:PlayerLogin()
-	GT.Log:Info('Event_PlayerLogin')
-end
-
-function Event:PlayerEnteringWorld()
-	GT.Log:Info('Event_PlayerEnteringWorld')
-end
-
 function Event:AddonLoaded()
 	GT.Log:Info('Event_AddonLoaded')
 end
 
 function Event:TradeSkillUpdate()
-	GT.Log:Info('Event_TradeSkillUpdate')
+	-- GT.Log:Info('Event_TradeSkillUpdate')
 	GT.Profession:AddProfession()
 end
 
@@ -59,7 +49,7 @@ function Event:ChannelNotice(...)
 
 	GT.Log:Info('Event_ChannelNotice', event, subEvent, channelType, channelNumber)
 
-	if GT.Table:Contains(GT.Advertise.events, subEvent) then
+	if Table:Contains(GT.Advertise.events, subEvent) then
 		GT.Advertise:ChannelNotice(subEvent, channelType, channelNumber)
 	end
 end

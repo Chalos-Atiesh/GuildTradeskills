@@ -11,9 +11,13 @@ local devCommands = {
 		methodName = 'LogDump',
 		help = '/gt recap: Dumps the stored logs to a copy/pastable window.'
 	},
-	dbdump = {
-		methodName = 'DBDump',
-		help = '/gt dbdump: Dumps the database to a copy/pastable window.'
+	dumpcharacter = {
+		methodName = 'DumpCharacter',
+		help = '/gt dumpcharacter {character_name}: Dumps a character database to a copy/pastable window.'
+	},
+	dumpprofession = {
+		methodName = 'DumpProfession',
+		help = '/gt dumpprofession {profession_name}: Dumps a profession database to a copy/pastable window.'
 	},
 	comm = {
 		methodName = 'ToggleComms',
@@ -33,13 +37,13 @@ end
 
 function Command:OnCommand(input)
 	GT.Log:Info('Command_OnCommand', input)
-	local tokens = GT.Text:Tokenize(input)
+	local tokens = Text:Tokenize(input)
 	if #tokens <= 0 then
 		Command:Search()
 		return
 	end
 
-	local userCommand, tokens = GT.Table:RemoveToken(tokens)
+	local userCommand, tokens = Table:RemoveToken(tokens)
 	userCommand = string.lower(userCommand)
 	Command.tokens = tokens
 
@@ -72,7 +76,7 @@ function Command:Help()
 end
 
 function Command:_Help(commands)
-	local sortedKeys = GT.Table:GetSortedKeys(commands, function(a, b) return Command:_CompareCommands(a, commands[a], b, commands[b]) end)
+	local sortedKeys = Table:GetSortedKeys(commands, function(a, b) return Command:_CompareCommands(a, commands[a], b, commands[b]) end)
 	for _, command in pairs(sortedKeys) do
 		local info = commands[command]
 		if info.help ~= nil then
@@ -92,7 +96,13 @@ function Command:_CompareCommands(a, aInfo, b, bInfo)
 end
 
 function Command:Options()
-	GT.Options:ToggleOptions(Command.tokens)
+	GT.Options:ToggleFrame(Command.tokens)
+end
+
+function Command:Search()
+	GT.Log:Info('Command_Search', Command.tokens)
+	GT.Search:Enable()
+	GT.Search:ToggleFrame(Command.tokens)
 end
 
 function Command:InitAddProfession()
@@ -107,8 +117,20 @@ end
 
 function Command:SetChatFrame()
 	GT.Log:Info('Command_SetChatFrame', Command.tokens)
-	local windowName = GT.Table:RemoveToken(Command.tokens)
-	GT.Log:SetChatFrame(windowName)
+	local windowName = Table:RemoveToken(Command.tokens)
+	if windowName == nil then
+		GT.Log:PlayerError(GT.L['CHAT_FRAME_NIL'])
+		return
+	end
+	local franeNumber = Log:SetChatFrameByName(windowName)
+	if franeNumber == nil then
+		local message = string.gsub(GT.L['CHAT_WINDOW_INVALID'], '%{{frame_name}}', frameName)
+		GT.Log:PlayerError(message)
+		return
+	end
+	GT.DB:SetChatFrameNumber(frameNumber)
+	local message = string.gsub(GT.L['CHAT_WINDOW_SUCCESS'], '%{{frame_name}}', name)
+	Log:PlayerInfo(message)
 end
 
 function Command:Reset()
@@ -116,20 +138,55 @@ function Command:Reset()
 	GT:InitReset(Command.tokens)
 end
 
-function Command:Search()
-	GT.Log:Info('Command_Search', Command.tokens)
-	GT.Search:Enable()
-	GT.Search:OpenSearch(Command.tokens)
-end
-
 function Command:LogDump()
 	GT.Log:Info('Command_LogDump', Command.tokens)
 	GT.Log:LogDump(Command.tokens)
 end
 
-function Command:DBDump()
-	GT.Log:Info('Command_DBDump', Command.tokens)
-	GT.Log:DBDump(Command.tokens)
+function Command:DumpCharacter()
+	GT.Log:Info('Command_DumpCharacters', Command.tokens)
+
+	local arg, args = Table:RemoveToken(Command.tokens)
+	if arg == nil then
+		GT.Log:PlayerError(GT.L['DUMP_CHARACTER_NIL'])
+		return
+	end
+
+	local character = GT.DBCharacter:GetCharacter(arg)
+	if character == nil then
+		local message = string.gsub(GT.L['DUMP_CHARACTER_NOT_FOUND'], '%{{character_name}}', arg)
+		GT.Log:PlayerError(message)
+		return
+	end
+
+	local message = string.gsub(GT.L['DUMP_CHARACTER'], '%{{character_name}}', character.characterName)
+	GT.Log:PlayerInfo(message)
+	local text = Text:FormatTable(character)
+	text = Text:Concat('\n', string.upper(character.characterName), text)
+	GT.Log:DumpText(text)
+end
+
+function Command:DumpProfession()
+	GT.Log:Info('Command_DumpProfession', Command.tokens)
+
+	local arg, args = Table:RemoveToken(Command.tokens)
+	if arg == nil then
+		GT.Log:PlayerError(GT.L['DUMP_PROFESSION_NIL'])
+		return
+	end
+
+	local profession = GT.DBProfession:GetProfession(arg)
+	if profession == nil then
+		local message = string.gsub(GT.L['DUMP_PROFESSION_NOT_FOUND'], '%{{profession_name}}', arg)
+		GT.Log:PlayerError(message)
+		return
+	end
+
+	local message = string.gsub(GT.L['PROFESSION_DUMP'], '%{{profession_name}}', arg)
+	GT.Log:PlayerInfo(message)
+	local text = Text:FormatTable(profession)
+	text = Text:Concat('\n', string.upper(profession.professionName), text)
+	GT.Log:DumpText(text)
 end
 
 function Command:ToggleAdvertising()
@@ -153,11 +210,13 @@ function Command:SendIgnore()
 end
 
 function Command:ShowRequests()
-	local comms = GT.DB:GetCommsWithCommand(GT.CommWhisper.INCOMING, GT.CommWhisper.REQUEST)
+	local comms = GT.DBComm:GetComms(GT.CommWhisper.INCOMING, GT.CommWhisper.REQUEST)
 	local characterNames = {}
-	for _, comm in pairs(comms) do
-		local characterName = comm.characterName:gsub("(%l)(%w*)", function(a,b) return string.upper(a)..b end)
-		table.insert(characterNames, characterName)
+	for characterName, comm in pairs(comms) do
+		if comm.isIncoming and comm.command == GT.CommWhisper.REQUEST then
+			local characterName = characterName:gsub("(%l)(%w*)", function(a,b) return string.upper(a)..b end)
+			table.insert(characterNames, characterName)
+		end
 	end
 	local message = nil
 	if #characterNames <= 0 then
@@ -171,7 +230,7 @@ end
 
 function Command:ToggleBroadcast()
 	GT.Log:Info('Command_ToggleBroadcast', Command.tokens)
-	local token = GT.Table:RemoveToken(Command.tokens)
+	local token = Table:RemoveToken(Command.tokens)
 	if token == nil or token == GT.L['SEND'] or token == GT.L['RECEIVE'] then
 		GT.CommYell:ToggleBroadcast({token})
 		return

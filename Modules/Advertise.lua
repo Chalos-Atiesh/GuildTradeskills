@@ -28,8 +28,8 @@ end
 
 function Advertise:Reset()
 	lastAdvertise = nil
-	GT.DB:SetAdvertising(Advertise.DEFAULT_IS_ADVERTISING)
-	GT.DB:SetAdvertisingInterval(Advertise.DEFAULT_INTERVAL)
+	GT.DBComm:SetIsAdvertising(Advertise.DEFAULT_IS_ADVERTISING)
+	GT.DBComm:SetAdvertisingInterval(Advertise.DEFAULT_INTERVAL)
 end
 
 function Advertise:ChannelNotice(subEvent, channelType, channelNumber)
@@ -51,12 +51,12 @@ function Advertise:Advertise()
 		shouldAdvertise = false
 	end
 
-	if not GT.DB:IsAdvertising() then
+	if not GT.DBComm:GetIsAdvertising() then
 		-- GT.Log:Info('Advertise_Advertise_NotAdvertising')
 		shouldAdvertise = false
 	end
 
-	local interval = GT.DB:GetAdvertisingInterval()
+	local interval = GT.DBComm:GetAdvertisingInterval()
 	if lastAdvertise ~= nil and lastAdvertise + interval < time() then
 		GT.Log:Warn('Advertise_Advertise_ShortenedInterval', lastAdvertise, interval, time())
 		lastAdvertise = time()
@@ -68,27 +68,26 @@ function Advertise:Advertise()
 		Advertise:_Advertise()
 	end
 
-	GT:ScheduleTimer(Advertise['Advertise'], GT.DB:GetAdvertisingInterval())
+	GT:ScheduleTimer(Advertise['Advertise'], GT.DBComm:GetAdvertisingInterval())
 end
 
 function Advertise:_Advertise()
-	local characterName = UnitName('player')
-	local professions = GT.DB:GetCharacter(characterName).professions
+	local characterName = GT:GetCharacterName()
+	local professions = GT.DBCharacter:GetProfessions(characterName)
 
 	local firstProfession = nil
 	local secondProfession = nil
 
 	local firstSkillCount = 0
 	local secondSkillCount = 0
-	for professionName, _ in pairs(professions) do
-		local profession = professions[professionName]
+	for professionName, profession in pairs(professions) do
 		if firstProfession == nil then
 			firstProfession = profession
 		else
 			secondProfession = profession
 		end
 
-		for skillName, _ in pairs(profession.skills) do
+		for _, skillName in pairs(profession.skills) do
 			if secondProfession == nil then
 				firstSkillCount = firstSkillCount + 1
 			else
@@ -99,6 +98,7 @@ function Advertise:_Advertise()
 
 	if firstProfession == nil then
 		GT.Log:PlayerWarn(GT.L['ADVERTISE_NO_PROFESSIONS'])
+		GT.DBComm:SetIsAdvertising(false)
 		return
 	end
 
@@ -121,6 +121,9 @@ function Advertise:_Advertise()
 
 	GT.Log:Info('Advertise_Advertise_Advertise', message)
 
+	--@debug@
+	GT.Log:Info('Advertise_Advertise_DebugIntercept')
+	--@end-debug@
 	--[===[@non-debug@
 	ChatThrottleLib:SendChatMessage('ALERT', PREFIX, message, 'CHANNEL', 'Common', CHANNEL_NUMBER)
 	--@end-non-debug@]===]
@@ -128,16 +131,16 @@ end
 
 
 function Advertise:ToggleAdvertising(tokens)
-	local isAdvertising = GT.DB:IsAdvertising()
+	local isAdvertising = GT.DBComm:GetIsAdvertising()
 
-	local interval, tokens = GT.Table:RemoveToken(tokens)
+	local interval, tokens = Table:RemoveToken(tokens)
 	if interval == nil then
 		local message = nil
-		if GT.DB:IsAdvertising() then
-			GT.DB:SetAdvertising(false)
+		if GT.DBComm:GetIsAdvertising() then
+			GT.DBComm:SetAdvertising(false)
 			message = GT.L['ADVERTISE_OFF']
 		else
-			GT.DB:SetAdvertising(true)
+			GT.DBComm:SetAdvertising(true)
 			message = GT.L['ADVERTISE_ON']
 			Advertise:Advertise()
 		end
@@ -161,7 +164,7 @@ function Advertise:ToggleAdvertising(tokens)
 
 	local message = string.gsub(GT.L['ADVERTISE_SET_INTERVAL'], '%{{interval}}', interval)
 	GT.Log:PlayerInfo(message)
-	GT.DB:SetAdvertisingInterval(interval)
+	GT.DBComm:SetAdvertisingInterval(interval)
 end
 
 function Advertise:SetChannelState()
