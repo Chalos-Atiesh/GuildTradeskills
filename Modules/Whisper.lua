@@ -22,13 +22,13 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		isAdded = true
 	end
 
-	-- if not GT.DBComm:GetIsAdvertising()
-	-- 	and not GT:IsGuildMember(sender)
-	-- 	and not isAdded
-	-- then
-	-- 	GT.Log:Info('Whisper_OnWhisperReceived_NotAdvertising')
-	-- 	return
-	-- end
+	if not GT.DBComm:GetIsAdvertising()
+		and not GT:IsGuildMember(sender)
+		and not isAdded
+	then
+		GT.Log:Info('Whisper_OnWhisperReceived_NotAdvertising')
+		return
+	end
 
 	local firstChar = string.sub(message, 1, 1)
 	if firstChar ~= GT.L['TRIGGER_CHAR'] then
