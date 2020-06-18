@@ -89,6 +89,7 @@ function CommGuild:SendDeletions()
 end
 
 function CommGuild:SendVersion()
+	if not IsInGuild() then return end
 	GT.Comm:SendVersion(GT.Comm.GUILD, nil)
 end
 
