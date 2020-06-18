@@ -75,6 +75,7 @@ local options = {
 					type = 'select',
 					style = 'dropdown',
 					order = 1,
+					disabled = true,
 					values = function() return Options:GetCharacters() end,
 					get = function() return Options:GetSelectedCharacter() end,
 					set = function(info, value) Options.selectedCharacter = value end,
@@ -160,15 +161,15 @@ local options = {
 					name = GT.L['LABEL_ADVERTISING'],
 					desc = GT.L['DESC_ADVERTISE_TOGGLE'],
 					type = 'toggle',
-					disabled = true,
 					order = 0,
-					get = function() return GT.DBComm:GetIsAdvertising() end,
-					set = function(info, val) GT.DBComm:SetIsAdvertising(val) end
+					get = function() return Options:GetIsAdvertising() end,
+					set = function(info, val) Options:SetIsAdvertising(val) end
 				},
 				advertiseInterval = {
 					name = GT.L['LABEL_ADVERTISING_INTERVAL'],
 					desc = GT.L['DESC_ADVERTISING_INTERVAL'],
 					type = 'range',
+					disabled = true,
 					min = GT.Advertise.MINIMUM_INTERVAL / 60,
 					max = GT.Advertise.MAXIMUM_INTERVAL / 60,
 					step = 0.25,
@@ -189,6 +190,7 @@ local options = {
 					desc = GT.L['DESC_BROADCAST_INTERVAL'],
 					type = 'range',
 					width = 'full',
+					disabled = true,
 					min = GT.CommYell.MIN_BROADCAST_INTERVAL / 60,
 					max = GT.CommYell.MAX_BROADCAST_INTERVAL / 60,
 					step = 0.25,
@@ -202,8 +204,9 @@ local options = {
 					type = 'toggle',
 					width = 'full',
 					order = 2,
-					get = function() return GT.DBComm:IsBroadcasting() end,
-					set = function(info, val) GT.DBComm:SetBroadcasting(val) end
+					confirm = function(info) return Options:GetBroadcastingConfirm(GT.L['CONFIRM_SEND_BROADCAST'], GT.DBComm:GetIsBroadcasting()) end,
+					get = function() return Options:GetIsBroadcasting() end,
+					set = function(info, val) Options:SetIsBroadcasting(val) end
 				},
 				receiveBroadcastingToggle = {
 					name = GT.L['LABEL_RECEIVE_BROADCASTS'],
@@ -211,8 +214,9 @@ local options = {
 					type = 'toggle',
 					width = 'full',
 					order = 3,
-					get = function() return GT.DBComm:IsReceivingBroadcasts() end,
-					set = function(info, val) GT.DBComm:SetReceivingBroadcasts(val) end
+					confirm = function(info) return Options:GetBroadcastingConfirm(GT.L['CONFIRM_RECEIVE_BROADCASTS'], GT.DBComm:GetIsReceivingBroadcasts()) end,
+					get = function() return GT.DBComm:GetIsReceivingBroadcasts() end,
+					set = function(info, val) GT.DBComm:SetIsReceivingBroadcasts(val) end
 				},
 				sendForwardsToggle = {
 					name = GT.L['LABEL_SEND_FORWARDS'],
@@ -220,8 +224,9 @@ local options = {
 					type = 'toggle',
 					width = 'full',
 					order = 4,
-					get = function() return GT.DBComm:IsForwarding() end,
-					set = function(info, val) GT.DBComm:SetForwarding(val) end
+					confirm = function(info) return Options:GetBroadcastingConfirm(GT.L['CONFIRM_SEND_FORWARDS'], GT.DBComm:GetIsForwarding()) end,
+					get = function() return Options:GetIsForwarding() end,
+					set = function(info, val) Options:SetIsForwarding(val) end
 				},
 				receiveForwardsToggle = {
 					name = GT.L['LABEL_RECEIVE_FORWARDS'],
@@ -229,8 +234,9 @@ local options = {
 					type = 'toggle',
 					width = 'full',
 					order = 5,
-					get = function() return GT.DBComm:IsReceivingForwards() end,
-					set = function(info, val) GT.DBComm:SetReceivingForwards(val) end
+					confirm = function(info) return Options:GetBroadcastingConfirm(GT.L['CONFIRM_RECEIVE_FORWARDS'], GT.DBComm:GetIsReceivingForwards()) end,
+					get = function() return GT.DBComm:GetIsReceivingForwards() end,
+					set = function(info, val) GT.DBComm:SetIsReceivingForwards(val) end
 				},
 			}
 		}
@@ -241,6 +247,59 @@ function Options:OnEnable()
 	GT.Log:Info('Options_OnEnable')
 	Config:RegisterOptionsTable(PANEL_NAME, options)
 	CD:AddToBlizOptions(GT.L['BARE_LONG_TAG'], GT.L['LONG_TAG'])
+end
+
+function Options:GetBroadcastingConfirm(message, isBroadcasting)
+	if not isBroadcasting then
+		return message
+	end
+	return nil
+end
+
+function Options:GetIsBroadcasting()
+	local isBroadcasting = GT.DBComm:GetIsBroadcasting()
+	local isForwarding = GT.DBComm:GetIsForwarding()
+	GT.Log:Info('Options_GetIsBroadcasting', isBroadcasting)
+	options.args.broadcastingRow.args.broadcastInterval.disabled = not isBroadcasting or not isForwarding
+	return isBroadcasting
+end
+
+function Options:SetIsBroadcasting(val)
+	GT.Log:Info('Options_SetIsBroadcasting', val)
+	local isForwarding = GT.DBComm:GetIsForwarding()
+	options.args.broadcastingRow.args.broadcastInterval.disabled = not val and not isForwarding
+	GT.DBComm:SetIsBroadcasting(val)
+	CR:NotifyChange(PANEL_NAME)
+end
+
+function Options:GetIsForwarding()
+	local isBroadcasting = GT.DBComm:GetIsBroadcasting()
+	local isForwarding = GT.DBComm:GetIsForwarding()
+	GT.Log:Info('Options_GetIsForwarding', isForwarding)
+	options.args.broadcastingRow.args.broadcastInterval.disabled = not isBroadcasting and not isForwarding
+	return isForwarding
+end
+
+function Options:SetIsForwarding(val)
+	GT.Log:Info('Options_SetIsForwarding', val)
+	local isBroadcasting = GT.DBComm:GetIsBroadcasting()
+	options.args.broadcastingRow.args.broadcastInterval.disabled = not val and not isForwarding
+	GT.DBComm:SetIsForwarding(val)
+	CR:NotifyChange(PANEL_NAME)
+end
+
+function Options:GetIsAdvertising()
+	local isAdvertising = GT.DBComm:GetIsAdvertising()
+	GT.Log:Info('Options_GetIsAdvertising', isAdvertising)
+	options.args.advertiseRow.args.advertiseInterval.disabled = not isAdvertising
+	return isAdvertising
+end
+
+function Options:SetIsAdvertising(val)
+	GT.Log:Info('Options_SetIsAdvertising', val)
+	options.args.advertiseRow.args.advertiseInterval.disabled = not val
+	GT.DBComm:SetIsAdvertising(val)
+	CR:NotifyChange(PANEL_NAME)
 end
 
 function Options:GetRequestFilter()
@@ -265,7 +324,7 @@ end
 
 function Options:SendConfirm()
 	local characterName = Options:GetSelectedRequest()
-	GT.CommWhisper:SendConfirm(characterName, true)
+	GT.CommWhisper:SendConfirm(characterName, false)
 	Options.selectedRequest = nil
 	GT:ScheduleTimer(Options['_SendConfirm'], ADD_DELAY)
 end
@@ -342,12 +401,20 @@ end
 function Options:GetCharacters()
 	local returnCharacters = {}
 	local characters = GT.DBCharacter:GetCharacters()
+	local enabled = false
 	for characterName, _ in pairs(characters) do
 		local character = characters[characterName]
 		if not character.isGuildMember then
 			returnCharacters[characterName] = characterName
+			enabled = true
 		end
 	end
+	if enabled then
+		options.args.nonGuildMembers.args.characters.disabled = false
+	else
+		options.args.nonGuildMembers.args.characters.disabled = true
+	end
+	CR:NotifyChange(PANEL_NAME)
 	return returnCharacters
 end
 
@@ -439,7 +506,7 @@ function Options:GetSelectedProfession()
 end
 
 function Options:GetPlayerProfessions()
-	local characterName = GT:GetCurrentCharacter()
+	local characterName = GT:GetCharacterName()
 	local professions = GT.DBCharacter:GetProfessions(characterName)
 	local returnProfessions = {}
 	for professionName, _ in pairs(professions) do

@@ -25,7 +25,7 @@ function DBCharacter:Reset()
 	GT.Log:Info('DBCharacter_Reset')
 	DBCharacter.db.char.characters = {}
 
-	DBCharacter:AddCharacter(GT:GetCurrentCharacter())
+	DBCharacter:AddCharacter(GT:GetCharacterName())
 end
 ----- CHARACTER START -----
 
@@ -70,6 +70,7 @@ function DBCharacter:AddCharacter(characterName)
 	character.characterName = characterName
 	character.isGuildMember = true
 	character.isBroadcasted = false
+	character.class = 'UNKNOWN'
 	character.lastCommReceived = time()
 
 	if character.professions == nil then
@@ -192,7 +193,7 @@ function DBCharacter:SkillExists(characterName, professionName, skillName)
 	skillName = string.lower(skillName)
 
 	local skills = DBCharacter:GetSkills(characterName, professionName)
-	for tempSkillName, _ in pairs(skills) do
+	for _, tempSkillName in pairs(skills) do
 		if string.lower(tempSkillName) == skillName then
 			return true
 		end
@@ -220,7 +221,7 @@ end
 
 function DBCharacter:AddSkill(characterName, professionName, skillName)
 	if skillName == nil then return nil end
-	if DBCharacter:ProfessionExists(characterName, professionName) then return nil end
+	if not DBCharacter:ProfessionExists(characterName, professionName) then return nil end
 
 	local skills = DBCharacter:GetSkills(characterName, professionName)
 	skills = Table:Insert(skills, nil, skillName)

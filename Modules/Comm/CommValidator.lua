@@ -57,8 +57,8 @@ function CommValidator:IsIncomingRequestValid(distribution, sender, uuid)
 		return false
 	end
 
-	if GT.DBComm:IsIgnored(CommWhisper.OUTGOING, uuid, sender) then
-		GT.Log:Info('CommWhisper_OnRequestReceived_Ignored', sender, uuid)
+	if GT.DBComm:IsIgnored(GT.CommWhisper.OUTGOING, uuid, sender) then
+		GT.Log:Info('CommValidator_OnRequestReceived_Ignored', sender, uuid)
 		return false
 	end
 	return true
@@ -152,11 +152,21 @@ function CommValidator:IsGetValid(message)
 			return false
 		end
 
+		if not GT.DBCharacter:CharacterExists(characterName) then
+			GT.Log:Error('CommValidator_IsGetValid_CharacterNotExists', characterName)
+			return false
+		end
+
 		if professionName == nil
 			or tonumber(professionName) ~= nil
 			or string.find(professionName, ']')
 		then
 			GT.Log:Error('CommValidator_IsGetValid_InvalidProfessionName', professionName)
+			return false
+		end
+
+		if not GT.DBCharacter:ProfessionExists(characterName, professionName) then
+			GT.Log:Error('CommValidator_IsGetValid_ProfessionNotExists', characterName, professionName)
 			return false
 		end
 	end
@@ -178,11 +188,21 @@ function CommValidator:IsPostValid(message)
 		return false
 	end
 
-	if professionName == nil
-		or tonumber(professionName) ~= nil
-		or string.find(professionName, ']')
-	then
-		GT.Log:Error('Comm_IsPostValidFormat_NilProfessionName')
+	if professionName == nil then
+		GT.Log:Error('Comm_IsPostValidFormat_NilProfessionName', characterName)
+		return false
+	end
+
+	local professionNameIsValid = false
+	for _, tempProfessionName in pairs(GT.L['PROFESSIONS_LIST']) do
+		if professionName == tempProfessionName then
+			professionNameIsValid = true
+			break
+		end
+	end
+
+	if not professionNameIsValid then
+		GT.Log:Error('Comm_IsPostValidFormat_InvalidProfessionName', Text:ToString(professionName), GT.L['PROFESSIONS_LIST'])
 		return false
 	end
 
@@ -229,6 +249,7 @@ function CommValidator:IsPostValid(message)
 		local actualReagentCount = 0
 		for i = 1, uniqueReagentCount do
 			local reagentName, tokens = Table:RemoveToken(tokens)
+			local reagentLink, tokens = Table:RemoveToken(tokens)
 			local thisReagentCount, tokens = Table:RemoveToken(tokens)
 
 			-- GT.Log:Info('Comm_IsPostValidFormat_ReagentCheck', reagentName, Text:ToString(thisReagentCount))
@@ -238,6 +259,13 @@ function CommValidator:IsPostValid(message)
 				or tonumber(reagentName) ~= nil
 			then
 				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentName', Text:ToString(reagentName))
+				return false
+			end
+
+			if reagentLink == nil
+				or not string.find(reagentLink, ']')
+			then
+				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentLink', Text:ToString(reagentLink))
 				return false
 			end
 

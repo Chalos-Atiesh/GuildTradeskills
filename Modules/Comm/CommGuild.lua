@@ -7,6 +7,9 @@ GT.CommGuild = CommGuild
 
 LibStub('AceComm-3.0'):Embed(CommGuild)
 
+-- 30 Days
+CommGuild.INACTIVE_TIMEOUT = 30 * GT.DAY
+
 local VOTE_DENY_VARIANCE = 30
 
 local START_WINDOW = 5
@@ -46,7 +49,6 @@ function CommGuild:OnEnable()
 	table.insert(STARTUP_TASKS, CommGuild['SendVersion'])
 	table.insert(STARTUP_TASKS, CommGuild['SendDeletions'])
 	table.insert(STARTUP_TASKS, CommGuild['RequestStartVote'])
-	table.insert(STARTUP_TASKS, CommGuild['RemoveNonGuildMembers'])
 	table.insert(STARTUP_TASKS, CommGuild['RemoveInactive'])
 
 	COMMAND_MAP = {
@@ -132,16 +134,19 @@ function CommGuild:OnRequestStartVoteReceived(prefix, message, distribution, sen
 	end
 
 	GT.Log:Info('CommGuild_OnRequestStartVoteReceived', sender, message)
-	if not GT.CommValidator:IsVoteStartValid(message) then
+	if tonumber(message) == nil then
 		GT.Log:Error('CommGuild_OnRequestStartVoteReceived_InvalidVoteStart', sender, message)
 		return
 	end
 
-	if not CommGuild:_IsInValidVoteState(VOTE_STATE_REGISTERING) then
+	if voteState > VOTE_STATE_REGISTERING then
 		GT.Log:Info('CommGuild_OnRequestStartVoteReceived_Deny', voteState, sender, message)
 		CommGuild:SendCommMessage(START_VOTE_DENY, tostring(voteEnd + 1), GT.Comm.GUILD, nil, GT.Comm.ALERT)
 		return
 	end
+	
+	voteStart = tonumber(message)
+	voteEnd = voteStart + VOTE_DURATION
 
 	if voteState == VOTE_STATE_REGISTERING then
 		GT.Log:Info('CommGuild_OnRequestStartVoteReceived_Registering', sender, voteStart)
@@ -153,15 +158,13 @@ function CommGuild:OnRequestStartVoteReceived(prefix, message, distribution, sen
 	GT.Log:Info('CommGuild_OnRequestStartVoteReceived_Ack', sender, message)
 
 	voteState = VOTE_STATE_REGISTERING
-	voteStart = tonumber(message)
-	voteEnd = voteStart + VOTE_DURATION
 
 	registeredVoters = {}
 	timestampCollection = {}
 	voteCollection = {}
 
-	GT.Log:Info('CommGuild_OnRequestStartVoteReceived_RegisterSelf', GT:GetCurrentCharacter())
-	registeredVoters = Table:Insert(registeredVoters, nil, GT:GetCurrentCharacter())
+	GT.Log:Info('CommGuild_OnRequestStartVoteReceived_RegisterSelf', GT:GetCharacterName())
+	registeredVoters = Table:Insert(registeredVoters, nil, GT:GetCharacterName())
 	registeredVoters = Table:Insert(registeredVoters, nil, sender)
 	GT:ScheduleTimer(CommGuild['SendTimestamps'], START_WINDOW)
 	CommGuild:SendCommMessage(START_VOTE_ACK, tostring(voteStart), GT.Comm.GUILD,  nil, GT.Comm.NORMAL)
@@ -195,8 +198,8 @@ function CommGuild:OnVoteStartAckReceived(prefix, message, distribution, sender)
 	local otherVoteStart = tonumber(message)
 
 	if voteState < VOTE_STATE_REGISTERING then
-		GT.Log:Info('CommGuild_OnVoteStartAckReceived_RegisterSelf', GT:GetCurrentCharacter())
-		registeredVoters = Table:Insert(registeredVoters, nil, GT:GetCurrentCharacter())
+		GT.Log:Info('CommGuild_OnVoteStartAckReceived_RegisterSelf', GT:GetCharacterName())
+		registeredVoters = Table:Insert(registeredVoters, nil, GT:GetCharacterName())
 		if otherVoteStart < voteStart then
 			local wait = START_WINDOW - (voteStart - otherVoteStart)
 			if wait <= 0 then
@@ -255,7 +258,21 @@ function CommGuild:SendTimestamps()
 		GT.Log:Info('Comm_SendTimestamps_NoResponses')
 		return
 	end
-	GT.Comm:SendTimestamps(GT.Comm.GUILD, nil)
+	local characters = GT.DBCharacter:GetCharacters()
+	local characterStrings = {}
+	for characterName, character in pairs(characters) do
+		if character.isGuildMember then
+			local characterString = GT.Comm:GetTimestampString(characterName)
+			if characterString ~= nil then
+				table.insert(characterStrings, characterString)
+			end
+		end
+	end
+	GT.Log:Info('CommGuild_SendTimestamps_Send', characterStrings)
+	if #characterStrings > 0 then
+		local message = table.concat(characterStrings, GT.Comm.DELIMITER)
+		GT.Comm:SendCommMessage(GT.Comm.TIMESTAMP, message, GT.Comm.GUILD, nil, GT.Comm.NORMAL)
+	end
 end
 
 function CommGuild:OnTimestampsReceived(sender, toGet, toPost)
@@ -454,39 +471,73 @@ end
 ----- END VOTING PROCESS -----
 ----- START MAINTENANCE -----
 
-function CommGuild:RemoveNonGuildMembers()
-	local guildCharacters = {}
-	for i = 1, GetNumGuildMembers() do
-		local guildName = GetGuildRosterInfo(i)
-		table.insert(guildCharacters, Ambiguate(guildName, 'none'))
-	end
-	guildCharacters = Table:Insert(guildCharacters, nil, GT.GetCurrentCharacter())
-
+function CommGuild:RemoveInactive()
 	local characters = GT.DBCharacter:GetCharacters()
+	local characterNames = {}
+	for characterName, character in pairs(characters) do
+		if not GT:IsCurrentCharacter(characterName) and character.isGuildMember then
+			local lastUpdate = character.lastCommReceived
 
-	local removedCharacters = {}
-	for characterName, _ in pairs(characters) do
-		local character = characters[characterName]
-		if not Table:Contains(guildCharacters, characterName)
-			and not GT:IsCurrentCharacter(characterName)
-			and character.isGuildMember
-		then
-			removedCharacters = Table:Insert(removedCharacters, nil, characterName)
-			GT.DBCharacter:DeleteCharacter(characterName)
+			local professions = character.professions
+			for professionName, profession in pairs(professions) do
+				if profession.lastUpdate > lastUpdate then
+					lastUpdate = profession.lastUpdate
+				end
+			end
+
+			if lastUpdate + CommGuild.INACTIVE_TIMEOUT < time() then
+				GT.Log:Info('CommGuild_RemoveInactive_RemoveCharacter', characterName, lastUpdate, time())
+				table.insert(characterNames, characterName)
+				GT.DBCharacter:DeleteCharacter(characterName)
+			end
 		end
 	end
-	if #removedCharacters > 0 then
-		local characterNames = table.concat(GT.L['PRINT_DELIMITER'], removedCharacters)
-		local message = string.gsub(GT.L['REMOVE_GUILD'], '%{{character_names}}', removedCharacters)
+
+	if #characterNames > 0 then
+		local names = table.concat(characterNames, GT.L['PRINT_DELIMITER'])
+		local days = tostring(math.floor(timeout / GT.DAY))
+
+		local message = string.gsub(GT.L['REMOVE_GUILD_INACTIVE'], '%{{character_names}}', names)
+		message = string.gsub(message, '%{{timeout_days}}', days)
 		GT.Log:PlayerInfo(message)
 	end
 end
 
-function CommGuild:RemoveInactive()
-	GT.Comm:RemoveInactive(GT.Comm.INACTIVE_TIMEOUT, true, false, false, GT.L['REMOVE_GUILD_INACTIVE'])
-end
-
 ----- END MAINTENANCE -----
+
+function CommGuild:OnPostReceived(sender, message)
+	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local characterName, tokens = Table:RemoveToken(tokens)
+
+	local character = GT.DBCharacter:GetCharacter(characterName)
+	if character == nil then
+		character = GT.DBCharacter:AddCharacter(characterName)
+		character.isGuildMember = true
+		character.isBroadcasted = false
+	end
+
+	local professionName, tokens = Table:RemoveToken(tokens)
+	local lastUpdate, tokens = Table:RemoveToken(tokens)
+	lastUpdate = tonumber(lastUpdate)
+	GT.Log:Info('CommGuild_OnPostReceived', sender, characterName, professionName, lastUpdate)
+
+	local profession = GT.DBCharacter:GetProfession(characterName, professionName)
+
+	if profession ~= nil and profession.lastUpdate > lastUpdate then
+		GT.Log:Info('CommGuild_OnPostReceived_RemoteUpdate', characterName, professionName, profession.lastUpdate, lastUpdate)
+		GT.Comm:SendPost(GT.Comm.GUILD, characterName, professionName, sender)
+		return
+	end
+
+	if profession == nil or profession.lastUpdate < lastUpdate then
+		local tempLastUpdate = nil
+		if profession ~= nil then
+			tempLastUpdate = profession.lastUpdate
+		end
+		GT.Log:Info('CommGuild_OnPostReceived_LocalUpdate', characterName, professionName, Text:ToString(tempLastUpdate), lastUpdate)
+		GT.Comm:UpdateProfession(message)
+	end
+end
 
 function CommGuild:ChatMessageSystem(message)
 	local offlineName = message:match(string.gsub(ERR_FRIEND_OFFLINE_S, '(%%s)', '(.+)'))

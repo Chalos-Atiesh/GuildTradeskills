@@ -48,10 +48,14 @@ function Friends:FriendAdded(info)
 	local tempCharacterName = string.lower(info.name)
 	if info.exists then
 		local friendInfo = C_FriendList.GetFriendInfo(info.name)
-		for k, v in pairs(friendInfo) do
-			info[k] = v
+		if friendInfo ~= nil then
+			for k, v in pairs(friendInfo) do
+				info[k] = v
+			end
+			info.className = string.upper(info.className)
+		else
+			info.className = 'UNKNOWN'
 		end
-		info.className = string.upper(info.className)
 		info.exists = true
 	else
 		info.className = 'UNKNOWN'
@@ -175,9 +179,16 @@ function Friends:FakeFriendFilter(...)
 		friendsAddedQueue = {}
 		return true
 	end
+
 	local characterName = message:match(string.gsub(ERR_FRIEND_ADDED_S, '(%%s)', '(.+)'))
     if characterName == nil then
     	characterName = message:match(string.gsub(ERR_FRIEND_ALREADY_S, '(%%s)', '(.+)'))
+    end
+    if characterName == nil then
+    	characterName = message:match(string.gsub(ERR_CHAT_PLAYER_NOT_FOUND_S, '(%%s)', '(.+)'))
+    end
+    if characterName == nil then
+    	characterName = message:match(string.gsub(ERR_FRIEND_OFFLINE_S, '(%%s)', '(.+)'))
     end
 	if characterName ~= nil then
 		-- print('Friends_FakeFriendFilter_Found: ', characterName)

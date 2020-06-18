@@ -4,6 +4,7 @@ local minorVersion = 1
 local Log, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
 
 local AceGUI = LibStub('AceGUI-3.0')
+local AceDB = LibStub('AceDB-3.0')
 
 local Text = assert(Text, 'Log-1.0 requires the Text library.')
 local Table = assert(Table, 'Log-1.0 requires the Table library.')
@@ -13,7 +14,7 @@ Log.DEFAULT_CHAT_FRAME = 1
 local DELIMITER = ': '
 local LOG_FORMAT = '{{tag}}{{start_color}}{{message}}{{end_color}}'
 local LOG_LINE_LENGTH_LIMIT = 200
-local LOG_ARCHIVE_LIMIT = 500
+local LOG_ARCHIVE_CHARACTER_LIMIT = 100000
 
 local INFO = 0
 local DEBUG = 1
@@ -68,26 +69,32 @@ function Log:Init()
 	LOG_STRING_MAP[PLAYER_WARN] = STRING_PLAYER_WARN
 	LOG_STRING_MAP[PLAYER_ERROR] = STRING_PLAYER_ERROR
 
-	if Log.DB == nil then
-		Log.DB = {}
+	Log.db = Log.db or AceDB:New('LogDB')
+
+	if Log.db.global == nil then
+		Log.db.global = {}
 	end
 
-	if Log.DB.log == nil then
-		Log.DB.log = {}
+	if Log.db.global.logTag == nil then
+		Log.db.global.logTag = ''
 	end
 
-	if Log.DB.logTag == nil then
-		Log.DB.logTag = ''
+	if Log.db.char.frameNumber == nil then
+		Log.db.char.frameNumber = Log.DEFAULT_CHAT_FRAME
 	end
 
-	if Log.DB.frameNumber == nil then
-		Log.DB.frameNumber = Log.DEFAULT_CHAT_FRAME
+	if Log.db.char.log == nil then
+		Log.db.char.log = {}
+	end
+
+	if Log.db.char.logSize == nil then
+		Log.db.char.logSize = 0
 	end
 end
 
 function Log:Reset()
-	Log.DB.log = {}
-	Log.DB.frameNumber = Log.DEFAULT_CHAT_FRAME
+	Log.db.char.log = {}
+	Log.db.char.frameNumber = Log.DEFAULT_CHAT_FRAME
 end
 
 function Log:Info(...)
@@ -119,10 +126,13 @@ function Log:PlayerError(...)
 end
 
 function Log:GetChatFrameNumber()
-	if Log.DB.frameNumber == nil then
+	if Log.db == nil
+		or Log.db.char == nil
+		or Log.db.char.frameNumber == nil
+	then
 		return Log.DEFAULT_CHAT_FRAME
 	end
-	return Log.DB.frameNumber
+	return Log.db.char.frameNumber
 end
 
 function Log:SetChatFrameByName(frameName)
@@ -132,7 +142,7 @@ function Log:SetChatFrameByName(frameName)
 		local name = GetChatWindowInfo(i) or ''
 		local shown = select(7, GetChatWindowInfo(i))
 		if name ~= '' and string.lower(name) == string.lower(frameName) and shown then
-			Log.DB.frameNumber = i
+			Log.db.char.frameNumber = i
 			return i
 		end
 	end
@@ -144,17 +154,17 @@ function Log:SetChatFrameByNumber(frameNumber)
 	local name = GetChatWindowInfo(frameNumber)
 	local shown = select(7, GetChatWindowInfo(frameNumber))
 	if shown then
-		Log.DB.frameNumber = i
+		Log.db.char.frameNumber = i
 		return true
 	end
 	return false
 end
 function Log:GetLogTag()
-	return Log.DB.logTag
+	return Log.db.global.logTag
 end
 
 function Log:SetLogTag(logTag)
-	Log.DB.logTag = logTag
+	Log.db.global.logTag = logTag
 end
 
 function Log:_Log(logLevel, ...)
@@ -168,21 +178,26 @@ function Log:_Log(logLevel, ...)
 	if logLevel < PLAYER_INFO and #logMessage >= LOG_LINE_LENGTH_LIMIT then
 		printMessage = string.sub(logMessage, 0, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
 	end
-	printMessage = Log:_FormatLogLine(printMessage, color, Log.DB.logTag)
+	printMessage = Log:_FormatLogLine(printMessage, color, Log.db.global.logTag)
 	logMessage = Log:_FormatLogLine(logMessage, color, '')
 
-	if GTDB ~= nil and GTDB.log ~= nil then
+	if Log.db ~= nil
+		and Log.db.char ~= nil
+		and Log.db.char.log ~= nil
+	then
 		local levelWithColor = nil
 		if color == '' then
 			levelWithColor = Text:Concat(DELIMITER, tostring(logLevel),  LOG_STRING_MAP[logLevel])
 		else
 			levelWithColor = color .. Text:Concat(tostring(logLevel), LOG_STRING_MAP[logLevel]) .. '|r'
 		end
-		while #GTDB.log > LOG_ARCHIVE_LIMIT do
-			table.remove(GTDB.log, 1)
+		logMessage = Text:Concat(DELIMITER, date('%y-%m-%d %H:%M:%S', time()), levelWithColor, logMessage)
+		table.insert(Log.db.char.log, logMessage)
+		while Log.db.char.logSize > LOG_ARCHIVE_CHARACTER_LIMIT do
+			local line = Log.db.char.log[1]
+			Log.db.char.logSize = Log.db.char.logSize - #line
+			table.remove(Log.db.char.log, 1)
 		end
-		logMessage = Text:Concat(DELIMITER, levelWithColor, date('%y-%m-%d %H:%M:%S', time()), logMessage)
-		table.insert(GTDB.log, logMessage)
 	end
 
 	if logLevel < LOG_LEVEL_FILTER then
@@ -204,13 +219,13 @@ function Log:_FormatLogLine(message, color, tag)
 	return message
 end
 
-function Log:LogDump(args)
-	Log:Info('Log_LogDump', args)
+function Log:LogDump()
+	Log:Info('Log_LogDump')
 	local editBox = Log:GetEditBox()
 	editBox:SetDisabled(true)
 
 	local text = nil
-	for _, logLine in pairs(GTDB.log) do
+	for _, logLine in pairs(Log.db.char.log) do
 		if text == nil then
 			text = logLine
 		else

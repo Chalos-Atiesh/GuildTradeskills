@@ -60,7 +60,6 @@ end
 
 function DBProfession:AddProfession(professionName)
 	if professionName == nil then return nil end
-
 	local professions = DBProfession:GetProfessions()
 	professions = Table:InsertField(professions, professionName)
 
@@ -201,7 +200,7 @@ function DBProfession:AddReagent(professionName, skillName, reagentName, reagent
 	local reagent = DBProfession:GetReagent(professionName, skillName, reagentName)
 
 	reagent.reagentName = reagentName
-	if reagent.reagentLink ~= nil then
+	if reagentLink ~= nil then
 		reagent.reagentLink = reagentLink
 	end
 	reagent.reagentCount = tonumber(reagentCount)

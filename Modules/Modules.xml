@@ -1,7 +1,7 @@
 <Ui xmlns='http://www.blizzard.com/wow/ui/'>
 	<Include file='Comm\Comm.xml'/>
 	<Include file='DB\DB.xml'/>
-	<Include file='Search.new.lua'/>
+	<Include file='Search.lua'/>
 	<Script file='Advertise.lua'/>
 	<Script file='Command.lua'/>
 	<Script file='Event.lua'/>

@@ -3,4 +3,5 @@
 	<Script file='Table.lua'/>
 	<Script file='Log.lua'/>
 	<Script file='Friends.lua'/>
+	<Script file='ScrollFrame.lua'/>
 </Ui>

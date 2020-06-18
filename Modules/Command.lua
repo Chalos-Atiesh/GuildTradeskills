@@ -11,9 +11,13 @@ local devCommands = {
 		methodName = 'LogDump',
 		help = '/gt recap: Dumps the stored logs to a copy/pastable window.'
 	},
-	dbdump = {
-		methodName = 'DBDump',
-		help = '/gt dbdump: Dumps the database to a copy/pastable window.'
+	dumpcharacter = {
+		methodName = 'DumpCharacter',
+		help = '/gt dumpcharacter {character_name}: Dumps a character database to a copy/pastable window.'
+	},
+	dumpprofession = {
+		methodName = 'DumpProfession',
+		help = '/gt dumpprofession {profession_name}: Dumps a profession database to a copy/pastable window.'
 	},
 	comm = {
 		methodName = 'ToggleComms',
@@ -139,14 +143,49 @@ function Command:LogDump()
 	GT.Log:LogDump(Command.tokens)
 end
 
-function Command:DBDump()
-	GT.Log:Info('Command_DBDump', Command.tokens)
+function Command:DumpCharacter()
+	GT.Log:Info('Command_DumpCharacters', Command.tokens)
 
 	local arg, args = Table:RemoveToken(Command.tokens)
+	if arg == nil then
+		GT.Log:PlayerError(GT.L['DUMP_CHARACTER_NIL'])
+		return
+	end
 
-	local characterDump = Text:FormatTable(GT.DBCharacter:GetCharacters())
-	local professionDump = Text:FormatTable(GT.DBProfession:GetProfessions())
-	local text = Text:Concat('\n', GT.L['CHARACTERS'], characterDump, GT.L['PROFESSIONS'], professionDump)
+	local character = GT.DBCharacter:GetCharacter(arg)
+	if character == nil then
+		local message = string.gsub(GT.L['DUMP_CHARACTER_NOT_FOUND'], '%{{character_name}}', arg)
+		GT.Log:PlayerError(message)
+		return
+	end
+
+	local message = string.gsub(GT.L['DUMP_CHARACTER'], '%{{character_name}}', character.characterName)
+	GT.Log:PlayerInfo(message)
+	local text = Text:FormatTable(character)
+	text = Text:Concat('\n', string.upper(character.characterName), text)
+	GT.Log:DumpText(text)
+end
+
+function Command:DumpProfession()
+	GT.Log:Info('Command_DumpProfession', Command.tokens)
+
+	local arg, args = Table:RemoveToken(Command.tokens)
+	if arg == nil then
+		GT.Log:PlayerError(GT.L['DUMP_PROFESSION_NIL'])
+		return
+	end
+
+	local profession = GT.DBProfession:GetProfession(arg)
+	if profession == nil then
+		local message = string.gsub(GT.L['DUMP_PROFESSION_NOT_FOUND'], '%{{profession_name}}', arg)
+		GT.Log:PlayerError(message)
+		return
+	end
+
+	local message = string.gsub(GT.L['PROFESSION_DUMP'], '%{{profession_name}}', arg)
+	GT.Log:PlayerInfo(message)
+	local text = Text:FormatTable(profession)
+	text = Text:Concat('\n', string.upper(profession.professionName), text)
 	GT.Log:DumpText(text)
 end
 

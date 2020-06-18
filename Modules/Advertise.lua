@@ -72,7 +72,7 @@ function Advertise:Advertise()
 end
 
 function Advertise:_Advertise()
-	local characterName = GT:GetCurrentCharacter()
+	local characterName = GT:GetCharacterName()
 	local professions = GT.DBCharacter:GetProfessions(characterName)
 
 	local firstProfession = nil
@@ -122,7 +122,7 @@ function Advertise:_Advertise()
 	GT.Log:Info('Advertise_Advertise_Advertise', message)
 
 	--@debug@
-	GT.Log:Info('Advertise_Advertise_FakeAdvertising')
+	GT.Log:Info('Advertise_Advertise_DebugIntercept')
 	--@end-debug@
 	--[===[@non-debug@
 	ChatThrottleLib:SendChatMessage('ALERT', PREFIX, message, 'CHANNEL', 'Common', CHANNEL_NUMBER)

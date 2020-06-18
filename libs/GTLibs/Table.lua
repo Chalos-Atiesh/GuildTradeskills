@@ -45,8 +45,8 @@ function Table:Contains(tbl, value)
 	if tbl == nil then
 		return false
 	end
-	for i, v in ipairs(tbl) do
-		if v == value or i == value then
+	for k, v in ipairs(tbl) do
+		if v == value or k == value then
 			return true
 		end
 	end

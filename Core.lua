@@ -20,6 +20,10 @@ GT.STARTUP_DELAY = 5
 
 local STARTUP_TASKS = {}
 
+local frame = nil
+local frameNumber = 0
+local frameDelays = {}
+
 function GT:OnInitialize()
 	local frameNumber = GT.DB:GetChatFrameNumber()
 	GT.Log:SetChatFrameByNumber(frameNumber)
@@ -39,6 +43,9 @@ function GT:OnInitialize()
 	table.insert(STARTUP_TASKS, GT.Comm['StartupTasks'])
 	table.insert(STARTUP_TASKS, GT.Advertise['Advertise'])
 
+	frame = CreateFrame('Frame')
+	frame:SetScript('OnUpdate', GT['ProcessFrameDelays'])
+
 	GT:ScheduleTimer(GT['StartupTasks'], GT.STARTUP_DELAY)
 end
 
@@ -50,8 +57,10 @@ function GT:StartupTasks()
 end
 
 function GT:Welcome()
-	local characterName = GT:GetCurrentCharacter()
-	GT.DBCharacter:AddCharacter(characterName)
+	local characterName = GT:GetCharacterName()
+	local character = GT.DBCharacter:AddCharacter(characterName)
+	character.class = GT:GetCharacterClass()
+	character.isOnline = true
 	
 	GT.Log:PlayerInfo(L['WELCOME'])
 	if not GT.DB.valid then
@@ -63,6 +72,36 @@ function GT:CreateActionQueue(delay, queue)
 	local wait = 0
 	for i, task in pairs(queue) do
 		GT:ScheduleTimer(task, (i - 1) * delay)
+	end
+end
+
+function GT:FrameDelay(frameCount, callback)
+	local uuid = Text:UUID()
+	delay = {
+		endFrame = frameCount + frameNumber,
+		callback = callback
+	}
+
+	frameDelays[uuid] = delay
+end
+
+function GT:ProcessFrameDelays()
+	frameNumber = frameNumber + 1
+	local remainingCallbackCount = 0
+	local uuids = {}
+	for uuid, delay in pairs(frameDelays) do
+		if delay.endFrame <= frameNumber then
+			delay.callback()
+			table.insert(uuids, uuid)
+		else
+			remainingCallbackCount = remainingCallbackCount + 1
+		end
+	end
+	for _, uuid in pairs(uuids) do
+		frameDelays[uuid] = nil
+	end
+	if remainingCallbackCount <= 0 then
+		frameNumber = 0
 	end
 end
 
@@ -124,7 +163,7 @@ function GT:GetCurrentVersion()
 	local version = GT:ConvertVersion(99, 99, 99)
 	--@debug@
 	if true then
-		GT.Log:Info('GT_GetCurrentVersion', version)
+		-- GT.Log:Info('GT_GetCurrentVersion', version)
 		return version
 	end
 	--@end-debug@
@@ -151,15 +190,20 @@ function GT:GetWait(interval, variance)
 end
 
 function GT:IsCurrentCharacter(characterName)
-	if string.lower(GT:GetCurrentCharacter()) == string.lower(characterName) then
+	if string.lower(GT:GetCharacterName()) == string.lower(characterName) then
 		return true
 	end
 	return false
 end
 
-function GT:GetCurrentCharacter()
+function GT:GetCharacterName()
 	local characterName = UnitName('player')
 	return characterName
+end
+
+function GT:GetCharacterClass()
+	local _, class = UnitClass('player')
+	return string.upper(class)
 end
 
 function GT:IsGuildMember(characterName)

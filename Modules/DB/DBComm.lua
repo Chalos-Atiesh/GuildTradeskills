@@ -185,10 +185,18 @@ function DBComm:GetComm(characterName)
 	return DBComm.db.char.comm.comms[characterName]
 end
 
-function DBComm:SetComm(isIncoming, command, characterName, message)
+function DBComm:SetComm(isIncoming, command, characterName, message, isPlayerInitiated, removeOnSend)
 	if command == nil then return nil end
 	if characterName == nil then return nil end
 	if message == nil then return nil end
+
+	if isPlayerInitiated == nil then
+		isPlayerInitiated = false
+	end
+
+	if removeOnSend == nil then
+		removeOnSend = false
+	end
 
 	comm = {}
 	comm.isIncoming = isIncoming
@@ -196,6 +204,11 @@ function DBComm:SetComm(isIncoming, command, characterName, message)
 	comm.characterName = characterName
 	comm.timestamp = time()
 	comm.message = message
+	comm.isPlayerInitiated = isPlayerInitiated
+	comm.removeOnSend = removeOnSend
+	comm.isSent = false
+	comm.didPrintOffline = false
+	comm.didPrintOnline = false
 
 	local comms = DBComm.db.char.comm.comms
 	comms[string.lower(characterName)] = comm
@@ -337,35 +350,35 @@ function DBComm:SetBroadcastInterval(interval)
 	DBComm.db.char.comm.broadcastInterval = interval
 end
 
-function DBComm:IsBroadcasting()
+function DBComm:GetIsBroadcasting()
 	return DBComm.db.char.comm.isBroadcasting
 end
 
-function DBComm:SetBroadcasting(isBroadcasting)
+function DBComm:SetIsBroadcasting(isBroadcasting)
 	DBComm.db.char.comm.isBroadcasting = isBroadcasting
 end
 
-function DBComm:IsReceivingBroadcasts()
+function DBComm:GetIsReceivingBroadcasts()
 	return DBComm.db.char.comm.isReceivingBroadcasts
 end
 
-function DBComm:SetReceivingBroadcasts(isReceiving)
+function DBComm:SetIsReceivingBroadcasts(isReceiving)
 	DBComm.db.char.comm.isReceivingBroadcasts = isReceiving
 end
 
-function DBComm:IsForwarding()
+function DBComm:GetIsForwarding()
 	return DBComm.db.char.comm.isForwarding
 end
 
-function DBComm:SetForwarding(isForwarding)
+function DBComm:SetIsForwarding(isForwarding)
 	DBComm.db.char.comm.isForwarding = isForwarding
 end
 
-function DBComm:IsReceivingForwards()
+function DBComm:GetIsReceivingForwards()
 	return DBComm.db.char.comm.isReceivingForwards
 end
 
-function DBComm:SetReceivingForwards(isAccepting)
+function DBComm:SetIsReceivingForwards(isAccepting)
 	DBComm.db.char.comm.isReceivingForwards = isAccepting
 end
 

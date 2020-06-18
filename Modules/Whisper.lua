@@ -13,6 +13,23 @@ local SKILLS_PER_PAGE = 5
 function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	GT.Log:Info('Whisper_OnWhisperReceived', sender, message)
 
+	local senderCharacter = GT.DBCharacter:GetCharacter(sender)
+	local isAdded = false
+	if senderCharacter ~= nil
+		and not senderCharacter.isGuildMember
+		and not senderCharacter.isBroadcasted
+	then
+		isAdded = true
+	end
+
+	-- if not GT.DBComm:GetIsAdvertising()
+	-- 	and not GT:IsGuildMember(sender)
+	-- 	and not isAdded
+	-- then
+	-- 	GT.Log:Info('Whisper_OnWhisperReceived_NotAdvertising')
+	-- 	return
+	-- end
+
 	local firstChar = string.sub(message, 1, 1)
 	if firstChar ~= GT.L['TRIGGER_CHAR'] then
 		GT.Log:Info('Whisper_OnWhisperReceived_NoTrigger', sender, message)
@@ -23,6 +40,10 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	local modMessage = string.sub(message, 2, #message)
 	local tokens = Text:Tokenize(modMessage, ' ')
 	local professionSearch, tokens = Table:RemoveToken(tokens)
+	if professionSearch == nil then
+		GT.Log:Warn('Whisper_OnWhisperReceived_NilProfessionSearch')
+		return
+	end
 	local searchTerm = table.concat(tokens, ' ')
 	if searchTerm == '' then
 		searchTerm = nil
@@ -33,7 +54,7 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		return
 	end
 
-	local characterName = GT:GetCurrentCharacter()
+	local characterName = GT:GetCharacterName()
 	local character = GT.DBCharacter:GetCharacter(characterName)
 
 	local professions = character.professions
@@ -62,7 +83,7 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 		end
 
 		if firstProfessionName == nil then
-			Whisper:SendResponse(sender, GT.L['WHISPER_NIL_PROFESSIONS'], searchTerm)
+			ChatThrottleLib:SendChatMessage('ALERT', PREFIX, GT.L['WHISPER_NIL_PROFESSIONS'], 'WHISPER', 'Common', sender)
 			return
 		end
 
@@ -190,11 +211,10 @@ end
 
 function Whisper:_SearchSkills(professionName, searchTerm)
 	GT.Log:Info('Whisper__SearchSkills', professionName, searchTerm)
-	local characterName = GT:GetCurrentCharacter()
-	local skills = GT.DB:GetProfession(characterName, professionName)
+	local skills = GT.DBCharacter:GetProfession(GT:GetCharacterName(), professionName)
 	
 	if skills == nil then
-		GT.logging.error('GT_Whisper_SendInitialResponse_NilSkills', recipient, professionName)
+		GT.Log:Error('Whisper_SendInitialResponse_NilSkills', recipient, professionName)
 		return {}
 	end
 	skills = skills.skills
@@ -207,7 +227,7 @@ function Whisper:_SearchSkills(professionName, searchTerm)
 			addSkill = false
 		end
 		if addSkill then
-			local skillLink = GT.DB:GetSkill(characterName, professionName, skillName).skillLink
+			local skillLink = GT.DBProfession:GetSkill(professionName, skillName).skillLink
 			local tempSkillName = Text:GetTextBetween(skillLink, '%[', ']')
 			returnSkills[tempSkillName] = skillLink
 		end

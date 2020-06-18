@@ -12,7 +12,6 @@ local TRIGGER_CHAR = '?'
 
 local ONLINE = 'Online'
 local OFFLINE = 'Offline'
-local NON_GUILD = 'Non Guild'
 
 local CHARACTER_NIL = 'You must pass a character name. \''
 
@@ -170,6 +169,8 @@ if L then
 
 	L['TRIGGER_CHAR'] = TRIGGER_CHAR
 
+	L['QUERY_TOOLTIP'] = 'Right click to ask about: {{skill}}'
+
 	L['WHISPER_TAG'] = WHISPER_TAG
 	L['WHISPER_FIRST_PROFESSION'] = '{{profession_name}}'
 	L['WHISPER_SECOND_PROFESSION'] = ' and {{profession_name}}'
@@ -194,13 +195,13 @@ if L then
 
 	L['LOG_TAG'] = GREEN .. 'G' .. COLOR_END .. YELLOW .. 'T' .. COLOR_END .. ': '
 
-	--@debug@
-	L['RECAP_HEADER'] = '---------- RECAP START ----------'
-	L['RECAP_FOOTER'] = '---------- RECAP END ----------'
-	L['LOG_DUMP'] = 'Log Dump'
-	L['CHARACTERS'] = 'CHARACTERS'
-	L['PROFESSIONS'] = 'PROFESSIONS'
-	--@end-debug@
+	L['DUMP_PROFESSION_NIL'] = 'You must pass a profession name: /gt dumpprofession {profession_name}'
+	L['DUMP_PROFESSION_NOT_FOUND'] = 'Whoops! Could not find profession: {{profession_name}}'
+	L['DUMP_PROFESSION'] = 'Dumping profession: {{profession_name}}'
+
+	L['DUMP_CHARACTER_NIL'] = 'You must pass a character name: /gt dumpcharacter {character_name}'
+	L['DUMP_CHARACTER_NOT_FOUND'] = 'Whoops! Could not find character: {{character_name}}'
+	L['DUMP_CHARACTER'] = 'Dumping character: {{character_name}}'
 
 	---------- LOG END ----------
 	---------- PROFESSION START ----------
@@ -219,13 +220,14 @@ if L then
 
 	L['PROFESSION_ADD_INIT'] = 'Please open the profession you want to add.'
 	L['PROFESSION_ADD_CANCEL'] = 'Canceling profession add.'
-	L['PROFESSION_ADD_SUCCESS'] = 'Successfully added profession \'{{profession_name}}\'.'
+	L['PROFESSION_ADD_PROGRESS'] = 'Fetching data from the server. This should only take a few seconds.'
+	L['PROFESSION_ADD_SUCCESS'] = 'Successfully added profession: {{profession_name}}'
 	L['PROFESSION_REMOVE_NIL_PROFESSION'] = 'Looks like you did not pass a profession name. You can remove a profession with \'/gt removeprofession {prfession_name}'
 	L['PROFESSION_REMOVE_NOT_FOUND'] = 'Could not find profession \'{{profession_name}}\' for character \'{{character_name}}\'.'
 	L['PROFESSION_REMOVE_SUCCESS'] = 'Successfully removed profession \'{{profession_name}}\' from character \'{{character_name}}\'.'
 
-	L['PROFESSION_RESET_NOT_FOUND'] = 'Could not find profession \'{{profession_name}}\'.'
-	L['PROFESSION_RESET_FINAL'] = 'Successfully reset profession \'{{profession_name}}\'.'
+	L['PROFESSION_RESET_NOT_FOUND'] = 'Could not find profession: {{profession_name}}'
+	L['PROFESSION_RESET_FINAL'] = 'Successfully reset profession: {{profession_name}}'
 
 	---------- PROFESSION END ----------
 	---------- GUI START ----------
@@ -233,7 +235,6 @@ if L then
 		---------- OPTIONS START -----------
 
 		L['CANCEL'] = 'Cancel'
-		L['STATIC_PROFESSION_ADD'] = 'Please open the profession you want to add.'
 		L['OKAY'] = 'Okay'
 
 		L['DESC_PROFESSIONS'] = 'Your currently tracked professions on this character.'
@@ -282,20 +283,24 @@ if L then
 
 		L['BROADCASTING'] = 'Broadcasting'
 
+		L['LABEL_BROADCAST_INTERVAL'] = 'Broadcast Interval'
+		L['DESC_BROADCAST_INTERVAL'] = 'How wmany minutes between broadcasts.'
+
 		L['LABEL_SEND_BROADCAST'] = 'Send Broadcasts'
 		L['DESC_SEND_BROADCAST'] = 'Broadcast your skills to everyone.'
+		L['CONFIRM_SEND_BROADCAST'] = 'You will broadcast your skills to everyone. Yes, everyone everyone. Are you sure?'
 
 		L['LABEL_RECEIVE_BROADCASTS'] = 'Accept Broadcasts'
 		L['DESC_RECEIVE_BROADCASTS'] = 'Accept broadcasts from everyone.'
+		L['CONFIRM_RECEIVE_BROADCASTS'] = 'Everyone will be able to add themselves. Yes, everyone everyone. Are you sure?'
 
 		L['LABEL_SEND_FORWARDS'] = 'Forward Broadcasts'
 		L['DESC_SEND_FORWARDS'] = 'Forward other player\'s broadcasts.'
+		L['CONFIRM_SEND_FORWARDS'] = 'This feature is in beta. You may experience issues. You will forward any broadcasted character. Are you sure?'
 
-		L['LABEL_RECEIVE_FORWARDS'] = 'Receive Forwards'
+		L['LABEL_RECEIVE_FORWARDS'] = 'Accept Forwards'
 		L['DESC_RECEIVE_FORWARDS'] = 'Accept forwarded broadcasts.'
-
-		L['LABEL_BROADCAST_INTERVAL'] = 'Broadcast Interval'
-		L['DESC_BROADCAST_INTERVAL'] = 'Ho wmany minutes between broadcasts.'
+		L['CONFIRM_RECEIVE_FORWARDS'] = 'This feature is in beta. You may experience issues. You will accept any forwarded broadcasts. Are you sure?'
 
 		---------- OPTIONS END ----------
 
@@ -316,9 +321,9 @@ if L then
     
     L['ONLINE'] = ONLINE
     L['OFFLINE'] = OFFLINE
+	L['BROADCASTED_TAG'] = '|cff7f7f7f{{guild_member}}|r'
 	L['OFFLINE_TAG'] = '|c{{class_color}}{{guild_member}}|r - |cff7f7f7f' .. OFFLINE ..'|r'
 	L['ONLINE_TAG'] = '|c{{class_color}}{{guild_member}}|r - |cff00ff00' .. ONLINE .. '|r'
-	L['NON_GUILD_TAG'] = '|cffffffff{{guild_member}}|r - |cffffffff' .. NON_GUILD .. '|r'
 
 	L['CHAT_FRAME_NIL'] = 'Looks like you didn\'t pass a chat window name. You can do so with ' .. YELLOW .. '\'/gt chatwindow {window_name}\'' .. COLOR_END ..'.'
 	L['CHAT_WINDOW_SUCCESS'] = 'Set ouput chat window to \'{{frame_name}}\'.'
@@ -435,6 +440,7 @@ if L then
 
 	L['PRINT_DELIMITER'] = ', '
 	L['ADDED_BY'] = 'Added by'
+	L['X'] = 'x'
 
 	L['REMOVE_GUILD'] = 'These characters are no longer part of the guild and have been removed: {{character_names}}'
 	L['REMOVE_GUILD_INACTIVE'] = 'These characters in the guild have been inactive for {{timeout_days}} days and have been removed: {{character_names}}'
