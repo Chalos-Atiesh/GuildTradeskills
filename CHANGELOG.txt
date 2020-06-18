@@ -1,3 +1,21 @@
+6.0.0
+	Tagging for release.
+
+5.0.5
+	Removed the result limit on the search frame.
+	Split out the databases. It was getting far too complicated.
+	We should now reliably fetch reagents on the first try.
+	We should now also fetch reagent links.
+	Fixed an error when the player received a whisper with the only contents being '?'.
+	We will not respond to whisper inquiries from non-guildmates and characters that have not been manually added when not advertising.
+	Moved broadcasting to only broadcasting timestamps and relying on whispers. The yell channel is more restrictive on rate limiting than the whisper and guild channels.
+	Throttled broadcasting to only send one message every minute.
+	It's no longer possible to add, reject, or ignore guildmates.
+	We now send deleted professions to manually added characters.
+	We now perform an addon check when manually adding a character.
+	Versions are now sent though yell and whisper channels.
+	Added a check for unsupported professions. Not many people would be interested in whether somebody can smelt something or not.
+
 5.0.4
 	Fixed an issue where the player would get disconnected if they were registered to vote but could not.
 
