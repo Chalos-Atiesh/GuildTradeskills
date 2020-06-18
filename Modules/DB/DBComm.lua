@@ -57,7 +57,7 @@ function DBComm:OnEnable()
 		----- CHARACTER COMM END -----
 
 	--@debug@
-	DBComm.db.global.comm.handshakes = {}
+	-- DBComm.db.global.comm.handshakes = {}
 
 	-- DBComm.db.char.comm.comms = {}
 
