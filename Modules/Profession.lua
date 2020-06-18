@@ -100,6 +100,7 @@ function Profession:AddProfession()
 		end
 	end
 	if not professionNameIsValid then
+		GT.Log:Error('Profession_AddProfession_InvalidProfessionName', professionName)
 		if adding then
 			StaticPopup_Hide(PROFESSION_ADD_INIT)
 			local message = string.gsub(GT.L[PROFESSION_ADD_UNSUPPORTED], '%{{profession_name}}', professionName)
@@ -117,23 +118,23 @@ function Profession:AddProfession()
 	profession = GT.DBProfession:AddProfession(professionName)
 
 	if adding then
-		-- GT.Log:Info('Profession_AddProfession', characterName, professionName)
+		local characterName = GT:GetCharacterName()
 		if not progressShown then
 			StaticPopupDialogs[PROFESSION_ADD_PROGRESS] = POPUP_PROFESSION_ADD_PROGRESS
 			GT.Log:PlayerInfo(GT.L[PROFESSION_ADD_PROGRESS])
 			StaticPopup_Show(PROFESSION_ADD_PROGRESS)
 			progressShown = true
 		end
-		profession = GT.DBCharacter:AddProfession(GT:GetCharacterName(), professionName)
+		GT.Log:Info('Profession_AddProfession', characterName, professionName)
+		profession = GT.DBCharacter:AddProfession(characterName, professionName)
 	end
 
 	GT:FrameDelay(FRAME_DELAY, Profession['UpdateProfession'])
-	-- GT:ScheduleTimer(Profession['UpdateProfession'], 1)
 end
 
 function Profession:UpdateProfession()
 	if profession == nil then return end
-	-- GT.Log:Info('Profession_UpdateProfession' , profession.professionName)
+	GT.Log:Info('Profession_UpdateProfession' , profession.professionName)
 
 	local GetNumTradeSkills = GetNumTradeSkills
 	local GetTradeSkillInfo = GetTradeSkillInfo
@@ -155,7 +156,8 @@ function Profession:UpdateProfession()
 		end
 	end
 
-	local trackingProfession = GT.DBCharacter:ProfessionExists(GT:GetCharacterName(), profession.professionName)
+	local characterName = GT:GetCharacterName()
+	local trackingProfession = GT.DBCharacter:ProfessionExists(characterName, profession.professionName)
 
 	local _, kind = GetTradeSkillInfo(1)
 	if kind == nil or (kind ~= 'header' and kind ~= 'optimal') then
@@ -173,7 +175,7 @@ function Profession:UpdateProfession()
 
 			if adding or trackingProfession then
 				if not GT.DBCharacter:SkillExists(characterName, profession.professionName, skillName) then
-					-- GT.Log:Info('Profession_UpdateProfession_AddSkill', characterName, profession.professionName, skillName, skillLink)
+					GT.Log:Info('Profession_UpdateProfession_AddSkill', characterName, profession.professionName, skillName, skillLink)
 					skill = GT.DBCharacter:AddSkill(characterName, profession.professionName, skillName, skillLink)
 					profession.lastUpdate = time()
 					updated = true
