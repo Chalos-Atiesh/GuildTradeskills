@@ -11,6 +11,7 @@
 Libs\Libs.xml
 
 Locale\localization.en.lua
+Locale\localization.de.lua
 
 Core.lua
 
