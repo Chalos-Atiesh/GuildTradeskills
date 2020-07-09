@@ -10,10 +10,10 @@ local LONG_TAG = GREEN .. 'Guild' .. COLOR_END .. YELLOW .. 'Tradeskills' .. COL
 local WHISPER_TAG = 'GT: '
 local TRIGGER_CHAR = '?'
 
-local ONLINE = 'Online'
-local OFFLINE = 'Offline'
+local ONLINE = 'En ligne'
+local OFFLINE = 'Hors ligne'
 
-local CHARACTER_NIL = 'Vous devez ajouter le nom d'un personnage. \''
+local CHARACTER_NIL = 'Vous devez ajouter le nom d\'un personnage. \''
 
 local ALCHEMY = 'Alchimie'
 local BLACKSMITHING = 'Forgeron'
@@ -49,7 +49,7 @@ if L then
 	---------- CHARACTER END ----------
 	---------- COMMAND START ----------
 
-	L['UNKNOWN_COMMAND'] = 'Désolé ! Je n\'ai pas trouvé la commande \'{{command}}\'. Tapez \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' pour obtenir une liste des commandes disponibles.'
+	L['UNKNOWN_COMMAND'] = 'Désolé, je n\'ai pas trouvé la commande \'{{command}}\'. Tapez \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' pour obtenir une liste des commandes disponibles.'
 	--@debug@
 	L['FORCE'] = 'force'
 	--@end-debug@
@@ -95,12 +95,12 @@ if L then
 				add = {
 					order = 5,
 					methodName = 'SendRequest',
-					help = YELLOW .. '/gt add {character_name}' .. COLOR_END .. ': Demande d\'ajout d'un personnage.'
+					help = YELLOW .. '/gt add {character_name}' .. COLOR_END .. ': Demande d\'ajout d\'un personnage.'
 				},
 				reject = {
 					order = 6,
 					methodName = 'SendReject',
-					help = YELLOW .. '/gt reject {character_name}' .. COLOR_END .. ': Rejette la demande d\'ajout de quelqu'un. Il peut refaire une demande.'
+					help = YELLOW .. '/gt reject {character_name}' .. COLOR_END .. ': Rejette la demande d\'ajout de quelqu\'un. Il peut refaire une demande.'
 				},
 				ignore = {
 					order = 7,
@@ -135,7 +135,7 @@ if L then
 						receiveforwards = {
 							order = 3,
 							methodName = 'ToggleForwards',
-							help = YELLOW .. '/gt broadcast receiveforwards' .. COLOR_END .. ': Active ou désactive si vous acceptez les anonnces transmises par d'autres. ' .. YELLOW .. 'Soyez prudent, peut impacter vos performances.' .. COLOR_END
+							help = YELLOW .. '/gt broadcast receiveforwards' .. COLOR_END .. ': Active ou désactive si vous acceptez les anonnces transmises par d\'autres. ' .. YELLOW .. 'Soyez prudent, peut impacter vos performances.' .. COLOR_END
 						}
 
 					}
@@ -174,33 +174,33 @@ if L then
 	L['WHISPER_TAG'] = WHISPER_TAG
 	L['WHISPER_FIRST_PROFESSION'] = '{{profession_name}}'
 	L['WHISPER_SECOND_PROFESSION'] = ' et {{profession_name}}'
-	L['WHISPER_PROFESSION_NOT_FOUND'] = WHISPER_TAG .. 'Whou pinaise! On dirait que je n\'ai pas \'{{profession_search}}\'. J\'ai: {{first_profession}}{{second_profession}}.'
-	L['WHISPER_NIL_PROFESSIONS'] = WHISPER_TAG .. 'Je n\'ai pas encore ajouter de profession. Redemande plus tard !'
+	L['WHISPER_PROFESSION_NOT_FOUND'] = WHISPER_TAG .. 'Désolé, on dirait que je n\'ai pas \'{{profession_search}}\'. J\'ai: {{first_profession}}{{second_profession}}.'
+	L['WHISPER_NIL_PROFESSIONS'] = WHISPER_TAG .. 'Je n\'ai pas encore ajouter de profession. Redemandez plus tard !'
 
-	L['WHISPER_INVALID_PAGE'] = WHISPER_TAG .. 'Houlà! La page {{page}} n'est pas valide. Je n\'ai que {{max_pages}} pages.'
+	L['WHISPER_INVALID_PAGE'] = WHISPER_TAG .. 'Désolé, la page {{page}} n\'est pas valide. Je n\'ai que {{max_pages}} pages.'
 	L['WHISPER_HEADER'] = WHISPER_TAG .. 'Page {{current_page}} sur {{total_pages}}. J\'ai {{total_skills}} talents.'
 	L['WHISPER_ITEM'] = WHISPER_TAG .. '{{number}}. {{skill_link}}'
-	L['WHISPER_FOOTER'] = WHISPER_TAG .. 'Tu peux avoir la page suivante en répondant \'' .. TRIGGER_CHAR .. '{{profession_name}} {{next_page}}\' ou sauter à la page en répondant \'' .. TRIGGER_CHAR .. '{{profession_name}} {page_number}\'.'
+	L['WHISPER_FOOTER'] = WHISPER_TAG .. 'Vous pouvez avoir la page suivante en répondant \'' .. TRIGGER_CHAR .. '{{profession_name}} {{next_page}}\' ou sauter à la page en répondant \'' .. TRIGGER_CHAR .. '{{profession_name}} {page_number}\'.'
 	L['WHISPER_FOOTER_LAST_PAGE'] = WHISPER_TAG .. 'Vous pouvez aller à la page en répondant \'' .. TRIGGER_CHAR .. '{{profession_name}} {page_number}\'.'
 
-    L['WHISPER_REQUEST'] = WHISPER_TAG .. 'Hey {{character_name}}! Tu peux me crafter {{item_link}} ?'
-    L['WHISPER_SELECT_REQUIRED'] = 'Pas de talent sélectionné. Tu dois d\'abord sélectionner un talent.'
+    L['WHISPER_REQUEST'] = WHISPER_TAG .. 'Salut {{character_name}}! Pouvez-vous me crafter {{item_link}} ?'
+    L['WHISPER_SELECT_REQUIRED'] = 'Pas de talent sélectionné. Vous devez d\'abord sélectionner un talent.'
     L['WHISPER_NO_CHARACTER_FOUND'] = 'Le personnage \'{{character_name}}\' n\'a pas l\'air d\'être connecté.'
 
-    L['WHISPER_INCOMING_REQUESTS'] = 'Tu as reçu des requêtes de: {{character_names}}'
-    L['WHISPER_NO_INCOMING_REQUESTS'] = 'Tu n\'as pas de requêtes.'
+    L['WHISPER_INCOMING_REQUESTS'] = 'Vous avez reçu des requêtes de: {{character_names}}'
+    L['WHISPER_NO_INCOMING_REQUESTS'] = 'Vous n\'avez pas de requêtes.'
 
 	---------- WHISPER END ----------
 	---------- LOG START ----------
 
 	L['LOG_TAG'] = GREEN .. 'G' .. COLOR_END .. YELLOW .. 'T' .. COLOR_END .. ': '
 
-	L['DUMP_PROFESSION_NIL'] = 'Tu dois passer un métier: /gt dumpprofession {profession_name}'
-	L['DUMP_PROFESSION_NOT_FOUND'] = 'Whoops! Je ne connais pas ce métier: {{profession_name}}'
+	L['DUMP_PROFESSION_NIL'] = 'Vous devez passer un métier: /gt dumpprofession {profession_name}'
+	L['DUMP_PROFESSION_NOT_FOUND'] = 'Désolé, je ne connais pas ce métier: {{profession_name}}'
 	L['DUMP_PROFESSION'] = 'Envoi du métier: {{profession_name}}'
 
-	L['DUMP_CHARACTER_NIL'] = 'Tu dois passer le nom d'un personnage: /gt dumpcharacter {character_name}'
-	L['DUMP_CHARACTER_NOT_FOUND'] = 'Whoops! Je n`\'ai pas trouvé le personnage: {{character_name}}'
+	L['DUMP_CHARACTER_NIL'] = 'Vous devez passer le nom d\'un personnage: /gt dumpcharacter {character_name}'
+	L['DUMP_CHARACTER_NOT_FOUND'] = 'Désolé, je n`\'ai pas trouvé le personnage: {{character_name}}'
 	L['DUMP_CHARACTER'] = 'Envoi du personnage: {{character_name}}'
 
 	---------- LOG END ----------
@@ -310,14 +310,14 @@ if L then
 
 	L['SEARCH_SKILLS'] = 'Chercher des talents:'
     L['SEARCH_REAGENTS'] = 'Chercher des réactifs:'
-    L['SEARCH_CHARACTERS'] = 'Chercher des perosnnages:'
+    L['SEARCH_CHARACTERS'] = 'Chercher des personnages:'
     L['LABEL_SKILLS'] = 'Talents'
     L['LABEL_PROFESSIONS'] = 'Métiers'
     L['LABEL_REAGENTS'] = 'Réactifs'
     L['LABEL_CHARACTERS'] = 'Personnages'
 
     L['BUTTON_FILTERS_RESET'] = 'Effacer les filtres'
-    
+
     L['ONLINE'] = ONLINE
     L['OFFLINE'] = OFFLINE
 	L['BROADCASTED_TAG'] = '|cff7f7f7f{{guild_member}}|r'
@@ -326,7 +326,7 @@ if L then
 
 	L['CHAT_FRAME_NIL'] = 'Il manque le nom de la fenêtre de chat. Entrer: ' .. YELLOW .. '\'/gt chatwindow {window_name}\'' .. COLOR_END ..'.'
 	L['CHAT_WINDOW_SUCCESS'] = 'Fenêtre de chat: \'{{frame_name}}\'.'
-	L['CHAT_WINDOW_INVALID'] = 'Désolé ! Je ne trouve aucune fenêtre de chat: \'{{frame_name}}\'.'
+	L['CHAT_WINDOW_INVALID'] = 'Désolé, je ne trouve aucune fenêtre de chat: \'{{frame_name}}\'.'
 
 	L['UPDATE_AVAILABLE'] = LONG_TAG .. ' n\'est plus à jour. Votre version est {{local_version}} alors que la version {{remote_version}} est disponible.'
 
@@ -341,22 +341,19 @@ if L then
 	L['ADVERTISING_INVALID_INTERVAL'] = '\'{{interval}}\' est un intervalle de temps invalide. Il doit être en secondes.'
 	L['ADVERTISE_MINIMUM_INTERVAL'] = 'Un intervalle de {{interval}} secondes est trop court. Je mets le minimum: {{minimum_interval}} secondes.'
 	L['ADVERTISE_SET_INTERVAL'] = 'Réglage de l\'intervalle d\'annonce à {{interval}} seconded.'
-	L['ADVERTISE_NO_PROFESSIONS'] = 'Oh oh! On dirait qu\'il n'y aucune profession ajoutée dans l'addon. Vous pouvez les ajouter avec: \'/gt addprofession\'.' 
+	L['ADVERTISE_NO_PROFESSIONS'] = 'Oh oh! On dirait qu\'il n\'y aucune profession ajoutée dans l\'addon. Vous pouvez les ajouter avec: \'/gt addprofession\'.' 
 
 	L['ADVERTISE_FIRST_PROFESSION'] = '{{skill_count}} {{profession_name}}'
 	L['ADVERTISE_SECOND_PROFESSION'] = ' et {{skill_count}} {{profession_name}}'
 	L['ADVERTISE_FIRST_WHISPER'] = '\'' .. TRIGGER_CHAR .. '{{profession_name}}\' ou \'' .. TRIGGER_CHAR .. '{{profession_name}} {search}\''
 	L['ADVERTISE_SECOND_WHISPER'] = ' ou \'' .. TRIGGER_CHAR .. '{{profession_name}}\' ou \'' .. TRIGGER_CHAR .. '{{profession_name}} {search}\'' 
-	L['ADVERTISE_ADVERTISEMENT'] = WHISPER_TAG .. 'J'offre mes services de craft! Je suis {{first_profession}}{{second_profession}}. Whispez moi {{first_whisper}}{{second_whisper}}.'
-
+	L['ADVERTISE_ADVERTISEMENT'] = WHISPER_TAG .. 'J\'offre mes services de craft ! Je suis {{first_profession}}{{second_profession}}. Whispez moi {{first_whisper}}{{second_whisper}}.'
 	---------- ADVERTISE END ----------
 	---------- BROADCAST START ----------
-
 	L['SEND'] = 'send'
 	L['RECEIVE'] = 'receive'
 	L['SEND_FORWARDS'] = 'sendforwards'
 	L['RECEIVE_FORWARDS'] = 'receiveforwards'
-
 	L['BROADCAST_UNKNOWN'] = 'Désolé, je ne connais pas le type de diffusion \'{{broadcast_type}}\'.'
 
 	L['BROADCAST_SEND_ON'] = 'Vous diffusez maintenant à tout le monde.'
@@ -369,12 +366,11 @@ if L then
 	L['BROADCAST_SEND_FORWARD_OFF'] = 'Vous ne transférez plus les diffusions.'
 
 	L['BROADCAST_FORWARDING_ON'] = 'Vous envoyez et acceptez maintenant toutes les diffusions trasmises.'
-	L['BROADCAST_FORWARDING_OFF'] = 'You n\'acceptez et n'\envoyez plus les diffusions transmises.'
-
+	L['BROADCAST_FORWARDING_OFF'] = 'Vous n\'acceptez et n\'envoyez plus les diffusions transmises.'
 	L['BROADCAST_FORWARD_UNKNOWN'] = 'Désolé, je ne connais pas le type de diffusion: \'{{broadcast_type}}\'.'
 
 	L['BROADCAST_ALL_ON'] = 'Vous envoyez et acceptez maintenant toutes les diffusions.'
-	L['BROADCAST_ALL_OFF'] = 'You n'\acceptez et n\'envoyez plus aucune diffusion.'
+	L['BROADCAST_ALL_OFF'] = 'Vous n\'acceptez plus et n\'envoyez plus aucune diffusion.'
 
 	---------- BROADCAST END ----------
 	---------- NON-GUILD REQUEST START ----------
@@ -400,9 +396,8 @@ if L then
 	L['REJECT_NOT_SELF'] = 'Vous ne pouvez pas rejeter votre propre demande.'
 	L['REJECT_NOT_GUILD'] = 'Désolé, {{character_name}} est membre de votre guilde, vous ne pouvez pas le rejeter.'
 	L['REJECT_ALREADY_IGNORED'] = 'Vous avez déjà ignoré {{character_name}}. Vous ne pouvez pas le réignorer.'
-	L['REJECT_REPEAT'] = 'Vous avez déjà envoyé un rejet à {{character_name}}. Vous ne pouvez pas en renvoyer un autre pour l'instant.'
+	L['REJECT_REPEAT'] = 'Vous avez déjà envoyé un rejet à {{character_name}}. Vous ne pouvez pas en renvoyer un autre pour l\'instant.'
 	L['REJECT_NIL'] = '{{character_name}} ne vous a pas envoyé une demande de rejet.'
-
 	L['IGNORE_CHARACTER_NIL'] = CHARACTER_NIL .. YELLOW .. '/gt ignore {character_name}' .. COLOR_END .. '\'.'
 	L['IGNORE_NOT_SELF'] = 'Vous ne pouvez pas vous ignorer.'
 	L['IGNORE_NOT_GUILD'] = '{{character_name}} est membre de votre giulde, vous ne pouvez pas l\'ignorer.'
@@ -412,7 +407,7 @@ if L then
 	L['IGNORE_REMOVE'] = '{{character_name}} a été retiré de a liste des personnages ignorés. Vous pouvez de nouveau recevoir des demandes de sa part.'
 	L['IGNORE_ALREADY_IGNORED'] = 'Vous avez déjà ignoré {{character_name}}. Vous ne pouvez pas l\'ignorer une deuxième fois.'
 
-	L['CHARACTER_NOT_FOUND'] = 'Oups! \'{{character_name}}\' n\'a pas l\'air d\'exister.'
+	L['CHARACTER_NOT_FOUND'] = 'Désolé, \'{{character_name}}\' n\'a pas l\'air d\'exister.'
 
 	L['INCOMING_REQUEST'] = '{{character_name}} voudrait vous ajouter en ' .. LONG_TAG .. '. Entrer \'' .. YELLOW .. '/gt help' .. COLOR_END .. '\' pour voir quoi faire.'
 	L['INCOMING_CONFIRM'] = '{{character_name}} a accepté votre demande ! Vous devriez voir ses capacités dans pas longtemps.'
@@ -434,7 +429,7 @@ if L then
 	L['OUTGOING_REQUEST_OFFLINE'] = '{{character_name}} n\'est pas en ligne. La demande sera renvoyée quand vous serez tous les deux en ligne.'
 	L['OUTGOING_CONFIRM_OFFLINE'] = '{{character_name}} n\'est pas en ligne. La confirmation sera faite quand vous serez tous les deux en ligne.'
 	L['OUTGOING_REJECT_OFFLINE'] = '{{character_name}} n\'est pas en ligne. Le rejet sera renvoyé quand vous serez tous les deux en ligne.'
-	L['OUTGOING_IGNORE_OFFLINE'] = '{{character_name}} n\'est pas en ligne. L'envoie de l'ignore sera fait quand vous serez tous les deux en ligne et il ne pourra plus vous faire de demandes.'
+	L['OUTGOING_IGNORE_OFFLINE'] = '{{character_name}} n\'est pas en ligne. L\'envoie de l\'ignore sera fait quand vous serez tous les deux en ligne et il ne pourra plus vous faire de demandes.'
 
 	---------- NON-GUILD REQUEST END ----------
 	---------- MISC START ----------
@@ -445,7 +440,7 @@ if L then
 
 	L['REMOVE_GUILD'] = 'Ces personnages ne font plus partie de votre guilde et ont été supprimés: {{character_names}}'
 	L['REMOVE_GUILD_INACTIVE'] = 'Ces membres de guilde sont inactifs depuis {{timeout_days}} jours et ont été supprimés: {{character_names}}'
-	
+
 
 	L['REMOVE_WHISPER_INACTIVE'] = 'Ces personnages que vous avez ajoutés manuellement sont inactifs depuis {{timeout_days}} jours et ont été supprimé: {{character_names}}'
 
