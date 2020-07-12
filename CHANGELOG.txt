@@ -1,3 +1,10 @@
+6.0.2
+	Fixed an issue that prevented the user from toggling receiving broadcasts off.
+	Fixed an issue that prevented the user from removing a tracked profession.
+	Fixed an issue that prevented the POST from being accepted when a reagent link was nil. Since they are not always populated we should not reject the post.
+	Added German localization.
+	Added French localization.
+
 6.0.1
 	Fixing an issue that prevented the user from adding a profession.
 
