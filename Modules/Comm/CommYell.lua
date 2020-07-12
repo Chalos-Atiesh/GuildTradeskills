@@ -196,7 +196,7 @@ function CommYell:ToggleBroadcast(tokens)
 		GT.Log:PlayerInfo(GT.L['BROADCAST_RECEIVE_OFF'])
 		return
 	elseif broadcastType == GT.L['RECEIVE'] then
-		GT.DDBCommB:SetReceivingBroadcasts(true)
+		GT.DBComm:SetIsReceivingBroadcasts(true)
 		GT.Log:PlayerInfo(GT.L['BROADCAST_RECEIVE_ON'])
 		return
 	end
