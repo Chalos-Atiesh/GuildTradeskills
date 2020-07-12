@@ -1,6 +1,8 @@
-## Interface: 11304
+## Interface: 11305
 ## Title: |cff3ce13fGuild|r|cfffcba03Tradeskills|r
 ## Notes: Allows guild members to search each other's tradeskills.
+## Notes-deDE: Ermöglicht Gildenmitgliedern, die Fertigkeiten des anderen zu durchsuchen.
+## Notes-frFR: Permet aux membres de la guilde de rechercher mutuellement leurs compétences.
 ## Author: Chalos
 ## Version: @project-version@
 ## X-Curse-Project_ID: 381775
@@ -12,6 +14,7 @@ Libs\Libs.xml
 
 Locale\localization.en.lua
 Locale\localization.de.lua
+Locale\localization.fr.lua
 
 Core.lua
 
