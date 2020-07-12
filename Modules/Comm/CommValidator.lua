@@ -262,13 +262,6 @@ function CommValidator:IsPostValid(message)
 				return false
 			end
 
-			if reagentLink == nil
-				or not string.find(reagentLink, ']')
-			then
-				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentLink', Text:ToString(reagentLink))
-				return false
-			end
-
 			if thisReagentCount == nil
 				or string.find(reagentName, ']')
 				or tonumber(thisReagentCount) == nil then

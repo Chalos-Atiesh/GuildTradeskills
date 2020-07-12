@@ -258,8 +258,12 @@ function Comm:UpdateProfession(message)
 
 		for i = 1, uniqueReagentCount do
 			local reagentName, tokens = Table:RemoveToken(tokens)
-			local reagentLink, tokens= Table:RemoveToken(tokens)
+			local reagentLink, tokens = Table:RemoveToken(tokens)
 			local thisReagentCount, tokens = Table:RemoveToken(tokens)
+
+			if reagentLink == 'nil' then
+				reagentLink = nil
+			end
 
 			GT.DBProfession:AddReagent(professionName, skillName, reagentName, reagentLink, thisReagentCount)
 		end
