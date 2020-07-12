@@ -158,6 +158,7 @@ function DBCharacter:DeleteProfession(characterName, professionName)
 	if not DBCharacter:ProfessionExists(characterName, professionName) then return false end
 	professionName = string.lower(professionName)
 
+	local character = DBCharacter:GetCharacter(characterName)
 	local professions = DBCharacter:GetProfessions(characterName)
 	for tempProfessionName, _ in pairs(professions) do
 		if string.lower(tempProfessionName) == professionName then

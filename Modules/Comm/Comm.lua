@@ -286,6 +286,7 @@ function Comm:SendDeletions(distribution, recipient)
 	end
 
 	if sendDelete then
+		GT.Log:Info('Comm_SendDeletions_Send', message)
 		Comm:SendCommMessage(Comm.DELETE, message, distribution, recipient, Comm.NORMAL)
 	end
 end
