@@ -251,7 +251,7 @@ function DBProfession:_ValidateData()
 	local professions = DBProfession.db.global.professions
 	for professionName, profession in pairs(professions) do
 
-		if Text:IsNumber(professionName) or Text:IsLink(professionName) then
+		if GTText:IsNumber(professionName) or GTText:IsLink(professionName) then
 			GT.Log:Error('Invalid professionName', professionName)
 			valid = false
 		end
@@ -260,12 +260,12 @@ function DBProfession:_ValidateData()
 			profession.professionName = professionName
 		end
 		local lastUpdate = profession.lastUpdate
-		if lastUpdate == nil or not Text:IsNumber(lastUpdate) then
+		if lastUpdate == nil or not GTText:IsNumber(lastUpdate) then
 			lastUpdate = time()
 		end
 
 		local tempProfessionName = profession.professionName
-		if Text:IsNumber(tempProfessionName) or Text:IsLink(tempProfessionName) then
+		if GTText:IsNumber(tempProfessionName) or GTText:IsLink(tempProfessionName) then
 			GT.Log:Error('Invalid profession.professionName', tempProfessionName)
 			valid = false
 		end
@@ -273,7 +273,7 @@ function DBProfession:_ValidateData()
 		local skills = profession.skills
 		for skillName, skill in pairs(skills) do
 
-			if Text:IsNumber(skillName) or Text:IsLink(skillName) then
+			if GTText:IsNumber(skillName) or GTText:IsLink(skillName) then
 				GT.Log:Error('Invalid skillName', skillName)
 				valid = false
 			end
@@ -283,19 +283,19 @@ function DBProfession:_ValidateData()
 			end
 
 			local tempSkillName = skill.skillName
-			if Text:IsNumber(tempSkillName) or Text:IsLink(tempSkillName) then
+			if GTText:IsNumber(tempSkillName) or GTText:IsLink(tempSkillName) then
 				GT.Log:Error('Invalid skill.skillName', tempSkillName)
 				valid = false
 			end
 
-			if skill.skillLink == nil or Text:IsNumber(skill.skillLink) or not Text:IsLink(skill.skillLink) then
-				GT.Log:Error('Invalid skill.skillLink', Text:ToString(skill.skillLink))
+			if skill.skillLink == nil or GTText:IsNumber(skill.skillLink) or not GTText:IsLink(skill.skillLink) then
+				GT.Log:Error('Invalid skill.skillLink', GTText:ToString(skill.skillLink))
 				valid = false
 			end
 
 			local reagents = skill.reagents
 			for reagentName, reagent in pairs(reagents) do
-				if Text:IsNumber(reagentName) or Text:IsLink(reagentName) then
+				if GTText:IsNumber(reagentName) or GTText:IsLink(reagentName) then
 					GT.Log:Error('Invalid reagentName', reagentName)
 					valid = false
 				end
@@ -305,7 +305,7 @@ function DBProfession:_ValidateData()
 				end
 
 				local tempReagentName = reagent.reagentName
-				if Text:IsNumber(tempReagentName) or Text:IsLink(tempReagentName) then
+				if GTText:IsNumber(tempReagentName) or GTText:IsLink(tempReagentName) then
 					GT.Log:Error('Invalid reagent.reagentName', reagentName)
 					valid = false
 				end
@@ -319,7 +319,7 @@ function DBProfession:_ValidateData()
 				end
 
 				local reagentCount = reagent.reagentCount
-				if not Text:IsNumber(reagentCount) or reagentCount <= 0 then
+				if not GTText:IsNumber(reagentCount) or reagentCount <= 0 then
 					GT.Log:Error('Invalid reagentCount', reagentCount)
 					valid = false
 				end

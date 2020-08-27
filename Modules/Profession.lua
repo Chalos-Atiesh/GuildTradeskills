@@ -161,7 +161,7 @@ function Profession:UpdateProfession()
 
 	local _, kind = GetTradeSkillInfo(1)
 	if kind == nil or (kind ~= 'header' and kind ~= 'optimal') then
-		-- GT.Log:Warn('Profession_UpdateProfession_UnexpectedHeader', Text:ToString(kind))
+		-- GT.Log:Warn('Profession_UpdateProfession_UnexpectedHeader', GTText:ToString(kind))
 		return
 	end
 

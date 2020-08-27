@@ -20,7 +20,7 @@ function DBComm:OnEnable()
 		end
 
 		if DBComm.db.global.comm.uuid == nil then
-			DBComm.db.global.comm.uuid = Text:UUID()
+			DBComm.db.global.comm.uuid = GTText:UUID()
 		end
 
 		if DBComm.db.global.comm.handshakes == nil then
@@ -441,13 +441,13 @@ function DBComm:_ValidateHandshakeData()
 
 	local handshakes = DBComm.db.global.comm.handshakes
 	for uuid, characterNames in pairs(handshakes) do
-		if not Text:IsUUIDValid(uuid) then
+		if not GTText:IsUUIDValid(uuid) then
 			GT.Log:Error('DBComm__ValidateHandshakeData_InvalidUUID', uuid)
 			valid = false
 		end
 
 		for _, characterName in pairs(characterNames) do
-			if Text:IsNumber(characterName) or Text:IsLink(characterName) then
+			if GTText:IsNumber(characterName) or GTText:IsLink(characterName) then
 				GT.Log:Error('DBComm__ValidateHandshakeData_InvalidCharacterName', characterName)
 				valid = false
 			end
@@ -460,7 +460,7 @@ function DBComm:_ValidateCommData()
 	local valid = true
 	
 	for characterName, comm in pairs(DBComm.db.char.comm.comms) do
-		if Text:IsNumber(characterName) or Text:IsLink(characterName) then
+		if GTText:IsNumber(characterName) or GTText:IsLink(characterName) then
 			GT.Log:Error('DBComm__ValidateCommQueues_InvalidCharacterName', characterName)
 			valid = false
 		end
@@ -477,17 +477,17 @@ function DBComm:_ValidateCommData()
 			valid = false
 		end
 
-		if Text:IsNumber(comm.command) or Text:IsLink(comm.command) then
+		if GTText:IsNumber(comm.command) or GTText:IsLink(comm.command) then
 			GT.Log:Error('DBComm__ValidateCommQueues_InvalidComm_Command', comm.command)
 			valid = false
 		end
 
-		if Text:IsNumber(comm.characterName) or Text:IsLink(comm.characterName) then
+		if GTText:IsNumber(comm.characterName) or GTText:IsLink(comm.characterName) then
 			GT.Log:Error('DBComm__ValidateCommQueues_InvalidComm_CharacterName', comm.characterName)
 			valid = false
 		end
 
-		if not Text:IsNumber(comm.timestamp) then
+		if not GTText:IsNumber(comm.timestamp) then
 			GT.Log:Error('DBComm__ValidateCommQueues_InvalidComm_Timestamp', comm.timestamp)
 			valid = false
 		end
@@ -500,13 +500,13 @@ function DBComm:_ValidateIgnoreData()
 
 	local assignedList = DBComm.db.global.comm.outgoingIgnores
 	for uuid, characterNames in pairs(assignedList) do
-		if not Text:IsUUIDValid(uuid) then
+		if not GTText:IsUUIDValid(uuid) then
 			GT.Log:Error('DBComm__ValidateIgnoreData_InvalidUUID', uuid)
 			valid = false
 		end
 
 		for _, characterName in pairs(characterNames) do
-			if Text:IsNumber(characterNames) or Text:IsLink(characterName) then
+			if GTText:IsNumber(characterNames) or GTText:IsLink(characterName) then
 				GT.Log:Error('DBComm__ValidateIgnoreData_InvalidUUID_CharacterName', uuid, characterName)
 				valid = false
 			end
@@ -515,7 +515,7 @@ function DBComm:_ValidateIgnoreData()
 
 	local unassignedList = DBComm.db.global.comm.outgoingUnassignedIgnores
 	for _, characterName in pairs(unassignedList) do
-		if Text:IsNumber(characterName) or Text:IsLink(characterName) then
+		if GTText:IsNumber(characterName) or GTText:IsLink(characterName) then
 			GT.Log:Error('DBComm__ValidateIgnoreData_InvalidCharacterName', characterName)
 			valid = false
 		end

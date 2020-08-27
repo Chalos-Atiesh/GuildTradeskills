@@ -4,7 +4,7 @@ local minorVersion = 1
 local Friends, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
 
 local CallbackHandler = LibStub('CallbackHandler-1.0')
-local Text = assert(Text, "Friends-1.0 requires the Text Friendsrary.")
+local GTText = assert(GTText, "Friends-1.0 requires the GTText library.")
 local Table = assert(Table, 'Friends-1.0 requires the Table library.')
 
 Friends.callbacks = Friends.callbacks or CallbackHandler:New(Friends)
@@ -26,7 +26,7 @@ function Friends:AddFriend(characterName, callback)
 	characterName = string.lower(characterName)
 	Friends:PurgeFriendList()
 
-	local uuid = Text:UUID()
+	local uuid = GTText:UUID()
 	if callback ~= nil then
 		pendingFriendsQueue = Table:InsertField(pendingFriendsQueue, characterName)
 		local queue = pendingFriendsQueue[characterName]
@@ -36,7 +36,7 @@ function Friends:AddFriend(characterName, callback)
 
 	if not Table:Contains(friendsAddedQueue, characterName) then
 		C_FriendList.AddFriend(characterName, NOTE)
-		uuid = Text:UUID()
+		uuid = GTText:UUID()
 		friendsAddedQueue = Table:InsertField(friendsAddedQueue, characterName)
 		local queue = friendsAddedQueue[characterName]
 		friendsAddedQueue[characterName] = Table:Insert(queue, uuid, callback)
@@ -79,7 +79,7 @@ end
 
 function Friends:IsOnline(characterName, callback)
 	characterName = string.lower(characterName)
-	local uuid = Text:UUID()
+	local uuid = GTText:UUID()
 	isOnlineQueue = Table:InsertField(isOnlineQueue, characterName)
 	isOnlineQueue[characterName] = Table:Insert(isOnlineQueue[characterName], uuid, callback)
 	Friends:RegisterCallback(uuid, callback)

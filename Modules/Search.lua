@@ -112,7 +112,7 @@ function Search:PopulateSkills()
 		GT.Log:Info('Search_PopulateSkills_Profession', professionName)
 		local skills = GT.DBProfession:GetSkills(professionName)
 		for skillName, skill in pairs(skills) do
-			local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
+			local tempSkillName = GTText:GetTextBetween(skill.skillLink, '%[', ']')
 			Search.skills.skills[tempSkillName] = skill
 			Search.skills.radios[tempSkillName] = {}
 
@@ -248,7 +248,7 @@ function Search:PopulateReagents()
 		local skills = GT.DBProfession:GetSkills(professionName)
 		for skillName, skill in pairs(skills) do
 			-- GT.Log:Info('Search_PopulateReagents_Skill', skillName)
-			local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
+			local tempSkillName = GTText:GetTextBetween(skill.skillLink, '%[', ']')
 			local reagents = GT.DBProfession:GetReagents(professionName, skillName)
 
 			for reagentName, reagent in pairs(reagents) do
@@ -364,7 +364,7 @@ function Search:PopulateReagents()
 				label = reagentName
 			end
 			if Search.state.clicks[NAME_SKILLS] ~= nil then
-				label = Text:Concat('', reagent.reagentCount, GT.L['X'], label)
+				label = GTText:Concat('', reagent.reagentCount, GT.L['X'], label)
 			end
 			radio.label = label
 
@@ -478,7 +478,7 @@ function Search:PopulateCharacters()
 		for professionName, _ in pairs(professions) do
 			local skills = GT.DBProfession:GetSkills(professionName)
 			for skillName, skill in pairs(skills) do
-				local tempSkillName = Text:GetTextBetween(skill.skillLink, '%[', ']')
+				local tempSkillName = GTText:GetTextBetween(skill.skillLink, '%[', ']')
 				local skillRadio = Search.skills.radios[tempSkillName]
 				if skillRadio ~= nil and skillRadio.shown and GT.DBCharacter:SkillExists(characterName, professionName, skillName) then
 					hasAnySkill = true
@@ -554,7 +554,7 @@ end
 	function Search:OnSkillClick(widget, event, value)
 		local skill = widget.skill
 		local skillName = skill.skillName
-		local skillLinkName = Text:GetTextBetween(skill.skillLink, '%[', ']')
+		local skillLinkName = GTText:GetTextBetween(skill.skillLink, '%[', ']')
 		GT.Log:Info('Search_OnSkillClick', skillName, value)
 
 		if value == true then
@@ -710,8 +710,8 @@ end
 
 function Search:OnSkillSearch(widget, event, value)
 	if event == '' then event = nil end
-	event = Text:Lower(event)
-	GT.Log:Info('Search_OnSkillSearch', Text:ToString(event))
+	event = GTText:Lower(event)
+	GT.Log:Info('Search_OnSkillSearch', GTText:ToString(event))
 	Search.state.text[NAME_SKILLS] = event
 	Search:PopulateSkills()
 	Search:PopulateReagents()
@@ -720,8 +720,8 @@ end
 
 function Search:OnReagentSearch(widget, event, value)
 	if event == '' then event = nil end
-	event = Text:Lower(event)
-	GT.Log:Info('Search_OnReagentSearch', Text:ToString(event))
+	event = GTText:Lower(event)
+	GT.Log:Info('Search_OnReagentSearch', GTText:ToString(event))
 	Search.state.text[NAME_REAGENTS] = event
 	Search:PopulateReagents()
 	Search:PopulateSkills()
@@ -730,8 +730,8 @@ end
 
 function Search:OnCharacterSearch(widget, event, value)
 	if event == '' then event = nil end
-	event = Text:Lower(event)
-	GT.Log:Info('Search_OnCharacterSearch', Text:ToString(event))
+	event = GTText:Lower(event)
+	GT.Log:Info('Search_OnCharacterSearch', GTText:ToString(event))
 	Search.state.text[NAME_CHARACTERS] = event
 	Search:PopulateCharacters()
 	Search:PopulateSkills()

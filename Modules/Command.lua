@@ -37,7 +37,7 @@ end
 
 function Command:OnCommand(input)
 	GT.Log:Info('Command_OnCommand', input)
-	local tokens = Text:Tokenize(input)
+	local tokens = GTText:Tokenize(input)
 	if #tokens <= 0 then
 		Command:Search()
 		return
@@ -161,8 +161,8 @@ function Command:DumpCharacter()
 
 	local message = string.gsub(GT.L['DUMP_CHARACTER'], '%{{character_name}}', character.characterName)
 	GT.Log:PlayerInfo(message)
-	local text = Text:FormatTable(character)
-	text = Text:Concat('\n', string.upper(character.characterName), text)
+	local text = GTText:FormatTable(character)
+	text = GTText:Concat('\n', string.upper(character.characterName), text)
 	GT.Log:DumpText(text)
 end
 
@@ -184,8 +184,8 @@ function Command:DumpProfession()
 
 	local message = string.gsub(GT.L['PROFESSION_DUMP'], '%{{profession_name}}', arg)
 	GT.Log:PlayerInfo(message)
-	local text = Text:FormatTable(profession)
-	text = Text:Concat('\n', string.upper(profession.professionName), text)
+	local text = GTText:FormatTable(profession)
+	text = GTText:Concat('\n', string.upper(profession.professionName), text)
 	GT.Log:DumpText(text)
 end
 

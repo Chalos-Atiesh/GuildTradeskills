@@ -6,7 +6,7 @@ local Log, oldMinor = LibStub:NewLibrary(majorVersion, minorVersion)
 local AceGUI = LibStub('AceGUI-3.0')
 local AceDB = LibStub('AceDB-3.0')
 
-local Text = assert(Text, 'Log-1.0 requires the Text library.')
+local GTText = assert(GTText, 'Log-1.0 requires the GTText library.')
 local Table = assert(Table, 'Log-1.0 requires the Table library.')
 
 Log.DEFAULT_CHAT_FRAME = 1
@@ -170,11 +170,11 @@ end
 function Log:_Log(logLevel, ...)
 	local color = LOG_COLOR_MAP[logLevel] or DEFAULT_LOG_COLOR
 
-	local original = Text:Concat(DELIMITER, ...)
+	local original = GTText:Concat(DELIMITER, ...)
 	
 	local printMessage = string.gsub(LOG_FORMAT, '%{{message}}', original)
 	printMessage = string.gsub(printMessage, '|r', '|r' .. color)
-	local logMessage = Text:Strip(printMessage)
+	local logMessage = GTText:Strip(printMessage)
 	if logLevel < PLAYER_INFO and #logMessage >= LOG_LINE_LENGTH_LIMIT then
 		printMessage = string.sub(logMessage, 0, LOG_LINE_LENGTH_LIMIT - 3) .. '...'
 	end
@@ -187,11 +187,11 @@ function Log:_Log(logLevel, ...)
 	then
 		local levelWithColor = nil
 		if color == '' then
-			levelWithColor = Text:Concat(DELIMITER, tostring(logLevel),  LOG_STRING_MAP[logLevel])
+			levelWithColor = GTText:Concat(DELIMITER, tostring(logLevel),  LOG_STRING_MAP[logLevel])
 		else
-			levelWithColor = color .. Text:Concat(tostring(logLevel), LOG_STRING_MAP[logLevel]) .. '|r'
+			levelWithColor = color .. GTText:Concat(tostring(logLevel), LOG_STRING_MAP[logLevel]) .. '|r'
 		end
-		logMessage = Text:Concat(DELIMITER, date('%y-%m-%d %H:%M:%S', time()), levelWithColor, logMessage)
+		logMessage = GTText:Concat(DELIMITER, date('%y-%m-%d %H:%M:%S', time()), levelWithColor, logMessage)
 		table.insert(Log.db.char.log, logMessage)
 		while Log.db.char.logSize > LOG_ARCHIVE_CHARACTER_LIMIT do
 			local line = Log.db.char.log[1]
@@ -229,7 +229,7 @@ function Log:LogDump()
 		if text == nil then
 			text = logLine
 		else
-			text = Text:Concat('\n', text, logLine)
+			text = GTText:Concat('\n', text, logLine)
 		end
 		editBox:SetText(text)
 	end

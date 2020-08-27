@@ -326,10 +326,11 @@ function CommGuild:DoVote()
 			local candidates = profession.candidates
 			local voteMessage = nil
 			if Table:Contains(candidates, characterName) then
-				voteMessage = Text:Concat(GT.Comm.DELIMITER, characterName, professionName, characterName)
+				voteMessage = GTText:Concat(GT.Comm.DELIMITER, characterName, professionName, characterName)
 			else
 				local vote = Table:Random(candidates)
-				local voteMessage = Text:Concat(GT.Comm.DELIMITER, characterName, professionName, vote)
+				voteMessage = GTText:Concat(GT.Comm.DELIMITER, characterName, professionName, vote)
+				GT.Log:Info('CommGuild_DoVote_Vote', voteMessage)
 			end
 			table.insert(votes, voteMessage)
 		end
@@ -371,7 +372,7 @@ function CommGuild:OnVoteReceived(prefix, message, distribution, sender)
 
 	voteState = VOTE_STATE_VOTING
 
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 	while #tokens > 0 do
 		local characterName, tokens = Table:RemoveToken(tokens)
 		local professionName, tokens = Table:RemoveToken(tokens)
@@ -496,7 +497,7 @@ function CommGuild:RemoveInactive()
 
 	if #characterNames > 0 then
 		local names = table.concat(characterNames, GT.L['PRINT_DELIMITER'])
-		local days = tostring(math.floor(timeout / GT.DAY))
+		local days = tostring(math.floor(CommGuild.INACTIVE_TIMEOUT / GT.DAY))
 
 		local message = string.gsub(GT.L['REMOVE_GUILD_INACTIVE'], '%{{character_names}}', names)
 		message = string.gsub(message, '%{{timeout_days}}', days)
@@ -507,7 +508,7 @@ end
 ----- END MAINTENANCE -----
 
 function CommGuild:OnPostReceived(sender, message)
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 	local characterName, tokens = Table:RemoveToken(tokens)
 
 	local character = GT.DBCharacter:GetCharacter(characterName)
@@ -535,7 +536,7 @@ function CommGuild:OnPostReceived(sender, message)
 		if profession ~= nil then
 			tempLastUpdate = profession.lastUpdate
 		end
-		GT.Log:Info('CommGuild_OnPostReceived_LocalUpdate', characterName, professionName, Text:ToString(tempLastUpdate), lastUpdate)
+		GT.Log:Info('CommGuild_OnPostReceived_LocalUpdate', characterName, professionName, GTText:ToString(tempLastUpdate), lastUpdate)
 		GT.Comm:UpdateProfession(message)
 	end
 end

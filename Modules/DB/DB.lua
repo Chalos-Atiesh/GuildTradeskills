@@ -30,6 +30,10 @@ function DB:OnEnable()
 		DB.db.global.chatFrameNumber = GT.Log.DEFAULT_CHAT_FRAME
 	end
 
+	if DB.db.global.displayAlts == nil then
+		DB.db.global.displayAlts = true
+	end
+
 	GT.DBProfession:Enable()
 	GT.DBCharacter:Enable()
 	GT.DBComm:Enable()
@@ -92,7 +96,6 @@ function DB:SetSearch(searchField, searchTerm)
 end
 
 ----- SEARCH END -----
-
 ----- VALIDATION START -----
 
 function DB:Validate()
@@ -101,3 +104,14 @@ function DB:Validate()
 end
 
 ----- VALIDATION END -----
+----- OPTIONS START -----
+
+function DB:GetDisplayAlts()
+	return DB.db.global.displayAlts
+end
+
+function DB:SetDisplayAlts(displayAlts)
+	DB.db.global.displayAlts = displayAlts
+end
+
+----- OPTIONS END -----

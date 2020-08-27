@@ -303,6 +303,10 @@ if L then
 		L['DESC_RECEIVE_FORWARDS'] = 'Accept forwarded broadcasts.'
 		L['CONFIRM_RECEIVE_FORWARDS'] = 'This feature is in beta. You may experience issues. You will accept any forwarded broadcasts. Are you sure?'
 
+		L['ALT_CHARACTERS'] = 'Alternate Characters'
+		L['LABEL_DISPLAY_ALTS'] = 'Show Alts'
+		L['DESC_DISPLAY_ALTS'] = 'Show alternate characters when searching.'
+
 		---------- OPTIONS END ----------
 
 	L['BARE_LONG_TAG'] = 'GuildTradeskills'

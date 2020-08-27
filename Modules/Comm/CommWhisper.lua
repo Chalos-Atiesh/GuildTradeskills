@@ -240,7 +240,7 @@ function CommWhisper:OnHandshakeReceived(prefix, uuid, distribution, sender)
 		return
 	end
 
-	if not Text:IsUUIDValid(uuid) then
+	if not GTText:IsUUIDValid(uuid) then
 		GT.Log:Error('CommWhisper_OnHandshakeReceived_Invalid', sender, uuid)
 		return
 	end
@@ -848,7 +848,7 @@ end
 function CommWhisper:_SendTimestamps(info)
 	if not info.connected then return end
 	local message = GT.Comm:GetTimestampString(GT:GetCharacterName())
-	GT.Log:Info('CommWhisper__SendTimestamps', info.name, Text:ToString(message))
+	GT.Log:Info('CommWhisper__SendTimestamps', info.name, GTText:ToString(message))
 	if message ~= nil then
 		GT.Comm:SendCommMessage(GT.Comm.TIMESTAMP, message, GT.Comm.WHISPER, info.name, GT.Comm.NORMAL)
 	end
@@ -880,7 +880,7 @@ function CommWhisper:OnTimestampsReceived(sender, toGet, toPost)
 			or string.lower(sender) == string.lower(characterName)
 		then
 			for professionName, _ in pairs(toGet[characterName]) do
-				table.insert(sendLines, Text:Concat(GT.Comm.DELIMITER, characterName, professionName))
+				table.insert(sendLines, GTText:Concat(GT.Comm.DELIMITER, characterName, professionName))
 			end
 		end
 	end
@@ -929,7 +929,7 @@ function CommWhisper:OnGetReceived(prefix, message, distribution, sender)
 	end
 	GT.Log:Info('CommWhisper_OnGetReceived', sender, message)
 
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 	while #tokens > 0 do
 		local characterName, tokens = Table:RemoveToken(tokens)
 		local professionName, tokens = Table:RemoveToken(tokens)
@@ -974,7 +974,7 @@ end
 function CommWhisper:OnPostReceived(sender, message)
 	GT.Log:Info('CommWhisper_OnPostReceived', sender, message)
 
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 	local characterName, tokens = Table:RemoveToken(tokens)
 	local professionName, tokens = Table:RemoveToken(tokens)
 	local lastUpdate, tokens = Table:RemoveToken(tokens)

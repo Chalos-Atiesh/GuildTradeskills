@@ -239,7 +239,25 @@ local options = {
 					set = function(info, val) GT.DBComm:SetIsReceivingForwards(val) end
 				},
 			}
-		}
+		}--[[,
+		altRow = {
+			name = GT.L['ALT_CHARACTERS'],
+			type ='group',
+			width = 'full',
+			inline = true,
+			order = 5,
+			args = {
+				displayAltsToggle = {
+					name = GT.L['LABEL_DISPLAY_ALTS'],
+					desc = GT.L['DESC_DISPLAY_ALTS'],
+					type = 'toggle',
+					width = 'full',
+					order = 1,
+					get = function() return GT.DB:GetDisplayAlts() end,
+					set = function(info, val) GT.DB:SetDisplayAlts(val) end
+				}
+			}
+		}]]--
 	}
 }
 
@@ -304,7 +322,7 @@ end
 
 function Options:GetRequestFilter()
 	local filterState = GT.DBComm:GetRequestFilterState()
-	GT.Log:Info('Options_GetRequestsFilter', Text:ToString(filterState))
+	GT.Log:Info('Options_GetRequestsFilter', GTText:ToString(filterState))
 	local toggle = options.args.requestsRow.args.requestsToggle
 	if filterState == nil then
 		toggle.name = GT.L['LABEL_REQUESTS_TOGGLE_CONFIRM']
@@ -318,7 +336,7 @@ function Options:GetRequestFilter()
 end
 
 function Options:SetRequestFilter(val)
-	GT.Log:Info('Options_SetRequestsFilter', Text:ToString(val))
+	GT.Log:Info('Options_SetRequestsFilter', GTText:ToString(val))
 	GT.DBComm:SetRequestFilterState(val)
 end
 

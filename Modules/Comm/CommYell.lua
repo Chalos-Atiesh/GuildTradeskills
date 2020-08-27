@@ -160,7 +160,7 @@ function CommYell:OnTimestampsReceived(sender, toGet, toPost)
 
 		if shouldSendGet then
 			for professionName, _ in pairs(toGet[characterName]) do
-				table.insert((sendLines), Text:Concat(GT.Comm.DELIMITER, characterName, professionName))
+				table.insert((sendLines), GTText:Concat(GT.Comm.DELIMITER, characterName, professionName))
 			end
 		end
 	end

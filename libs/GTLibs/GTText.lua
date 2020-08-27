@@ -2,19 +2,19 @@ local TEXT_VERSION = 1
 
 local _G = _G
 
-if not _G.Text then
-    _G.Text = {}
+if not _G.GTText then
+    _G.GTText = {}
 end
 
-Text = _G.Text
-local Text = _G.Text
+GTText = _G.GTText
+local GTText = _G.GTText
 
-Text.version = TEXT_VERSION
+GTText.version = TEXT_VERSION
 
 local DEFAULT_DELIMITER = ' '
 local TABLE_INDENT = '  '
 
-function Text:Tokenize(text, delimiter)
+function GTText:Tokenize(text, delimiter)
     delimiter = delimiter or DEFAULT_DELIMITER
     local tokens = {}
     local token = ''
@@ -33,23 +33,23 @@ function Text:Tokenize(text, delimiter)
     return tokens
 end
 
-function Text:Concat(delimiter, ...)
+function GTText:Concat(delimiter, ...)
     delimiter = delimiter or DEFAULT_DELIMITER
     local args = {...}
     local txt = nil
     for i = 1, #args do
         local arg = args[i]
         if txt == nil then
-            txt = Text:ToString(arg)
+            txt = GTText:ToString(arg)
         else
-            txt = txt .. delimiter .. Text:ToString(arg)
+            txt = txt .. delimiter .. GTText:ToString(arg)
         end
     end
     if txt == nil then return 'nil' end
     return txt
 end
 
-function Text:ToString(object)
+function GTText:ToString(object)
     if object == nil then
         return 'nil'
     end
@@ -72,7 +72,7 @@ function Text:ToString(object)
     if type(object) == 'table' then
         local txt = '{'
         for k, v in pairs(object) do
-            txt = txt .. '{' .. Text:ToString(k) .. ':' .. Text:ToString(v) .. '}'
+            txt = txt .. '{' .. GTText:ToString(k) .. ':' .. GTText:ToString(v) .. '}'
         end
         txt = txt .. '}'
         return txt
@@ -80,13 +80,13 @@ function Text:ToString(object)
     return type(object)
 end
 
-function Text:Lower(text)
+function GTText:Lower(text)
     if text == nil then return nil end
     if type(text) ~= 'string' then return text end
     return string.lower(text)
 end
 
-function Text:Strip(text)
+function GTText:Strip(text)
     text = string.gsub(text, '|cff[%a%d][%a%d][%a%d][%a%d][%a%d][%a%d]', '')
     text = string.gsub(text, '|r', '')
     local returnText = ''
@@ -113,8 +113,8 @@ function Text:Strip(text)
     return returnText
 end
 
-function Text:ConvertCharacterName(characterName)
-    characterName = Text:GetTextBetween(characterName, '%[', ']')
+function GTText:ConvertCharacterName(characterName)
+    characterName = GTText:GetTextBetween(characterName, '%[', ']')
     if not string.find(characterName, '-') then
         return characterName
     end
@@ -122,7 +122,7 @@ function Text:ConvertCharacterName(characterName)
     return string.sub(characterName, 1, dashIndex - 1)
 end
 
-function Text:GetTextBetween(text, startCharacter, endCharacter)
+function GTText:GetTextBetween(text, startCharacter, endCharacter)
     if not string.find(text, startCharacter) or not string.find(text, endCharacter) then
         return text
     end
@@ -131,7 +131,7 @@ function Text:GetTextBetween(text, startCharacter, endCharacter)
     return string.sub(text, startIndex + 1, endIndex - 1)
 end
 
-function Text:UUID()
+function GTText:UUID()
     local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
     local uuid = string.gsub(template, '[xy]', function (c)
         local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
@@ -140,7 +140,7 @@ function Text:UUID()
     return uuid
 end
 
-function Text:IsUUIDValid(uuid)
+function GTText:IsUUIDValid(uuid)
     local _, countDash = string.gsub(uuid, '-', '-')
     if #uuid ~= 36 then
         GT.Log:Error('CommValidator_IsRequestValid_IvalidLength', 36, #uuid, uuid)
@@ -153,22 +153,22 @@ function Text:IsUUIDValid(uuid)
     return true
 end
 
-function Text:IsNumber(str)
+function GTText:IsNumber(str)
     if tonumber(str) ~= nil then return true end
     return false
 end
 
-function Text:IsLink(str)
+function GTText:IsLink(str)
     if string.find(str, ']') then return true end
     return false
 end
 
-function Text:FormatTable(tbl)
-    local txt = Text:_FormatTable(tbl, 1)
+function GTText:FormatTable(tbl)
+    local txt = GTText:_FormatTable(tbl, 1)
     return txt
 end
 
-function Text:_FormatTable(tbl, depth)
+function GTText:_FormatTable(tbl, depth)
     txt = '{'
     local count = 0
     for k, v in pairs(tbl) do
@@ -177,9 +177,9 @@ function Text:_FormatTable(tbl, depth)
         end
         formatting = string.rep('    ', depth) .. k .. ': '
         if type(v) == 'table' then
-            txt = txt .. '\n' .. formatting .. Text:_FormatTable(v, depth + 1)
+            txt = txt .. '\n' .. formatting .. GTText:_FormatTable(v, depth + 1)
         else
-            txt = txt .. '\n' .. formatting .. Text:ToString(v)
+            txt = txt .. '\n' .. formatting .. GTText:ToString(v)
         end
         count = count + 1
     end

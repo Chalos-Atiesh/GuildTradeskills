@@ -42,7 +42,7 @@ function CommValidator:IsIncomingRequestValid(distribution, sender, uuid)
 		return false
 	end
 
-	if not Text:IsUUIDValid(uuid) then
+	if not GTText:IsUUIDValid(uuid) then
 		GT.Log:Error('CommValidator_IsIncomingRequestValid_InvalidUUID', sender, uuid)
 		return false
 	end
@@ -66,7 +66,7 @@ end
 
 function CommValidator:IsTimestampValid(message)
 	-- GT.Log:Info('CommValidator_IsTimestampValid', message)
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 	
 	while #tokens > 0 do
 		local characterName, tokens = Table:RemoveToken(tokens)
@@ -102,7 +102,7 @@ end
 
 function CommValidator:IsVoteValid(message)
 	-- GT.Log:Info('CommValidator_IsVoteValid', message)
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 	
 	while #tokens > 0 do
 		local characterName, tokens = Table:RemoveToken(tokens)
@@ -138,7 +138,7 @@ end
 
 function CommValidator:IsGetValid(message)
 	-- GT.Log:Info('CommValidator_IsGetValid', message)
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 
 	while #tokens > 0 do
 		local characterName, tokens = Table:RemoveToken(tokens)
@@ -175,7 +175,7 @@ end
 
 function CommValidator:IsPostValid(message)
 	-- GT.Log:Info('CommValidator_IsPostValid', message)
-	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, GT.Comm.DELIMITER)
 	
 	local characterName, tokens = Table:RemoveToken(tokens)
 	local professionName, tokens = Table:RemoveToken(tokens)
@@ -202,14 +202,14 @@ function CommValidator:IsPostValid(message)
 	end
 
 	if not professionNameIsValid then
-		GT.Log:Error('Comm_IsPostValidFormat_InvalidProfessionName', Text:ToString(professionName), GT.L['PROFESSIONS_LIST'])
+		GT.Log:Error('Comm_IsPostValidFormat_InvalidProfessionName', GTText:ToString(professionName), GT.L['PROFESSIONS_LIST'])
 		return false
 	end
 
 	if lastUpdate == nil
 		or tonumber(lastUpdate) == nil
 	then
-		GT.Log:Error('Comm_IsPostValidFormat_InvalidLastUpdate', Text:ToString(lastUpdate))
+		GT.Log:Error('Comm_IsPostValidFormat_InvalidLastUpdate', GTText:ToString(lastUpdate))
 		return false
 	end
 
@@ -220,7 +220,7 @@ function CommValidator:IsPostValid(message)
 		local skillLink, tokens = Table:RemoveToken(tokens)
 		local uniqueReagentCount, tokens = Table:RemoveToken(tokens)
 
-		-- GT.Log:Info('Comm_IsPostValidFormat_SkillCheck', skillName, skillLink, Text:ToString(uniqueReagentCount))
+		-- GT.Log:Info('Comm_IsPostValidFormat_SkillCheck', skillName, skillLink, GTText:ToString(uniqueReagentCount))
 
 		if skillName == nil
 			or string.find(skillName, ']')
@@ -241,7 +241,7 @@ function CommValidator:IsPostValid(message)
 		if uniqueReagentCount == nil
 			or tonumber(uniqueReagentCount) == nil
 		then
-			GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', Text:ToString(uniqueReagentCount))
+			GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GTText:ToString(uniqueReagentCount))
 			return false
 		end
 		uniqueReagentCount = tonumber(uniqueReagentCount)
@@ -252,20 +252,20 @@ function CommValidator:IsPostValid(message)
 			local reagentLink, tokens = Table:RemoveToken(tokens)
 			local thisReagentCount, tokens = Table:RemoveToken(tokens)
 
-			-- GT.Log:Info('Comm_IsPostValidFormat_ReagentCheck', reagentName, Text:ToString(thisReagentCount))
+			-- GT.Log:Info('Comm_IsPostValidFormat_ReagentCheck', reagentName, GTText:ToString(thisReagentCount))
 
 			if reagentName == nil
 				or string.find(reagentName, ']')
 				or tonumber(reagentName) ~= nil
 			then
-				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentName', Text:ToString(reagentName))
+				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentName', GTText:ToString(reagentName))
 				return false
 			end
 
 			if thisReagentCount == nil
 				or string.find(reagentName, ']')
 				or tonumber(thisReagentCount) == nil then
-				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', Text:ToString(reagentCount))
+				GT.Log:Error('Comm_IsPostValidFormat_InvalidReagentCount', GTText:ToString(reagentCount))
 				return false
 			end
 			actualReagentCount = actualReagentCount + 1

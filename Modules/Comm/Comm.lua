@@ -82,7 +82,7 @@ function Comm:GetTimestampString(characterName)
 	local character = GT.DBCharacter:GetCharacter(characterName)
 	local professionStrings = {}
 	for professionName, profession in pairs(character.professions) do
-		local professionString = Text:Concat(Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
+		local professionString = GTText:Concat(Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
 		GT.Log:Info('Comm_GetTimestampString', professionString)
 		table.insert(professionStrings, professionString)
 	end
@@ -166,9 +166,9 @@ function Comm:GetPostMessage(characterName, professionName)
 		local skill = GT.DBProfession:GetSkill(professionName, skillName)
 		if skill ~= nil then
 			if message == nil then
-				message = Text:Concat(Comm.DELIMITER, skillName, skill.skillLink)
+				message = GTText:Concat(Comm.DELIMITER, skillName, skill.skillLink)
 			else
-				message = Text:Concat(Comm.DELIMITER, message, skillName, skill.skillLink)
+				message = GTText:Concat(Comm.DELIMITER, message, skillName, skill.skillLink)
 			end
 
 			local uniqueReagentCount = 0
@@ -176,15 +176,15 @@ function Comm:GetPostMessage(characterName, professionName)
 				uniqueReagentCount = uniqueReagentCount + 1
 			end
 
-			message = Text:Concat(Comm.DELIMITER, message, uniqueReagentCount)
+			message = GTText:Concat(Comm.DELIMITER, message, uniqueReagentCount)
 			for reagentName, reagent in pairs(skill.reagents) do
-				message = Text:Concat(Comm.DELIMITER, message, reagentName, Text:ToString(reagent.reagentLink), reagent.reagentCount)
+				message = GTText:Concat(Comm.DELIMITER, message, reagentName, GTText:ToString(reagent.reagentLink), reagent.reagentCount)
 			end
 		end
 	end
 	if message ~= nil then
-		local header = Text:Concat(Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
-		return Text:Concat(Comm.DELIMITER, header, message)
+		local header = GTText:Concat(Comm.DELIMITER, characterName, professionName, profession.lastUpdate)
+		return GTText:Concat(Comm.DELIMITER, header, message)
 	else
 		return nil
 	end
@@ -211,7 +211,7 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 		return
 	end
 
-	local tokens = Text:Tokenize(message, Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, Comm.DELIMITER)
 	local characterName = Table:RemoveToken(tokens)
 
 	if GT:IsCurrentCharacter(characterName) then
@@ -235,7 +235,7 @@ function Comm:OnPostReceived(prefix, message, distribution, sender)
 end
 
 function Comm:UpdateProfession(message)
-	local tokens = Text:Tokenize(message, Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, Comm.DELIMITER)
 	local characterName, tokens = Table:RemoveToken(tokens)
 	local professionName, tokens = Table:RemoveToken(tokens)
 	local lastUpdate, tokens = Table:RemoveToken(tokens)
@@ -285,7 +285,7 @@ function Comm:SendDeletions(distribution, recipient)
 	local sendDelete = false
 	local message = characterName
 	for _, professionName in pairs(character.deletedProfessions) do
-		message = Text:Concat(Comm.DELIMITER, message, professionName)
+		message = GTText:Concat(Comm.DELIMITER, message, professionName)
 		sendDelete = true
 	end
 
@@ -308,7 +308,7 @@ function Comm:OnDeletionsReceived(prefix, message, distribution, sender)
 		return
 	end
 
-	local tokens = Text:Tokenize(message, Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, Comm.DELIMITER)
 	local characterName, tokens = Table:RemoveToken(tokens)
 
 	if string.lower(characterName) ~= string.lower(sender) then
@@ -375,8 +375,8 @@ function Comm:OnVersionReceived(prefix, message, distribution, sender)
 		if GT.DB:GetVersionNotification() < rVersion then
 			local lrVersion, lbVersion, laVersion = GT:DeconvertVersion(lVersion)
 			local rrVersion, rbVersion, raVersion = GT:DeconvertVersion(rVersion)
-			local message = string.gsub(GT.L['UPDATE_AVAILABLE'], '%{{local_version}}', Text:Concat('.', lrVersion, lbVersion, laVersion))
-			message = string.gsub(message, '%{{remote_version}}', Text:Concat('.', rrVersion, rbVersion, raVersion))
+			local message = string.gsub(GT.L['UPDATE_AVAILABLE'], '%{{local_version}}', GTText:Concat('.', lrVersion, lbVersion, laVersion))
+			message = string.gsub(message, '%{{remote_version}}', GTText:Concat('.', rrVersion, rbVersion, raVersion))
 			GT.Log:PlayerInfo(message)
 			GT.DB:SetVersionNotification(rVersion)
 		else
@@ -442,7 +442,7 @@ function Comm:_ProcessTimestamps(message)
 	local toPost = {}
 	local all = {}
 
-	local tokens = Text:Tokenize(message, Comm.DELIMITER)
+	local tokens = GTText:Tokenize(message, Comm.DELIMITER)
 
 	while #tokens > 0 do
 		local characterName, tokens = Table:RemoveToken(tokens)

@@ -38,7 +38,7 @@ function Whisper:OnWhisperReceived(_, message, _, _, _, sender)
 	GT.Log:Info('Whisper_OnWhisperReceived_Trigger', sender, message)
 
 	local modMessage = string.sub(message, 2, #message)
-	local tokens = Text:Tokenize(modMessage, ' ')
+	local tokens = GTText:Tokenize(modMessage, ' ')
 	local professionSearch, tokens = Table:RemoveToken(tokens)
 	if professionSearch == nil then
 		GT.Log:Warn('Whisper_OnWhisperReceived_NilProfessionSearch')
@@ -228,7 +228,7 @@ function Whisper:_SearchSkills(professionName, searchTerm)
 		end
 		if addSkill then
 			local skillLink = GT.DBProfession:GetSkill(professionName, skillName).skillLink
-			local tempSkillName = Text:GetTextBetween(skillLink, '%[', ']')
+			local tempSkillName = GTText:GetTextBetween(skillLink, '%[', ']')
 			returnSkills[tempSkillName] = skillLink
 		end
 	end
