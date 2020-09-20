@@ -201,6 +201,11 @@ function CommWhisper:SendDeletions()
 		GT.Log:Warn('CommWhisper_SendDeletions_CommDisabled')
 		return
 	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommWhisper_SendDeletions_InRaid')
+		return
+	end
 	
 	local characters = GT.DBCharacter:GetCharacters()
 	for characterName, character in pairs(characters) do
@@ -860,6 +865,11 @@ function CommWhisper:OnTimestampsReceived(sender, toGet, toPost)
 		return
 	end
 
+	if IsInRaid() then
+		GT.Log:Warn('CommWhisper_OnTimestampsReceived_InRaid')
+		return
+	end
+
 	local character = GT.DBCharacter:GetCharacter(sender)
 	if character == nil then
 		GT.Log:Warn('CommWhisper_OnTimestampsReceived_NotExist', sender)
@@ -903,6 +913,11 @@ end
 function CommWhisper:OnGetReceived(prefix, message, distribution, sender)
 	if not GT.DBComm:GetIsEnabled() then
 		GT.Log:Warn('CommWhisper_OnGetReceived_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommWhisper_OnGetReceived_InRaid')
 		return
 	end
 
@@ -973,6 +988,15 @@ end
 
 function CommWhisper:OnPostReceived(sender, message)
 	GT.Log:Info('CommWhisper_OnPostReceived', sender, message)
+	if not GT.DBComm:GetIsEnabled() then
+		GT.Log:Warn('CommWhisper_OnPostReceived_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommWhisper_OnPostReceived_InRaid')
+		return
+	end
 
 	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
 	local characterName, tokens = Table:RemoveToken(tokens)

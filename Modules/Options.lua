@@ -20,12 +20,24 @@ local PANEL_NAME = GT.L['LONG_TAG'] .. ' Options'
 local options = {
 	type = 'group',
 	args = {
+		openSearchButton = {
+			name = GT.L['LABEL_OPEN_SEARCH'],
+			desc = GT.L['DESC_OPEN_SEARCH'],
+			type = 'execute',
+			order = 0,
+			func = function()
+				InterfaceOptionsFrame_Show()
+				ToggleGameMenu()
+				CD:Close(PANEL_NAME)
+				GT.Search:ToggleFrame()
+			end
+		},
 		professionGroup = {
 			name = GT.L['LABEL_PROFESSIONS'],
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 0,
+			order = 1,
 			args = {
 				professionSelect = {
 					name = GT.L['LABEL_PROFESSIONS'],
@@ -60,7 +72,7 @@ local options = {
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 1,
+			order = 2,
 			args = {
 				characterInput = {
 					name = GT.L['LABEL_ADD_CHARACTER'],
@@ -96,7 +108,7 @@ local options = {
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 2,
+			order = 3,
 			args = {
 				requestsToggle = {
 					name = GT.L['LABEL_REQUESTS_TOGGLE_CONFIRM'],
@@ -155,7 +167,7 @@ local options = {
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 3,
+			order = 4,
 			args = {
 				advertiseToggle = {
 					name = GT.L['LABEL_ADVERTISING'],
@@ -183,7 +195,7 @@ local options = {
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 4,
+			order = 5,
 			args = {
 				broadcastInterval = {
 					name = GT.L['LABEL_BROADCAST_INTERVAL'],
@@ -246,6 +258,7 @@ local options = {
 function Options:OnEnable()
 	GT.Log:Info('Options_OnEnable')
 	Config:RegisterOptionsTable(PANEL_NAME, options)
+	CR:RegisterOptionsTable(AddOnName, options)
 	CD:AddToBlizOptions(GT.L['BARE_LONG_TAG'], GT.L['LONG_TAG'])
 end
 

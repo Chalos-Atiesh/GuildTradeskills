@@ -4,6 +4,8 @@ local GT = LibStub('AceAddon-3.0'):GetAddon(AddOnName)
 
 local AceGUI = LibStub('AceGUI-3.0')
 
+local PREFIX = 'GT'
+
 local Search = GT:NewModule('Search')
 GT.Search = Search
 
@@ -591,8 +593,18 @@ end
 	function Search:OnCharacterClick(widget, event, value)
 		local character = widget.character
 		local characterName = character.characterName
-		GT.Log:Info('Search_OnCharacterClick', characterName, event)
+		GT.Log:Info('Search_OnCharacterClick', characterName, event, value)
 
+
+		if GetMouseButtonClicked() == 'RightButton' and not value then
+			GT.Log:Info('Search_OnCharacterClick_RightButton')
+
+			local character = GT.DBCharacter:GetCharacter(characterName)
+			if character.isOnline then
+				value = not value
+				Search:SendWhisper(characterName)
+			end
+		end
 		if value == true then
 			Search.state.clicks[NAME_CHARACTERS] = character
 			local offset = Search.frames.scroll[NAME_CHARACTERS]:GetScroll()
@@ -606,6 +618,20 @@ end
 			Search:PopulateReagents()
 			Search:PopulateCharacters()
 		end
+	end
+
+	function Search:SendWhisper(characterName)
+		GT.Log:Info('Search_SendWhisper', characterName)
+		if Search.state.clicks[NAME_SKILLS] == nil then
+			GT.Log:PlayerWarn(GT.L['NO_SKILL_SELECTED'])
+			return
+		end
+
+		local skill = Search.state.clicks[NAME_SKILLS]
+		GT.Log:Info('Search_SendWhisper_SkillSelected', skill.skillName)
+		local message = string.gsub(GT.L['SEND_WHISPER'], '%{{character_name}}', characterName)
+		message = string.gsub(message, '%{{skill_link}}', skill.skillLink)
+		ChatThrottleLib:SendChatMessage('ALERT', PREFIX, message, 'WHISPER', 'Common', characterName)
 	end
 
 	----- END CLICK MANAGEMENT -----

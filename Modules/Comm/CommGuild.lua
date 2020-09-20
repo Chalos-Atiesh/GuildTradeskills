@@ -33,7 +33,7 @@ local VOTE_STATE_TIMESTAMPS = 2
 local VOTE_STATE_VOTING = 3
 local VOTE_STATE_POSTING = 4
 
-local voteStart = nil
+local voteStart = 0
 local voteEnd = nil
 local registeredVoters = {}
 local timestampCollection = {}
@@ -70,11 +70,13 @@ function CommGuild:StartupTasks()
 end
 
 function CommGuild:RollCall()
+	GT.Log:Info('CommGuild_RollCall')
 	for i = 1, GetNumGuildMembers() do
 		local characterName, _, _, _, class, _, _, _, online = GetGuildRosterInfo(i)
 		characterName = Ambiguate(characterName, 'none')
 		if GT.DBCharacter:CharacterExists(characterName) then
 			local character = GT.DBCharacter:GetCharacter(characterName)
+			GT.Log:Info('CommGuild_RollCall_IsOnline', characterName, online)
 			character.isOnline = online
 			if class ~= nil and string.upper(class) ~= 'UNKNOWN' then
 				character.class = string.upper(class)
@@ -101,6 +103,11 @@ function CommGuild:RequestStartVote()
 	GT.Log:Info('CommGuild_RequestStartVote', voteStart)
 	if not GT.DBComm:GetIsEnabled() then
 		GT.Log:Warn('CommGuild_RequestStartVote_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_RequestStartVote_InRaid')
 		return
 	end
 
@@ -131,6 +138,11 @@ function CommGuild:OnRequestStartVoteReceived(prefix, message, distribution, sen
 
 	if not GT.DBComm:GetIsEnabled() then
 		GT.Log:Warn('CommGuild_OnRequestStartVoteReceived_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_OnRequestStartVoteReceived_InRaid')
 		return
 	end
 
@@ -184,6 +196,11 @@ function CommGuild:OnVoteStartAckReceived(prefix, message, distribution, sender)
 		return
 	end
 
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_OnVoteStartAckReceived_InRaid')
+		return
+	end
+
 	GT.Log:Info('CommGuild_OnVoteStartAckReceived', sender, message)
 
 	if tonumber(message) == nil then
@@ -230,6 +247,11 @@ function CommGuild:OnVoteStartDenyReceived(prefix, message, distribution, sender
 
 	if not GT.DBComm:GetIsEnabled() then
 		GT.Log:Warn('CommGuild_OnVoteStartDenyReceived_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_OnVoteStartDenyReceived_InRaid')
 		return
 	end
 
@@ -284,6 +306,11 @@ function CommGuild:OnTimestampsReceived(sender, toGet, toPost)
 		return
 	end
 
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_OnTimestampsReceived_InRaid')
+		return
+	end
+
 	if not CommGuild:_IsInValidVoteState(VOTE_STATE_TIMESTAMPS) then
 		GT.Log:Error('CommGuild_OnTimestampsReceived_InvalidVoteState', voteState, sender, message)
 		return
@@ -308,6 +335,11 @@ function CommGuild:DoVote()
 
 	if not GT.DBComm:GetIsEnabled() then
 		GT.Log:Warn('CommGuild_DoVote_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_DoVote_InRaid')
 		return
 	end
 
@@ -354,6 +386,11 @@ function CommGuild:OnVoteReceived(prefix, message, distribution, sender)
 		return
 	end
 
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_OnVoteReceived_InRaid')
+		return
+	end
+
 	if not CommGuild:_IsInValidVoteState(VOTE_STATE_VOTING) then
 		GT.Log:Error('CommGuild_OnVoteReceived_InvalidVoteState', voteState, sender, message)
 		return
@@ -394,6 +431,11 @@ function CommGuild:FinalizeVote()
 
 	if not GT.DBComm:GetIsEnabled() then
 		GT.Log:Warn('CommGuild_FinalizeVote_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_FinalizeVote_InRaid')
 		return
 	end
 
@@ -465,7 +507,7 @@ function CommGuild:FinalizePost()
 	timestampCollection = {}
 	voteCollection = {}
 	goneOffline = {}
-	voteStart = nil
+	voteStart = 0
 	voteEnd = nil
 end
 
@@ -507,6 +549,7 @@ end
 ----- END MAINTENANCE -----
 
 function CommGuild:OnPostReceived(sender, message)
+
 	local tokens = Text:Tokenize(message, GT.Comm.DELIMITER)
 	local characterName, tokens = Table:RemoveToken(tokens)
 
@@ -521,6 +564,16 @@ function CommGuild:OnPostReceived(sender, message)
 	local lastUpdate, tokens = Table:RemoveToken(tokens)
 	lastUpdate = tonumber(lastUpdate)
 	GT.Log:Info('CommGuild_OnPostReceived', sender, characterName, professionName, lastUpdate)
+
+	if not GT.DBComm:GetIsEnabled() then
+		GT.Log:Warn('CommGuild_OnPostReceived_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommGuild_OnPostReceived_InRaid')
+		return
+	end
 
 	local profession = GT.DBCharacter:GetProfession(characterName, professionName)
 
@@ -541,6 +594,7 @@ function CommGuild:OnPostReceived(sender, message)
 end
 
 function CommGuild:ChatMessageSystem(message)
+	GT.Log:Info('CommGuild_ChatMessageSystem', message)
 	local offlineName = message:match(string.gsub(ERR_FRIEND_OFFLINE_S, '(%%s)', '(.+)'))
 	if offlineName ~= nil then
 		if GT.DBCharacter:CharacterExists(offlineName) then
@@ -550,11 +604,12 @@ function CommGuild:ChatMessageSystem(message)
 		end
 	end
 
-	local onlineName = message:match(string.gsub(ERR_FRIEND_ONLINE_SS, '(%%s)', '(.+)'))
-	if onlineName ~= nil then
+	local i, j = message:find('%[(.+)]')
+	if i ~= nil and j ~= nil then
+		local onlineName = message:sub(i + 1, j - 1)
 		if GT.DBCharacter:CharacterExists(onlineName) then
-			local character = GT.DBCharacter:GetCharacter(onlineName)
 			GT.Log:Info('CommGuild_ChatMessageSystem_Online', onlineName)
+			local character = GT.DBCharacter:GetCharacter(onlineName)
 			character.isOnline = true
 		end
 	end

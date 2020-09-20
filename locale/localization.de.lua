@@ -234,6 +234,9 @@ if L then
 
 		---------- OPTIONS START -----------
 
+		L['LABEL_OPEN_SEARCH'] = 'Suche Öffnen'
+		L['DESC_OPEN_SEARCH'] = 'Öffnet das Suchfeld.'
+
 		L['CANCEL'] = 'Cancel'
 		L['OKAY'] = 'Okay'
 
@@ -332,6 +335,9 @@ if L then
 	L['UPDATE_AVAILABLE'] = LONG_TAG .. ' ist veraltet. Deine Version ist {{local_version}} und Verfügbar ist die Version {{remote_version}}.'
 
 	L['CORRUPTED_DATABASE'] = 'Leider sind deine Daten nicht mehr lesbar. Bitte setze alles mit \'/gt reset\' zurück.'
+
+	L['NO_SKILL_SELECTED'] = 'Sie müssen eine Fertigkeit auswählen, bevor Sie einen Charakter flüstern.'
+	L['SEND_WHISPER'] = WHISPER_TAG .. 'Hey {{character_name}}! Kannst du {{skill_link}} mich herstellen?'
 
 	---------- GUI END ----------
 	---------- ADVERTISE START ----------

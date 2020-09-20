@@ -235,6 +235,9 @@ if L then
 
 		---------- OPTIONS START -----------
 
+		L['LABEL_OPEN_SEARCH'] = 'Open Search'
+		L['DESC_OPEN_SEARCH'] = 'Opens the search panel.'
+
 		L['CANCEL'] = 'Cancel'
 		L['OKAY'] = 'Okay'
 
@@ -333,6 +336,9 @@ if L then
 	L['UPDATE_AVAILABLE'] = LONG_TAG .. ' is out of date. Your version is {{local_version}} and {{remote_version}} is available.'
 
 	L['CORRUPTED_DATABASE'] = 'Unfortunately it seems your database has become corrupted. Please reset it with \'/gt reset\'.'
+
+	L['NO_SKILL_SELECTED'] = 'You must select a skill before whispering a character.'
+	L['SEND_WHISPER'] = WHISPER_TAG .. 'Hey {{character_name}}! Can you craft {{skill_link}} for me?'
 
 	---------- GUI END ----------
 	---------- ADVERTISE START ----------

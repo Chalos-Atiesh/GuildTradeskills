@@ -1,3 +1,9 @@
+6.0.2
+	Comms are now disabled when in a raid.
+	Added options to the default interface options panel.
+	Fixed online/offline tracking. Players who are online should now show so.
+	Fixed the ability to right click and whisper a character.
+
 6.0.1
 	Fixing an issue that prevented the user from adding a profession.
 

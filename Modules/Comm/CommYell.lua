@@ -72,6 +72,11 @@ function CommYell:SendTimestamps()
 		return
 	end
 
+	if IsInRaid() then
+		GT.Log:Warn('CommYell_SendTimestamps_InRaid')
+		return
+	end
+
 	local characterStrings = {}
 	local size = 0
 
@@ -122,6 +127,11 @@ end
 function CommYell:OnTimestampsReceived(sender, toGet, toPost)
 	if not GT.DBComm:GetIsEnabled() then
 		GT.Log:Warn('CommYell_OnTimestampsReceived_CommDisabled')
+		return
+	end
+
+	if IsInRaid() then
+		GT.Log:Warn('CommYell_OnTimestampsReceived_InRaid')
 		return
 	end
 
