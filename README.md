@@ -28,14 +28,25 @@
 <p><strong>Q: I can't see my guild member's skills.</strong></p>
 <p>A: Currently if your guild members do not have the addon or have not added their professions their skills will not appear in the search window.</p>
 <p><strong>Q: I can't see skill X.</strong></p>
-<p>A: The addon does not have a complete list of trade skills. It only tracks the skills it has been told about. Additionally the number of results is currently capped at 200 alphabetically sorted. Try searching for the skill in the text search box.</p>
+<p>A: The addon does not have a complete list of trade skills. It only tracks the skills it has been told about.</p>
+<p><strong>Q: Are characters that are not in my guild that I have added sent to my guild?</strong></p>
+<p>No, characters that are added are not sent to the guild.</p>
+<p><strong>Q: Do I send my guild member's information to people outside the guild?</strong></p>
+<p>No, characters outside the guild do not know about your guildmates.</p>
+<p><strong>Q: What is broadcasting?</strong></p>
+<p>Broadcasting is sending an invitation for everyone to fetch the skills you have added to the addon. Everyone inside you guild. Everyone outside. Everyone. This setting has no impact on whether you are syncing your skills with the guild. That will always happen even if this is off.</p>
+<p><strong>Q: What is advertising?</strong></p>
+<p>If this is on the addon will periodically advertise in the trade channel when you are in a city. People can then whisper you and query what skills you have.</p>
 <h2>ToDo</h2>
 <ul>
 	<li>Add dropdown for online characters in the character search field.</li>
+	<li>Add ability to view alts even when they are not in the same guild.</li>
+	<li>Add ability to add a 'guild friend' that is then synced to the entire guild as if they were a guild member.</li>
 </ul>
 <h2>Known Issues</h2>
 <ul>
-	<li>None</li>
+	<li>AddOns\GuildTradeskills\Modules\Comm\CommGuild.lua line 209: AceTimer-3.0: ScheduleTimer(callback, delay, args...): 'callback' and 'delay' must have set values.</li>
+	<li>AddOns\GuildTradeskills\Core.lua:193: bad argument #1 to 'lower' (string expected, got nil)</li>
 </ul>
 <h2>Links</h2>
 <ul>
