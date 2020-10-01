@@ -143,7 +143,7 @@ function Profession:UpdateProfession()
 	local GetTradeSkillReagentInfo = GetTradeSkillReagentInfo
 	local GetTradeSkillReagentItemLink = GetTradeSkillReagentItemLink
 
-	if profession.professionName == 'Enchanting' then
+	if profession.professionName == GT.L['PROFESSIONS_LIST']['ENCHANTING'] then
 		GetNumTradeSkills = GetNumCrafts
 		GetTradeSkillItemLink = GetCraftItemLink
 		GetTradeSkillNumReagents = GetCraftNumReagents
