@@ -80,6 +80,7 @@ if L then
 					methodName = 'RemoveProfession',
 					help = YELLOW .. '/gt removeprofession {profession_name}' .. COLOR_END .. ': Supprime un métier.'
 				},
+				--[[
 				advertise = {
 					order = 4,
 					methodName = 'ToggleAdvertising',
@@ -92,6 +93,7 @@ if L then
 						}
 					}
 				},
+				--]]
 				add = {
 					order = 5,
 					methodName = 'SendRequest',
@@ -236,6 +238,9 @@ if L then
 
 		L['LABEL_OPEN_SEARCH'] = 'Recherche Ouverte'
 		L['DESC_OPEN_SEARCH'] = 'Ouvre le panneau de recherche.'
+
+		L['LABEL_SHOW_LOGIN_MESSAGE'] = 'Message de connexion'
+		L['DESC_SHOW_LOGIN_MESSAGE'] = 'Indique si le message de connexion est imprimé.'
 
 		L['CANCEL'] = 'Cancel'
 		L['OKAY'] = 'Okay'

@@ -397,7 +397,8 @@ function DBComm:SetAdvertisingInterval(interval)
 end
 
 function DBComm:GetIsAdvertising()
-	return DBComm.db.char.comm.isAdvertising
+	return false
+	-- return DBComm.db.char.comm.isAdvertising
 end
 
 function DBComm:SetIsAdvertising(isAdvertising)

@@ -62,7 +62,9 @@ function GT:Welcome()
 	character.class = GT:GetCharacterClass()
 	character.isOnline = true
 	
-	GT.Log:PlayerInfo(L['WELCOME'])
+	if GT.DB:GetShouldPrintLoginMessage() then
+		GT.Log:PlayerInfo(L['WELCOME'])
+	end
 	if not GT.DB.valid then
 		GT.Log:PlayerError(L['CORRUPTED_DATABASE'])
 	end

@@ -32,12 +32,20 @@ local options = {
 				GT.Search:ToggleFrame()
 			end
 		},
+		showLoginMessage = {
+			name = GT.L['LABEL_SHOW_LOGIN_MESSAGE'],
+			desc = GT.L['DESC_SHOW_LOGIN_MESSAGE'],
+			type = 'toggle',
+			order = 1,
+			get = function() return GT.DB:GetShouldPrintLoginMessage() end,
+			set = function(info, val) GT.DB:SetShouldPrintLoginMessage(val) end
+		},
 		professionGroup = {
 			name = GT.L['LABEL_PROFESSIONS'],
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 1,
+			order = 2,
 			args = {
 				professionSelect = {
 					name = GT.L['LABEL_PROFESSIONS'],
@@ -72,7 +80,7 @@ local options = {
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 2,
+			order = 3,
 			args = {
 				characterInput = {
 					name = GT.L['LABEL_ADD_CHARACTER'],
@@ -108,7 +116,7 @@ local options = {
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 3,
+			order = 4,
 			args = {
 				requestsToggle = {
 					name = GT.L['LABEL_REQUESTS_TOGGLE_CONFIRM'],
@@ -162,12 +170,13 @@ local options = {
 				}
 			}
 		},
+		--[[
 		advertiseRow = {
 			name = GT.L['LABEL_ADVERTISING'],
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 4,
+			order = 5,
 			args = {
 				advertiseToggle = {
 					name = GT.L['LABEL_ADVERTISING'],
@@ -190,12 +199,13 @@ local options = {
 				}
 			}
 		},
+		--]]
 		broadcastingRow = {
 			name = GT.L['BROADCASTING'],
 			type = 'group',
 			width = 'full',
 			inline = true,
-			order = 5,
+			order = 6,
 			args = {
 				broadcastInterval = {
 					name = GT.L['LABEL_BROADCAST_INTERVAL'],
@@ -305,7 +315,8 @@ function Options:GetIsAdvertising()
 	local isAdvertising = GT.DBComm:GetIsAdvertising()
 	GT.Log:Info('Options_GetIsAdvertising', isAdvertising)
 	options.args.advertiseRow.args.advertiseInterval.disabled = not isAdvertising
-	return isAdvertising
+	return false
+	-- return isAdvertising
 end
 
 function Options:SetIsAdvertising(val)
@@ -507,12 +518,12 @@ function Options:GetSelectedProfession()
 	end
 	GT.Log:Info('Options_GetSelectedProfession', Options.selectedProfession)
 	local button = options.args.professionGroup.args.professionRemove
-	local toggle = options.args.advertiseRow.args.advertiseToggle
+	-- local toggle = options.args.advertiseRow.args.advertiseToggle
 	if Options.selectedProfession == nil then
-		toggle.disabled = true
+		-- toggle.disabled = true
 		button.disabled = true
 	else
-		toggle.disabled = false
+		-- toggle.disabled = false
 		button.disabled = false
 	end
 	return Options.selectedProfession

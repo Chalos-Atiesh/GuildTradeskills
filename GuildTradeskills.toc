@@ -3,6 +3,7 @@
 ## Notes: Allows guild members to search each other's tradeskills.
 ## Notes-deDE: Ermöglicht Gildenmitgliedern, die Fertigkeiten des anderen zu durchsuchen.
 ## Notes-frFR: Permet aux membres de la guilde de rechercher mutuellement leurs compétences.
+## Notes-ruRU: Позволяет членам гильдии искать друг у друга профессиональные навыки.
 ## Author: Chalos
 ## Version: release_6.0.5
 ## X-Curse-Project_ID: 381775
@@ -11,12 +12,6 @@
 ## SavedVariables: GTDB
 
 Libs\Libs.xml
-
-Locale\localization.en.lua
-Locale\localization.de.lua
-Locale\localization.fr.lua
-Locale\localization.ru.lua
-
+Locale\localization.xml
 Core.lua
-
 Modules\Modules.xml

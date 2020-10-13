@@ -1,3 +1,9 @@
+6.0.6
+	Added Russian localization.
+	Fixed an issue comparing a nil value.
+	Blizzard has removed the ability for addons to send chat messages to channels required for advertising. Removed the advertising option.
+	Added the ability to silence the login message.
+
 6.0.5
 	Fixed an issue that was causing non-english clients to not be able to add enchanting.
 

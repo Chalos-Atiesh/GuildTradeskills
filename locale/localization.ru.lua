@@ -29,15 +29,15 @@ if L then
 	-- The KEY should be the localized value here.
 	-- It should be in all caps.
 	-- We use it for getting class colors.
-	L['DRUID'] = 'ДРУИД'
-	L['HUNTER'] = 'ОХОТНИК'
-	L['MAGE'] = 'МАГ'
-	L['PALADIN'] = 'ПАЛАДИН'
-	L['PRIEST'] = 'ЖРЕЦ'
-	L['ROGUE'] = 'РАЗБОЙНИК'
-	L['SHAMAN'] = 'ШАМАН'
-	L['WARLOCK'] = 'ЧЕРНОКНИЖНИК'
-	L['WARRIOR'] = 'ВОИН'
+	L['ДРУИД'] = 'DRUID'
+	L['ОХОТНИК'] = 'HUNTER'
+	L['МАГ'] = 'MAGE'
+	L['ПАЛАДИН'] = 'PALADIN'
+	L['ЖРЕЦ'] = 'PRIEST'
+	L['РАЗБОЙНИК'] = 'ROGUE'
+	L['ШАМАН'] = 'SHAMAN'
+	L['ЧЕРНОКНИЖНИК'] = 'WARLOCK'
+	L['ВОИН'] = 'WARRIOR'
 
 	---------- CHARACTER START ----------
 
@@ -80,6 +80,7 @@ if L then
 					methodName = 'RemoveProfession',
 					help = YELLOW .. '/gt removeprofession {Имя_профессии}' .. COLOR_END .. ': Убирает профессию.'
 				},
+				--[[
 				advertise = {
 					order = 4,
 					methodName = 'ToggleAdvertising',
@@ -92,6 +93,7 @@ if L then
 						}
 					}
 				},
+				--]]
 				add = {
 					order = 5,
 					methodName = 'SendRequest',
@@ -100,7 +102,7 @@ if L then
 				reject = {
 					order = 6,
 					methodName = 'SendReject',
-					help = YELLOW .. '/gt reject {Имя_персонажа}' .. COLOR_END .. ': Отказ на добавление вашего персонажа. Они могут попытаться снова...'
+					help = YELLOW .. '/gt reject {Имя_персонажа}' .. COLOR_END .. ': Отказ на добавление вашего персонажа. Они могут попытаться снова.'
 				},
 				ignore = {
 					order = 7,
@@ -195,13 +197,13 @@ if L then
 
 	L['LOG_TAG'] = GREEN .. 'G' .. COLOR_END .. YELLOW .. 'T' .. COLOR_END .. ': '
 
-	L['DUMP_PROFESSION_NIL'] = 'You must pass a profession name: /gt dumpprofession {profession_name}'
-	L['DUMP_PROFESSION_NOT_FOUND'] = 'Whoops! Could not find profession: {{profession_name}}'
-	L['DUMP_PROFESSION'] = 'Dumping profession: {{profession_name}}'
+	L['DUMP_PROFESSION_NIL'] = 'Вы должны передать название профессии: /gt dumpprofession {profession_name}'
+	L['DUMP_PROFESSION_NOT_FOUND'] = 'Ой! Не нашел профессии: {{profession_name}}'
+	L['DUMP_PROFESSION'] = 'Демпинг профессия: {{profession_name}}'
 
-	L['DUMP_CHARACTER_NIL'] = 'You must pass a character name: /gt dumpcharacter {character_name}'
-	L['DUMP_CHARACTER_NOT_FOUND'] = 'Whoops! Could not find character: {{character_name}}'
-	L['DUMP_CHARACTER'] = 'Dumping character: {{character_name}}'
+	L['DUMP_CHARACTER_NIL'] = 'Вы должны передать имя персонажа: /gt dumpcharacter {character_name}'
+	L['DUMP_CHARACTER_NOT_FOUND'] = 'Ой! Не удалось найти персонажа: {{character_name}}'
+	L['DUMP_CHARACTER'] = 'Демпинг-персонаж: {{character_name}}'
 
 	---------- LOG END ----------
 	---------- PROFESSION START ----------
@@ -237,6 +239,9 @@ if L then
 
 		L['LABEL_OPEN_SEARCH'] = 'Открыть поиск'
 		L['DESC_OPEN_SEARCH'] = 'Открывает панель поиска.'
+
+		L['LABEL_SHOW_LOGIN_MESSAGE'] = 'Сообщение для входа'
+		L['DESC_SHOW_LOGIN_MESSAGE'] = 'Переключает, будет ли напечатано сообщение для входа.'
 
 		L['CANCEL'] = 'Отмена'
 		L['OKAY'] = 'Подтвердить'

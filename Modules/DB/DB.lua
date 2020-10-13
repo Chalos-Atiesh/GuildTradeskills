@@ -7,6 +7,8 @@ GT.DB = DB
 
 DB.valid = true
 
+local DEFAULT_SHOULD_PRINT_LOGIN_MESSAGE = true
+
 function DB:OnEnable()
 	DB.db = DB.db or LibStub('AceDB-3.0'):New('GTDB')
 
@@ -28,6 +30,10 @@ function DB:OnEnable()
 
 	if DB.db.global.chatFrameNumber == nil then
 		DB.db.global.chatFrameNumber = GT.Log.DEFAULT_CHAT_FRAME
+	end
+
+	if DB.db.global.shouldPrintLoginMessage == nil then
+		DB.db.global.shouldPrintLoginMessage = DEFAULT_SHOULD_PRINT_LOGIN_MESSAGE
 	end
 
 	GT.DBProfession:Enable()
@@ -64,6 +70,17 @@ function DB:SetVersionNotification(version)
 end
 
 ----- END VERSION -----
+----- START LOGIN MESSAGE -----
+
+function DB:GetShouldPrintLoginMessage()
+	return DB.db.global.shouldPrintLoginMessage
+end
+
+function DB:SetShouldPrintLoginMessage(shouldPrintLoginMessage)
+	DB.db.global.shouldPrintLoginMessage = shouldPrintLoginMessage
+end
+
+----- END LOGIN MESSAGE -----
 ----- START CHAT FRAME -----
 
 function DB:GetChatFrameNumber()

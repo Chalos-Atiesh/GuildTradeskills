@@ -538,7 +538,7 @@ function CommGuild:RemoveInactive()
 
 	if #characterNames > 0 then
 		local names = table.concat(characterNames, GT.L['PRINT_DELIMITER'])
-		local days = tostring(math.floor(timeout / GT.DAY))
+		local days = tostring(math.floor(CommGuild.INACTIVE_TIMEOUT / GT.DAY))
 
 		local message = string.gsub(GT.L['REMOVE_GUILD_INACTIVE'], '%{{character_names}}', names)
 		message = string.gsub(message, '%{{timeout_days}}', days)

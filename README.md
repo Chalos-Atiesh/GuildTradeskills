@@ -8,8 +8,10 @@
 	<li><strong>/gt opt</strong>: Toggles the options pane.</li>
 	<li><strong>/gt addprofession</strong>: Toggles adding a profession. Open the profession you want to add after.</li>
 	<li><strong>/gt removeprofession {profession_name}</strong>: Remove a profession from&nbsp;<strong><span style="color: #339966;">Guild</span></strong>&nbsp;<strong><span style="color: #ffcc00;">Tradeskills</span></strong></li>
+	<!--
 	<li><strong>/gt advertise</strong>: Toggles advertising.</li>
 	<li><strong>/gt advertise {seconds}</strong>: Sets the number of seconds between advertisements.</li>
+	-->
 	<li><strong>/gt add {character_name}</strong>: Requests to add a specific character.</li>
 	<li><strong>/gt reject {character_name}</strong>: Rejects someone's request to add you. They can request again.</li>
 	<li><strong>/gt ignore {character_name}</strong>: Ignores that person. No requests from that account should get through.</li>
