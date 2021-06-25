@@ -19,6 +19,7 @@ local ALCHEMY = 'Алхимия'
 local BLACKSMITHING = 'Кузнечное дело'
 local ENCHANTING = 'Наложение чар'
 local ENGINEERING = 'Инженерное дело'
+local JEWELCRAFTING = 'Ювелирное дело'
 local LEATHERWORKING = 'Кожевничество'
 local TAILORING = 'Портняжное дело'
 local COOKING = 'Кулинария'
@@ -213,11 +214,12 @@ if L then
 	L['PROFESSIONS_LIST'] = {
 		ALCHEMY = ALCHEMY,
 		BLACKSMITHING = BLACKSMITHING,
+		COOKING = COOKING,
 		ENCHANTING = ENCHANTING,
 		ENGINEERING = ENGINEERING,
+		JEWELCRAFTING = JEWELCRAFTING,
 		LEATHERWORKING = LEATHERWORKING,
-		TAILORING = TAILORING,
-		COOKING = COOKING
+		TAILORING = TAILORING
 	}
 
 	L['PROFESSION_ADD_INIT'] = 'Пожалуйста, откройте профессию, которую вы хотите добавить.'

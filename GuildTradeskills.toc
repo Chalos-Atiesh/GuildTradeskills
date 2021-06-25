@@ -1,11 +1,11 @@
-## Interface: 11305
+## Interface: 20501
 ## Title: |cff3ce13fGuild|r|cfffcba03Tradeskills|r
 ## Notes: Allows guild members to search each other's tradeskills.
 ## Notes-deDE: Ermöglicht Gildenmitgliedern, die Fertigkeiten des anderen zu durchsuchen.
 ## Notes-frFR: Permet aux membres de la guilde de rechercher mutuellement leurs compétences.
 ## Notes-ruRU: Позволяет членам гильдии искать друг у друга профессиональные навыки.
 ## Author: Chalos
-## Version: release_6.0.5
+## Version: release_6.1.0
 ## X-Curse-Project_ID: 381775
 ## X-WoWI-ID: 25573
 ## SavedVariablesPerCharacter: GTCDB

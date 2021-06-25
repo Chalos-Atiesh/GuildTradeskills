@@ -17,11 +17,12 @@ local CHARACTER_NIL = 'Vous devez ajouter le nom d\'un personnage. \''
 
 local ALCHEMY = 'Alchimie'
 local BLACKSMITHING = 'Forgeron'
+local COOKING = 'Cuisine'
 local ENCHANTING = 'Enchantement'
 local ENGINEERING = 'Ingénierie'
+local JEWELCRAFTING = 'Joaillerie'
 local LEATHERWORKING = 'Travail du cuir'
 local TAILORING = 'Couture'
-local COOKING = 'Cuisine'
 
 if L then
 	---------- CLASSES START ----------
@@ -213,11 +214,12 @@ if L then
 	L['PROFESSIONS_LIST'] = {
 		ALCHEMY = ALCHEMY,
 		BLACKSMITHING = BLACKSMITHING,
+		COOKING = COOKING,
 		ENCHANTING = ENCHANTING,
 		ENGINEERING = ENGINEERING,
+		JEWELCRAFTING = JEWELCRAFTING,
 		LEATHERWORKING = LEATHERWORKING,
-		TAILORING = TAILORING,
-		COOKING = COOKING
+		TAILORING = TAILORING
 	}
 
 	L['PROFESSION_ADD_INIT'] = 'Ouvrez le métier à ajouter.'
