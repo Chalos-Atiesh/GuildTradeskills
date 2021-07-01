@@ -160,7 +160,7 @@ function Profession:UpdateProfession()
 	local trackingProfession = GT.DBCharacter:ProfessionExists(characterName, profession.professionName)
 
 	local _, kind = GetTradeSkillInfo(1)
-	if kind == nil or (kind ~= 'header' and kind ~= 'optimal') then
+	if kind == nil or (kind ~= 'header' and kind ~= 'trivial' and kind ~= 'easy' and kind ~= 'medium' and kind ~= 'optimal' and kind ~= 'difficult') then
 		-- GT.Log:Warn('Profession_UpdateProfession_UnexpectedHeader', Text:ToString(kind))
 		return
 	end
