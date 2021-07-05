@@ -528,7 +528,7 @@ function Search:PopulateCharacters()
 			label = string.gsub(label, '%{{guild_member}}', characterName)
 
 			local classColor = UNKNOWN_CLASS_COLOR
-			if character.class ~= nil and character.class ~= 'UNKNOWN' then
+			if character.class ~= nil and character.class ~= 'UNKNOWN' and RCC[character.class] ~= nil  then
 				classColor = RCC[character.class].colorStr
 			end
 			label = string.gsub(label, '%{{class_color}}', classColor)
