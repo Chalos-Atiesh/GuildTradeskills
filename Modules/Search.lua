@@ -897,7 +897,7 @@ function Search:CreateSearchBox(searchRow, name, label, callback)
 		GT.Log:Info('Search_CreateSearchBox', name, value)
 		searchBox:SetText(value)
 	end
-	searchBox:SetCallback('OnTextChanged', function(widget, event, value) callback(widget, event, value) end)
+	searchBox:SetCallback('OnEnterPressed', function(widget, event, value) callback(widget, event, value) end)
 	searchContainer:AddChild(searchBox)
 
 	Search.frames.text[name] = searchBox
