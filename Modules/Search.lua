@@ -95,6 +95,12 @@ local LABEL_R = 224/255
 local LABEL_G = 202/255
 local LABEL_B = 10/255
 
+local DEBOUNCE_TIME = 1
+local debounceTimer = nil
+local debounceWidget = nil
+local debounceEvent = nil
+local debounceValue = nil
+
 function Search:OnEnable()
 	GT.Log:Info('Search_OnEnable')
 
@@ -734,31 +740,31 @@ function Search:OnProfessionSearch(widget, event, value)
 	Search.frames.scroll[NAME_CHARACTERS]:SetScroll(offset)
 end
 
-function Search:OnSkillSearch(widget, event, value)
-	if event == '' then event = nil end
-	event = Text:Lower(event)
-	GT.Log:Info('Search_OnSkillSearch', Text:ToString(event))
-	Search.state.text[NAME_SKILLS] = event
+function Search:OnSkillSearch()
+	if debounceValue == '' then debounceValue = nil end
+	debounceValue = Text:Lower(debounceValue)
+	GT.Log:Info('Search_OnSkillSearch', Text:ToString(debounceValue))
+	Search.state.text[NAME_SKILLS] = debounceValue
 	Search:PopulateSkills()
 	Search:PopulateReagents()
 	Search:PopulateCharacters()
 end
 
-function Search:OnReagentSearch(widget, event, value)
-	if event == '' then event = nil end
-	event = Text:Lower(event)
-	GT.Log:Info('Search_OnReagentSearch', Text:ToString(event))
-	Search.state.text[NAME_REAGENTS] = event
+function Search:OnReagentSearch()
+	if debounceValue == '' then debounceValue = nil end
+	debounceValue = Text:Lower(debounceValue)
+	GT.Log:Info('Search_OnReagentSearch', Text:ToString(debounceValue))
+	Search.state.text[NAME_REAGENTS] = debounceValue
 	Search:PopulateReagents()
 	Search:PopulateSkills()
 	Search:PopulateCharacters()
 end
 
-function Search:OnCharacterSearch(widget, event, value)
-	if event == '' then event = nil end
-	event = Text:Lower(event)
-	GT.Log:Info('Search_OnCharacterSearch', Text:ToString(event))
-	Search.state.text[NAME_CHARACTERS] = event
+function Search:OnCharacterSearch()
+	if debounceValue == '' then debounceValue = nil end
+	debounceValue = Text:Lower(debounceValue)
+	GT.Log:Info('Search_OnCharacterSearch', Text:ToString(debounceValue))
+	Search.state.text[NAME_CHARACTERS] = debounceValue
 	Search:PopulateCharacters()
 	Search:PopulateSkills()
 	Search:PopulateReagents()
@@ -897,7 +903,24 @@ function Search:CreateSearchBox(searchRow, name, label, callback)
 		GT.Log:Info('Search_CreateSearchBox', name, value)
 		searchBox:SetText(value)
 	end
-	searchBox:SetCallback('OnTextChanged', function(widget, event, value) callback(widget, event, value) end)
+	searchBox:SetCallback('OnEnterPressed', function(widget, event, value)
+		if debounceTimer ~= nil then
+			GT:CancelTimer(debounceTimer)
+		end
+		debounceWidget = widget
+		debounceEvent = event
+		debounceValue = value
+		callback()
+	end)
+	searchBox:SetCallback('OnTextChanged', function(widget, event, value)
+		if debounceTimer ~= nil then
+			GT:CancelTimer(debounceTimer)
+		end
+		debounceWidget = widget
+		debounceEvent = event
+		debounceValue = value
+		debounceTimer = GT:ScheduleTimer(callback, DEBOUNCE_TIME)
+	end)
 	searchContainer:AddChild(searchBox)
 
 	Search.frames.text[name] = searchBox
