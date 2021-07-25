@@ -220,9 +220,9 @@ function CommGuild:OnVoteStartAckReceived(prefix, message, distribution, sender)
 		registeredVoters = Table:Insert(registeredVoters, nil, GT:GetCharacterName())
 		if otherVoteStart < voteStart then
 			local wait = START_WINDOW - (voteStart - otherVoteStart)
-			if wait <= 0 then
+			if wait <= 0 or wait == nil then
 				CommGuild:SendTimestamps()
-			else
+			elseif wait ~= nil then
 				GT.ScheduleTimer(CommGuild['SendTimestamps'], wait)
 			end
 		else
