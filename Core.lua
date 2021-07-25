@@ -192,7 +192,7 @@ function GT:GetWait(interval, variance)
 end
 
 function GT:IsCurrentCharacter(characterName)
-	if string.lower(GT:GetCharacterName()) == string.lower(characterName) then
+	if GT:GetCharacterName() ~= nil and characterName ~= nil and string.lower(GT:GetCharacterName()) == string.lower(characterName) then
 		return true
 	end
 	return false
