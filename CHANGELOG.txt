@@ -1,3 +1,7 @@
+6.1.4
+	Adding a debouncer to the search field. The addon will now perform a search after one second of no input from the user instead of on every character change.
+	Added enter button support on the search fields.
+
 6.1.1
 	Fixing enchanting scanning to accept more valid headers.
 
